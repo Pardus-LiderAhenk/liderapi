@@ -1,0 +1,23 @@
+#use visual studio code for requests
+@hostname = localhost
+
+@port = 8080
+@host = {{hostname}}:{{port}}
+@contentType = application/json
+
+@token = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJsaWRlcl9jb25zb2xlIiwiaWF0IjoxNjE1OTAwNzM4LCJleHAiOjE2MTY3NjQ3Mzh9.Qs3D3wKQxuAOOuPSw5LNiER1sC0QYL-WmH6ngyN69hZ0TPbQF7o7wGzZWp37-FVJJKjSTjeN4Ems1zSe0tXjmw
+POST http://{{host}}/api/auth/signin
+Content-Type: {{contentType}}
+
+{
+    "username": "lider_console",
+    "password": "123"
+}
+
+### Test Not Secured Service
+POST http://{{host}}/test/hello
+
+### Test Secured Service
+POST http://{{host}}/test/secured
+Content-Type: {{contentType}}
+Authorization: Bearer {{token}}
