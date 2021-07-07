@@ -39,7 +39,7 @@ public class Lider2Application extends SpringBootServletInitializer {
 
 	static Properties getProperties() {
 		Properties props = new Properties();
-		props.put("spring.config.location","file:/home/ismail/dev/lider/lider.properties");
+		props.put("spring.config.location","file:/etc/lider/lider.properties");
 		return props;
 	}
 	

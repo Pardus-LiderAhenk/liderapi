@@ -62,5 +62,10 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	
 	void deleteByDn(String Dn);
 	
+	@Query(value = "SELECT property_value as property FROM c_agent_property "
+			+ "where property_name= :name "
+			+ "AND property_value != \"\" GROUP BY property ORDER BY property ASC", nativeQuery = true)
+	List<String> getPropertyValueByName(@Param("name") String name);
+	
 }
 
