@@ -70,6 +70,16 @@ public class AgentService {
 		}
 	}
 	
+	public AgentImpl updateUserDirectoryAgentByDn(String dn, String userDirectoryDomain) {
+		List<AgentImpl> existAgent = agentRepository.findByDn(dn);
+		if(existAgent != null && existAgent.size() > 0) {
+			existAgent.get(0).setUserDirectoryDomain(userDirectoryDomain);
+			return agentRepository.save(existAgent.get(0));
+		} else {
+			return null;
+		}
+	}
+	
 	public Page<AgentImpl> findAllAgents(
 			int pageNumber,
 			int pageSize,
