@@ -129,6 +129,7 @@ public class ConfigParams {
 	private Boolean adUseSSL;
 	private Boolean adUseTLS;
 	private Boolean adAllowSelfSignedCert;
+	private Boolean allowDynamicDNSUpdate;
 	
 	//other settings
 	private Boolean disableLocalUser;
@@ -195,6 +196,8 @@ public class ConfigParams {
 		this.domainType = DomainType.LDAP;
 		this.ahenkRepoAddress = "";
 		this.ahenkRepoKeyAddress = "";
+		
+		this.allowDynamicDNSUpdate = false;
 	}
 
 	public String getLiderLocale() {
@@ -827,6 +830,16 @@ public class ConfigParams {
 		this.adAllowSelfSignedCert = adAllowSelfSignedCert;
 	}
 
+	public Boolean getAllowDynamicDNSUpdate() {
+		if(this.allowDynamicDNSUpdate == null)
+			return true;
+		return allowDynamicDNSUpdate;
+	}
+
+	public void setAllowDynamicDNSUpdate(Boolean allowDynamicDNSUpdate) {
+		this.allowDynamicDNSUpdate = allowDynamicDNSUpdate;
+	}
+	
 	public Boolean getDisableLocalUser() {
 		return disableLocalUser;
 	}

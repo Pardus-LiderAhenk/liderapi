@@ -60,6 +60,7 @@ public class ConfigurationService {
 				ConfigImpl updatedConfigImpl = configRepository.save(configImpl.get());
 				configParams = mapper.readValue(updatedConfigImpl.getValue(), ConfigParams.class);
 				configParams.setAllowVNCConnectionWithoutPermission(getAllowVNCConnectionWithoutPermission());
+				configParams.setAllowDynamicDNSUpdate(getAllowDynamicDNSUpdate());
 				return configParams;
 			} catch (JsonProcessingException e) {
 				logger.error("Error occured while updating configuration parameters.");
