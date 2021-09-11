@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.ldap.LdapName;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
@@ -327,11 +328,22 @@ public class ComputerGroupsController {
 	}
 	
 	
-	@RequestMapping(method=RequestMethod.POST ,value = "/rename/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Boolean renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
+	@RequestMapping(method=RequestMethod.POST ,value = "/rename/entry", produces={"application/json","application/xml"})
+	public LdapEntry renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
 			@RequestParam(value="newName", required=true) String newName) {
 		try {
-			return ldapService.renameEntry(oldDN, newName);
+			ldapService.renameEntry(oldDN, newName);
+			String newEntryDN = newName + ",";
+			LdapName dn = new LdapName(oldDN);
+			for (int i = dn.size()-2; 0 <= i; i--) {
+				newEntryDN += dn.get(i);
+				if(i>0) {
+					newEntryDN += ",";
+				}
+			}
+			LdapEntry selectedEntry = ldapService.getEntryDetail(newEntryDN);
+			
+			return selectedEntry;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

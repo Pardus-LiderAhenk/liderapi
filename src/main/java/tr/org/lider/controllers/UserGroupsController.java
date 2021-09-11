@@ -1,6 +1,7 @@
 package tr.org.lider.controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -215,7 +220,7 @@ public class UserGroupsController {
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
-	public LdapEntry addOu(LdapEntry selectedEntry) {
+	public LdapEntry addOu(@RequestBody  LdapEntry selectedEntry) {
 		try {
 			Map<String, String[]> attributes = new HashMap<String,String[]>();
 			attributes.put("objectClass", new String[] {"organizationalUnit", "top", "pardusLider"} );
@@ -258,9 +263,18 @@ public class UserGroupsController {
 	//add new group and add selected agents
 	@RequestMapping(method=RequestMethod.POST ,value = "/createNewGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public LdapEntry createNewUserGroup(@RequestParam(value = "selectedOUDN", required=false) String selectedOUDN,
-			@RequestParam(value = "groupName", required=true) String groupName,
-			@RequestParam(value = "checkedList[]", required=true) String[] checkedList) {
+	public LdapEntry createNewUserGroup(@RequestBody Map<String, String> params) throws JsonMappingException, JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		String selectedOUDN = params.get("selectedOUDN");
+		String groupName =  params.get("groupName");
+		//String[] checkedList = (String[]) Arrays.asList(mapper.readValue(params.get("checkedEntries"), String.class)).toArray();
+		
+		List<LdapEntry> entries = new ArrayList<>();
+		try {
+			entries = Arrays.asList(mapper.readValue(params.get("checkedEntries"), LdapEntry[].class));
+		} catch (JsonProcessingException e) {
+			logger.error("Error occured while mapping checked entry list to object");
+		}
 		String newGroupDN = "";
 		//to return newly added entry with its details
 		LdapEntry entry;
@@ -277,18 +291,11 @@ public class UserGroupsController {
 			//so dn must be joined with comma
 			//if member dn that will be added to group is cn=user1,ou=Groups,dn=liderahenk,dc=org
 			//spring boot gets this param as array which has size 4
-			Boolean checkedArraySizeIsOne = true;
-			for (int i = 0; i < checkedList.length; i++) {
-				if(checkedList[i].contains(",")) {
-					checkedArraySizeIsOne = false;
-					break;
-				}
-			}
-			if(checkedArraySizeIsOne ) {
-				attributes.put("member", new String[] {String.join(",", checkedList)} );
-			} else {
-				attributes.put("member", checkedList );
-			}
+
+			String[] strings = entries.stream().map(x -> x.getDistinguishedName()).
+	                   toArray(String[]::new);
+			attributes.put("member", strings );
+			
 			ldapService.addEntry(newGroupDN , attributes);
 			entry = ldapService.getEntryDetail(newGroupDN);
 		} catch (LdapException e) {

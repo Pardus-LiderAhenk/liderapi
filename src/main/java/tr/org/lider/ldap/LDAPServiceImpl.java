@@ -1561,6 +1561,7 @@ public class LDAPServiceImpl implements ILDAPService {
 			org.apache.directory.api.ldap.model.name.Rdn rdn= new org.apache.directory.api.ldap.model.name.Rdn(newName);
 			connection.rename(entry.getDn(), rdn, true);
 			updateOLCAccessRulesAfterEntryRename(newName, oldDN);
+			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new LdapException(e);
