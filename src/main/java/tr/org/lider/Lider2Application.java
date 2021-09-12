@@ -39,7 +39,7 @@ public class Lider2Application extends SpringBootServletInitializer {
 
 	static Properties getProperties() {
 		Properties props = new Properties();
-		props.put("spring.config.location","file:/home/ismail/dev/lider/lider.properties");
+		props.put("spring.config.location","file:/etc/lider/lider.properties");
 		return props;
 	}
 	
@@ -50,7 +50,6 @@ public class Lider2Application extends SpringBootServletInitializer {
         config.setAllowCredentials(true); 
         // * URL below needs to match the Vue client URL and port *
         config.setAllowedOrigins(Collections.singletonList("http://localhost:8081"));
-//        config.setAllowedOrigins(Collections.singletonList("http://172.26.140.27:8081"));
         config.setAllowedMethods(Collections.singletonList("*"));  
         config.setAllowedHeaders(Collections.singletonList("*"));  
         source.registerCorsConfiguration("/**", config);  
