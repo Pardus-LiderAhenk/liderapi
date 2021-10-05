@@ -15,7 +15,6 @@ import tr.org.lider.repositories.ScriptRepository;
 
 @Service
 public class ScriptService {
-	
 
 	@Autowired
 	private ScriptRepository scriptRepository;
@@ -30,7 +29,12 @@ public class ScriptService {
 			String label = "Dosya Oluştur";
 			String contents = "#!/bin/bash\n" + 
 					"touch /tmp/test.txt";
-			scriptRepository.save(new ScriptTemplate(scriptType, label, contents, new Date(), null));
+			ScriptTemplate scriptTemplate = new ScriptTemplate();
+			scriptTemplate.setContents(contents);
+			scriptTemplate.setCreateDate(new Date());
+			scriptTemplate.setLabel(label);
+			scriptTemplate.setScriptType(scriptType);
+			scriptRepository.save(scriptTemplate);
 		}
 	}
 
@@ -38,32 +42,32 @@ public class ScriptService {
 		return scriptRepository.findAll();
 	}
 
-	public ScriptTemplate add(ScriptTemplate file) {
-		ScriptTemplate scriptFile = scriptRepository.save(file);
+	public ScriptTemplate add(ScriptTemplate script) {
+		ScriptTemplate scriptFile = scriptRepository.save(script);
 		try {
-			operationLogService.saveOperationLog(OperationType.CREATE, "Betik Tanımı oluşturuldu.", file.getContents().getBytes());
+			operationLogService.saveOperationLog(OperationType.CREATE, "Betik Tanımı oluşturuldu.", script.getContents().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return scriptFile;
 	}
 
-	public ScriptTemplate del(ScriptTemplate file) {
-		ScriptTemplate existFile = scriptRepository.findOne(file.getId());
-		scriptRepository.deleteById(file.getId());
+	public ScriptTemplate delete(ScriptTemplate script) {
+		ScriptTemplate existFile = scriptRepository.findOne(script.getId());
+		scriptRepository.deleteById(script.getId());
 		try {
 			operationLogService.saveOperationLog(OperationType.DELETE, "Betik Tanımı silindi.", existFile.getContents().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return file;
+		return script;
 	}
 	
-	public ScriptTemplate update(ScriptTemplate file) {
-		file.setModifyDate(new Date());
-		ScriptTemplate scriptFile = scriptRepository.save(file);
+	public ScriptTemplate update(ScriptTemplate script) {
+		script.setModifyDate(new Date());
+		ScriptTemplate scriptFile = scriptRepository.save(script);
 		try {
-			operationLogService.saveOperationLog(OperationType.UPDATE, "Betik Tanımı güncellendi.", file.getContents().getBytes());
+			operationLogService.saveOperationLog(OperationType.UPDATE, "Betik Tanımı güncellendi.", script.getContents().getBytes());
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
