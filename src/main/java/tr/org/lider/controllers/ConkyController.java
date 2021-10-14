@@ -36,19 +36,19 @@ public class ConkyController {
 
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
 	@RequestMapping(method=RequestMethod.POST ,value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ConkyTemplate notifyAdd(@RequestBody ConkyTemplate file){
-		return conkyService.add(file);
+	public ConkyTemplate notifyAdd(@RequestBody ConkyTemplate template){
+		return conkyService.add(template);
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
-	@RequestMapping(method=RequestMethod.POST ,value = "/del", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ConkyTemplate notifyDel(@RequestBody ConkyTemplate file){
-		return conkyService.del(file);
+	@RequestMapping(method=RequestMethod.POST ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ConkyTemplate notifyDel(@RequestBody ConkyTemplate template){
+		return conkyService.delete(template);
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
 	@RequestMapping(method=RequestMethod.POST ,value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ConkyTemplate notifyUpdate(@RequestBody ConkyTemplate file){
-		return conkyService.update(file);
+	public ConkyTemplate notifyUpdate(@RequestBody ConkyTemplate template){
+		return conkyService.update(template);
 	}
 }
