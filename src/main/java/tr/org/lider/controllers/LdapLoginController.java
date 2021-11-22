@@ -75,7 +75,7 @@ public class LdapLoginController {
 	
 	//updated user directory domain method by agent dn as null, AD or OpenLDAP
 	@RequestMapping(method=RequestMethod.POST ,value = "/updateDirectoryDomain", produces = MediaType.APPLICATION_JSON_VALUE)
-	public String changeUserDirectoryDomain(@RequestParam (value = "userDirectoryDomain", required=false) String userDirectoryDomain,
+	public boolean changeUserDirectoryDomain(@RequestParam (value = "userDirectoryDomain", required=false) String userDirectoryDomain,
 			@RequestParam (value="dn", required=false) String dn){
 		try {
 			List<LdapSearchFilterAttribute> filterAttributes = new ArrayList<LdapSearchFilterAttribute>();
@@ -94,9 +94,9 @@ public class LdapLoginController {
 		} catch (LdapException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null;
+			return false;
 		}
-		return dn;
+		return true;
 	}
 	
 //	This method is only for ldap-login plugin

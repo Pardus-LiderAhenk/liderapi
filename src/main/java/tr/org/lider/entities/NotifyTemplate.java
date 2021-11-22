@@ -34,7 +34,7 @@ public class NotifyTemplate implements Serializable {
 	@Column(name = "ID", unique = true, nullable = false)
 	private Long id;
 
-	@Column(name = "LABEL", nullable = false, unique = true, length = 255)
+	@Column(name = "LABEL", nullable = false, length = 255)
 	private String label;
 	
 	@Column(name = "TIME", nullable = false, unique = false, length = 255)
@@ -54,17 +54,21 @@ public class NotifyTemplate implements Serializable {
 	@Column(name = "MODIFY_DATE")
 	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone="Europe/Istanbul")
 	private Date modifyDate;
+	
+	@Column(name = "DELETED")
+	private boolean deleted;
 
 	public NotifyTemplate() {
 	}
 
-	public NotifyTemplate(Long id, String label, Integer time, String contents, Date createDate, Date modifyDate) {
+	public NotifyTemplate(Long id, String label, Integer time, String contents, Date createDate, Date modifyDate, Boolean deleted) {
 		this.id = id;
 		this.label = label;
 		this.time = time;
 		this.contents = contents;
 		this.createDate = createDate;
 		this.modifyDate = modifyDate;
+		this.deleted = deleted;
 	}
 
 	public Long getId() {
@@ -114,6 +118,13 @@ public class NotifyTemplate implements Serializable {
 	public void setModifyDate(Date modifyDate) {
 		this.modifyDate = modifyDate;
 	}
+	
+	public boolean getDeleted() {
+		return deleted;
+	}
 
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
+	}
 }
 

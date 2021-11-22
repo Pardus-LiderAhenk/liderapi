@@ -85,52 +85,56 @@ public class ConkyService {
 					"	alignment = 'top_right',\n" + 
 					"};\n"; 
 					
-			conkyRepository.save(new ConkyTemplate(label, contents, settings, new Date(), null));
+			conkyRepository.save(new ConkyTemplate(label, contents, settings, new Date(), null, false));
 		}
 	}
 
 	public List<ConkyTemplate> list(){
-		return conkyRepository.findAll();
+//		return conkyRepository.findAll();
+		return conkyRepository.findByDeletedOrderByCreateDateDesc(false);
 	}
 
 	public ConkyTemplate add(ConkyTemplate template) {
+		template.setDeleted(false);
 		ArrayList<String> conky = new ArrayList<String>();
 		conky.add(template.getSettings());
 		conky.add(template.getContents());
-		ConkyTemplate conkyTemplate = conkyRepository.save(template);
+		ConkyTemplate savedTemplate = conkyRepository.save(template);
 		try {
 			operationLogService.saveOperationLog(OperationType.CREATE, "Sistem Gözlemcisi Tanımı oluşturuldu.", conky.toString().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return conkyTemplate;
+		return savedTemplate;
 	}
 
 	public ConkyTemplate delete(ConkyTemplate template) {
 		ConkyTemplate existTemplate = conkyRepository.findOne(template.getId());
+		existTemplate.setDeleted(true);
 		ArrayList<String> conky = new ArrayList<String>();
 		conky.add(existTemplate.getSettings());
 		conky.add(existTemplate.getContents());
-		conkyRepository.deleteById(template.getId());
+		ConkyTemplate savedTemplate = conkyRepository.save(existTemplate);
 		try {
 			operationLogService.saveOperationLog(OperationType.DELETE, "Sistem Gözlemcisi Tanımı silindi.", conky.toString().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return template;
+		return savedTemplate;
 	}
 	
 	public ConkyTemplate update(ConkyTemplate template) {
 		template.setModifyDate(new Date());
+		template.setDeleted(false);
 		ArrayList<String> conky = new ArrayList<String>();
 		conky.add(template.getSettings());
 		conky.add(template.getContents());
-		ConkyTemplate conkyTemplate = conkyRepository.save(template);
+		ConkyTemplate savedTemplate = conkyRepository.save(template);
 		try {
 			operationLogService.saveOperationLog(OperationType.UPDATE, "Sistem Gözlemcisi Tanımı güncellendi.", conky.toString().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return conkyTemplate;
+		return savedTemplate;
 	}
 }
