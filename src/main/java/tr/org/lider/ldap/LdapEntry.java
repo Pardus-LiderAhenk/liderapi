@@ -64,6 +64,8 @@ public class LdapEntry implements Serializable , Comparable<LdapEntry>{
 
 	private String createDateStr;
 	
+	private String modifyDateStr;
+	
 	private String mail;
 
 	private List<UserSessionsModel> sessionList;
@@ -379,6 +381,12 @@ public class LdapEntry implements Serializable , Comparable<LdapEntry>{
 	}
 	public void setCreateDateStr(String createDateStr) {
 		this.createDateStr = createDateStr;
+	}
+	public String getModifyDateStr() {
+		return modifyDateStr;
+	}
+	public void setModifyDateStr(String modifyDateStr) {
+		this.modifyDateStr = modifyDateStr;
 	}
 	public Integer getAgentListSize() {
 		return agentListSize;

@@ -92,9 +92,9 @@ public class PluginService {
 		pluginTaskList.add(new PluginTask("AD Oturum Açma Ayarları Uygula", "ad-login", "İstemcide AD ayarlarını uygular", "EXECUTE_AD_LOGIN", true, findPluginIdByName("ldap-login"), 0));
 		pluginTaskList.add(new PluginTask("Oturum Açma Ayarları İptal Et", "cancel-ldap-login", "İstemcinin oturum açma ayarlarını iptal eder", "EXECUTE_CANCEL_LDAP_LOGIN", true, findPluginIdByName("ldap-login"), 0));
 //		ldap plugin tasks
-		pluginTaskList.add(new PluginTask("İstemci Sil", "delete-agent", "İstemciyi siler", "DELETE_AGENT", true, findPluginIdByName("ldap"), 0));
-		pluginTaskList.add(new PluginTask("İstemci Taşı", "move-agent", "İstemciyi taşır", "MOVE_AGENT", true, findPluginIdByName("ldap"), 0));
-		pluginTaskList.add(new PluginTask("İstemci Adını Değiştir", "rename-agent", "İstemci adını değiştirir", "RENAME_AGENT", true, findPluginIdByName("ldap"), 0));
+		pluginTaskList.add(new PluginTask("İstemci Sil", "delete-agent", "İstemciyi siler", "DELETE_AGENT", false, findPluginIdByName("ldap"), 0));
+		pluginTaskList.add(new PluginTask("İstemci Taşı", "move-agent", "İstemciyi taşır", "MOVE_AGENT", false, findPluginIdByName("ldap"), 1));
+		pluginTaskList.add(new PluginTask("İstemci Adını Değiştir", "rename-agent", "İstemci adını değiştirir", "RENAME_AGENT", false, findPluginIdByName("ldap"), 0));
 //		local-user plugin tasks
 		pluginTaskList.add(new PluginTask("Yerel Kullanıcıları Listele", "local-user", "İstemciye bulunan yerel kullanıcıları listeler", "GET_USERS", false, findPluginIdByName("local-user"), 1));
 		pluginTaskList.add(new PluginTask("Yerel Kullanıcı Ekle", "add-local-user", "İstemciye yerel kullanıcı ekler", "ADD_USER", false, findPluginIdByName("local-user"), 0));

@@ -898,16 +898,25 @@ public class LDAPServiceImpl implements ILDAPService {
 
 					LdapEntry ldapEntry= new LdapEntry(entry.getDn().toString(), attrs,attributesMultiValues, priviliges,convertObjectClass2DNType(entry.get("objectClass")));
 
-					String dateStr= ldapEntry.get("createTimestamp");
-					String year=dateStr.substring(0,4);
-					String month=dateStr.substring(4,6);
-					String day=dateStr.substring(6,8);
-					String hour=dateStr.substring(8,10);
-					String min=dateStr.substring(10,12);
-					String sec=dateStr.substring(12,14);
-					String crtDate=day+"/"+ month+"/"+ year+" "+ hour +":"+min;
-
+					String dateStr = ldapEntry.get("createTimestamp");
+					String year = dateStr.substring(0,4);
+					String month = dateStr.substring(4,6);
+					String day = dateStr.substring(6,8);
+					String hour = dateStr.substring(8,10);
+					String min = dateStr.substring(10,12);
+					String sec = dateStr.substring(12,14);
+					String crtDate = day+"/"+ month+"/"+ year+" "+ hour +":"+min;
 					ldapEntry.setCreateDateStr(crtDate);
+					
+					String dateModifyStr = ldapEntry.get("modifyTimestamp");
+					String yearModify = dateModifyStr.substring(0,4);
+					String monthModify = dateModifyStr.substring(4,6);
+					String dayModify = dateModifyStr.substring(6,8);
+					String hourModify = dateModifyStr.substring(8,10);
+					String minModify = dateModifyStr.substring(10,12);
+					String crtDateModify = dayModify+"/"+ monthModify+"/"+ yearModify+" "+ hourModify +":"+minModify;
+					ldapEntry.setModifyDateStr(crtDateModify);
+					
 					if(ldapEntry.getType()==DNType.AHENK) {
 						ldapEntry.setOnline(xmppClientImpl.isRecipientOnline(ldapEntry.getUid()));
 					}

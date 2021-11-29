@@ -566,10 +566,9 @@ public class ComputerController {
 			@RequestParam(value="agentVersion", required=true) String agentVersion,
 			@RequestParam(value="macAddresses", required=true) String macAddresses,
 			@RequestParam(value="phase", required=true) String phase,
-			@RequestParam(value="processor", required=true) String processor,
-			@RequestParam(value="agentUid", required=true) String agentUid){
+			@RequestParam(value="agentUid", required=true) String agentUid,
+			@RequestParam(value="osVersion", required=true) String osVersion){
 
-		System.out.println(ipAddresses);
 		List<AgentImpl> agents =  agentService.findAgentByJid(agentUid);
 
 		if (agents != null && agents.size() > 0) {
@@ -578,7 +577,6 @@ public class ComputerController {
 				if (prop.getPropertyName().equals("hardware.network.ipAddresses")
 						&& prop.getPropertyValue() != ipAddresses
 						&& !agent.getIpAddresses().equals(ipAddresses)) {
-					logger.info("IP Addresses of Agent with ID {} has been changed. Updating in DB", agent.getId());
 					prop.setPropertyValue(ipAddresses);
 					agent.setIpAddresses(ipAddresses);
 				} else if (hostname != null && !agent.getHostname().equals(hostname)) {
@@ -594,9 +592,11 @@ public class ComputerController {
 				} else if (phase != null && phase != "" && prop.getPropertyName().equals("phase")
 						&& prop.getPropertyValue() != phase) {
 					prop.setPropertyValue(phase);
-				} else if (processor != null && processor != "" && prop.getPropertyName().equals("processor")
-						&& prop.getPropertyValue() != processor) {
-					prop.setPropertyValue(processor);
+				}
+				else if (osVersion != null 
+						&& prop.getPropertyName().equals("os.version") 
+						&& !prop.getPropertyValue().equals(osVersion)) {
+					prop.setPropertyValue(osVersion);
 				}
 			}
 
