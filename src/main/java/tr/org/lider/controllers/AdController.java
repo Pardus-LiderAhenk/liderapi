@@ -84,7 +84,7 @@ public class AdController {
 	
 	@RequestMapping(value = "/getChildEntriesOu")
 	public List<LdapEntry> getChildEntriesOu(HttpServletRequest request, LdapEntry selectedEntry) {
-		logger.info("Getting AD child OU entries for dn = "+ selectedEntry.getDistinguishedName());
+		logger.info("Getting AD child OU entries for dn = "+ selectedEntry.getUid());
 		List<LdapEntry> oneLevelSubList=null;
 		try {
 			String filter="(|"
@@ -97,7 +97,7 @@ public class AdController {
 					+")";
 			
 			oneLevelSubList= new ArrayList<>();
-			oneLevelSubList = service.findSubEntries(selectedEntry.getDistinguishedName(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
+			oneLevelSubList = service.findSubEntries(selectedEntry.getUid(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
@@ -106,7 +106,7 @@ public class AdController {
 	
 	@RequestMapping(value = "/getChildEntries")
 	public List<LdapEntry> getChildEntries(HttpServletRequest request, LdapEntry selectedEntry) {
-		logger.info("Getting AD child entries for dn = "+ selectedEntry.getDistinguishedName());
+		logger.info("Getting AD child entries for dn = "+ selectedEntry.getUid());
 		List<LdapEntry> oneLevelSubList=null;
 		try {
 			String filter="(|"
@@ -118,7 +118,7 @@ public class AdController {
 					+")";
 			
 			oneLevelSubList= new ArrayList<>();
-			oneLevelSubList = service.findSubEntries(selectedEntry.getDistinguishedName(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
+			oneLevelSubList = service.findSubEntries(selectedEntry.getUid(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}

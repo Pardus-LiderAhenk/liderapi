@@ -94,7 +94,7 @@ public class PluginService {
 //		ldap plugin tasks
 		pluginTaskList.add(new PluginTask("İstemci Sil", "delete-agent", "İstemciyi siler", "DELETE_AGENT", false, findPluginIdByName("ldap"), 0));
 		pluginTaskList.add(new PluginTask("İstemci Taşı", "move-agent", "İstemciyi taşır", "MOVE_AGENT", false, findPluginIdByName("ldap"), 1));
-		pluginTaskList.add(new PluginTask("İstemci Adını Değiştir", "rename-agent", "İstemci adını değiştirir", "RENAME_AGENT", false, findPluginIdByName("ldap"), 0));
+		pluginTaskList.add(new PluginTask("İstemci Adını Değiştir", "rename-agent", "İstemci adını değiştirir", "RENAME_ENTRY", false, findPluginIdByName("ldap"), 0));
 //		local-user plugin tasks
 		pluginTaskList.add(new PluginTask("Yerel Kullanıcıları Listele", "local-user", "İstemciye bulunan yerel kullanıcıları listeler", "GET_USERS", false, findPluginIdByName("local-user"), 1));
 		pluginTaskList.add(new PluginTask("Yerel Kullanıcı Ekle", "add-local-user", "İstemciye yerel kullanıcı ekler", "ADD_USER", false, findPluginIdByName("local-user"), 0));

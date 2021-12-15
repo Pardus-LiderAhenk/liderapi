@@ -29,6 +29,7 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
+import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.UserSessionsModel;
 import tr.org.lider.services.CommandService;
 import tr.org.lider.services.ConfigurationService;
@@ -469,5 +470,14 @@ public class UserController {
 			return null;
 		}
 		return entry ;
+	}
+	
+	@RequestMapping(method=RequestMethod.GET, value = "/configurations", produces = MediaType.APPLICATION_JSON_VALUE)
+	public HashMap<String, Object> getConfigParams() {
+		ConfigParams configParams = configurationService.getConfigParams();
+		HashMap<String, Object> configMap = new HashMap<String, Object>();
+		configMap.put("userGroupLdapBaseDn", configParams.getUserGroupLdapBaseDn());
+		configMap.put("userLdapBaseDn", configParams.getUserLdapBaseDn());
+		return configMap;
 	}
 }
