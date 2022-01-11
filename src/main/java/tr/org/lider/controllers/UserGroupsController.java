@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.ldap.LdapName;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
@@ -116,9 +118,9 @@ public class UserGroupsController {
 		return userList;
 	}
 	
-	//add users to existing group
+//	add user to existing group by member list
 	@RequestMapping(method=RequestMethod.POST ,value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
-	public LdapEntry addUsersToExistingGroup(@RequestParam(value="groupDN") String groupDN,
+	public LdapEntry addUserToExistingGroup(@RequestParam(value="groupDN") String groupDN,
 			@RequestParam(value = "checkedList[]", required=true) String[] checkedList) {
 		LdapEntry entry;
 		try {
@@ -146,6 +148,59 @@ public class UserGroupsController {
 			return null;
 		}
 		return entry;
+	}
+	
+//	Add user list to existing group by checked node list
+	@RequestMapping(method=RequestMethod.POST ,value = "/group/existing/addUser", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> addUsersToExistingGroup(@RequestBody Map<String, String> params) {
+		LdapEntry entry;
+		ObjectMapper mapper = new ObjectMapper();
+		List<LdapEntry> entries = new ArrayList<>();
+		try {
+			entries = Arrays.asList(mapper.readValue(params.get("checkedEntries"), LdapEntry[].class));
+		} catch (JsonProcessingException e) {
+			logger.error("Error occured while mapping checked entry list to object");
+		}
+		List<LdapEntry> users = new ArrayList<>();
+		List<LdapEntry> directories = new ArrayList<>();
+		
+		for (LdapEntry ldapEntry : entries) {
+			if(ldapEntry.getType().equals(DNType.USER)) {
+				users.add(ldapEntry);
+			}
+		}
+		
+		for (LdapEntry ldapEntry : entries) {
+			Boolean hasParentChecked = false;
+			for (LdapEntry entryTemp : entries) {
+				if(ldapEntry.getType().equals(DNType.ORGANIZATIONAL_UNIT) && entryTemp.getType().equals(DNType.ORGANIZATIONAL_UNIT)) {
+					if(!ldapEntry.getDistinguishedName().equals(entryTemp.getDistinguishedName()) 
+							&& ldapEntry.getDistinguishedName().contains(entryTemp.getDistinguishedName())) {
+						hasParentChecked = true;
+						break;
+					}
+				}
+			}
+			if(ldapEntry.getType().equals(DNType.ORGANIZATIONAL_UNIT)  && !hasParentChecked) {
+				directories.add(ldapEntry);
+			}
+		}
+
+		List<LdapEntry> allUsers = getUsersUnderOUs(directories, users);
+		if(allUsers.size() == 0) {
+			return new ResponseEntity<String>("Seçili klasörlerde kullanıcı bulunamadı. Lütfen en az bir kullanıcı seçiniz.", HttpStatus.NOT_ACCEPTABLE);
+		}
+		try {
+			String [] allUserDNs = allUsers.stream().map(LdapEntry::getDistinguishedName).toArray(String[]::new);
+			for (int i = 0; i < allUserDNs.length; i++) {
+				ldapService.updateEntryAddAtribute(params.get("groupDN"), "member", allUserDNs[i]);
+			}
+			entry = ldapService.getEntryDetail(params.get("groupDN"));
+		} catch (LdapException e) {
+			logger.error("Error occured while adding new group.");
+			return null;
+		}
+		return new ResponseEntity<LdapEntry>(entry, HttpStatus.OK);
 	}
 	
 	//get members of group
@@ -209,10 +264,21 @@ public class UserGroupsController {
 	}
 	
 	@RequestMapping(method=RequestMethod.POST ,value = "/rename/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Boolean renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
+	public LdapEntry renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
 			@RequestParam(value="newName", required=true) String newName) {
 		try {
-			return ldapService.renameEntry(oldDN, newName);
+			
+			ldapService.renameEntry(oldDN, newName);
+			String newEntryDN = newName + ",";
+			LdapName dn = new LdapName(oldDN);
+			for (int i = dn.size()-2; 0 <= i; i--) {
+				newEntryDN += dn.get(i);
+				if(i>0) {
+					newEntryDN += ",";
+				}
+			}
+			LdapEntry selectedEntry = ldapService.getEntryDetail(newEntryDN);
+			return selectedEntry;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -263,7 +329,7 @@ public class UserGroupsController {
 	//add new group and add selected agents
 	@RequestMapping(method=RequestMethod.POST ,value = "/createNewGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public LdapEntry createNewUserGroup(@RequestBody Map<String, String> params) throws JsonMappingException, JsonProcessingException {
+	public ResponseEntity<?> createNewUserGroup(@RequestBody Map<String, String> params) throws JsonMappingException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		String selectedOUDN = params.get("selectedOUDN");
 		String groupName =  params.get("groupName");
@@ -283,26 +349,87 @@ public class UserGroupsController {
 		} else {
 			newGroupDN = "cn=" +  groupName +","+ selectedOUDN;
 		}
+		
+		List<LdapEntry> users = new ArrayList<>();
+		List<LdapEntry> directories = new ArrayList<>();
+		
+		for (LdapEntry ldapEntry : entries) {
+			if(ldapEntry.getType().equals(DNType.USER)) {
+				users.add(ldapEntry);
+			}
+		}
+		for (LdapEntry ldapEntry : entries) {
+			Boolean hasParentChecked = false;
+			for (LdapEntry entryTemp : entries) {
+				if(ldapEntry.getType().equals(DNType.ORGANIZATIONAL_UNIT) && entryTemp.getType().equals(DNType.ORGANIZATIONAL_UNIT)) {
+					if(!ldapEntry.getDistinguishedName().equals(entryTemp.getDistinguishedName()) 
+							&& ldapEntry.getDistinguishedName().contains(entryTemp.getDistinguishedName())) {
+						hasParentChecked = true;
+						break;
+					}
+				}
+			}
+			if(ldapEntry.getType().equals(DNType.ORGANIZATIONAL_UNIT)  && !hasParentChecked) {
+				directories.add(ldapEntry);
+			}
+		}
+		List<LdapEntry> allUsers = getUsersUnderOUs(directories, users);
+		if(allUsers.size() == 0) {
+			return new ResponseEntity<String>("Seçili klasörlerde kullanıcı bulunamadı. Lütfen en az bir kullanıcı seçiniz.", HttpStatus.NOT_ACCEPTABLE);
+		}
 		Map<String, String[]> attributes = new HashMap<String,String[]>();
 		attributes.put("objectClass", new String[] {"groupOfNames", "top", "pardusLider"} );
 		attributes.put("liderGroupType", new String[] {"USER"} );
+		
 		try {
-			//when single dn comes spring boot takes it as multiple arrays
-			//so dn must be joined with comma
-			//if member dn that will be added to group is cn=user1,ou=Groups,dn=liderahenk,dc=org
-			//spring boot gets this param as array which has size 4
-
-			String[] strings = entries.stream().map(x -> x.getDistinguishedName()).
-	                   toArray(String[]::new);
-			attributes.put("member", strings );
-			
+			String [] allUserDNs = allUsers.stream().map(LdapEntry::getDistinguishedName).toArray(String[]::new);
+			attributes.put("member", allUserDNs);
 			ldapService.addEntry(newGroupDN , attributes);
 			entry = ldapService.getEntryDetail(newGroupDN);
 		} catch (LdapException e) {
-			System.out.println("Error occured while adding new group.");
+			logger.error("Error occured while adding new group.");
 			return null;
 		}
-		return entry;
+		
+//		try {
+//			//when single dn comes spring boot takes it as multiple arrays
+//			//so dn must be joined with comma
+//			//if member dn that will be added to group is cn=user1,ou=Groups,dn=liderahenk,dc=org
+//			//spring boot gets this param as array which has size 4
+//
+//			String[] strings = entries.stream().map(x -> x.getDistinguishedName()).
+//	                   toArray(String[]::new);
+//			attributes.put("member", strings );
+//			
+//			ldapService.addEntry(newGroupDN , attributes);
+//			entry = ldapService.getEntryDetail(newGroupDN);
+//		} catch (LdapException e) {
+//			System.out.println("Error occured while adding new group.");
+//			return null;
+//		}
+		return new ResponseEntity<LdapEntry>(entry, HttpStatus.OK);
 	}
 	
+	public List<LdapEntry> getUsersUnderOUs(List<LdapEntry> directories, List<LdapEntry> users) {
+		for (LdapEntry ldapEntry : directories) {
+			try {
+				List<LdapEntry> retList = ldapService.findSubEntries(ldapEntry.getDistinguishedName(), "(objectclass=pardusAccount)", new String[] { "*" }, SearchScope.SUBTREE);
+				for (LdapEntry ldapEntry2 : retList) {
+					boolean isExist=false;
+					for (LdapEntry ldapEntryUser : users) {
+						if(ldapEntry2.getEntryUUID().equals(ldapEntryUser.getEntryUUID())) {
+							isExist=true;
+							break;
+						}
+					}
+					if(!isExist) {
+						users.add(ldapEntry2);
+					}
+				}
+			} catch (LdapException e) {
+				e.printStackTrace();
+			}
+		}
+		return users;
+	}
 }
