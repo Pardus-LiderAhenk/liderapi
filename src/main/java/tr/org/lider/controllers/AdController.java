@@ -106,7 +106,7 @@ public class AdController {
 	
 	@RequestMapping(value = "/getChildEntries")
 	public List<LdapEntry> getChildEntries(HttpServletRequest request, LdapEntry selectedEntry) {
-		logger.info("Getting AD child entries for dn = "+ selectedEntry.getUid());
+		logger.info("Getting AD child entries for dn = "+ selectedEntry.getDistinguishedName());
 		List<LdapEntry> oneLevelSubList=null;
 		try {
 			String filter="(|"
@@ -118,7 +118,7 @@ public class AdController {
 					+")";
 			
 			oneLevelSubList= new ArrayList<>();
-			oneLevelSubList = service.findSubEntries(selectedEntry.getUid(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
+			oneLevelSubList = service.findSubEntries(selectedEntry.getDistinguishedName(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
