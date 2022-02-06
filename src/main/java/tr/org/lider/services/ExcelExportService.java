@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
+import tr.org.lider.entities.CommandImpl;
 
 @Service
 public class ExcelExportService {
@@ -258,6 +259,138 @@ public class ExcelExportService {
 		}
 		return fileToByteCode(exportFile);
 	}
+	
+	
+	
+	public byte[] generateTaskReport(List<CommandImpl> commands) {
+		int rowCount = 0;
+		String exportFile = getFileWriteLocation() 
+				+ "Task Raporu_" 
+				+ new SimpleDateFormat("ddMMyyyyHH:mm:ss.SSS").format(new Date())
+				+ ".xlsx";
+		XSSFWorkbook wb = new XSSFWorkbook();
+
+		Font fontTextColourRed = wb.createFont();
+		fontTextColourRed.setColor(IndexedColors.RED.getIndex());
+
+		Font ftArial = wb.createFont();
+		ftArial.setFontName("Arial");
+
+		Font fontTextBold = wb.createFont();
+		fontTextBold.setBold(true);
+		fontTextBold.setFontName("Arial");
+		fontTextBold.setFontHeightInPoints((short) 10);
+
+		CellStyle csBoldAndBordered = wb.createCellStyle();
+		csBoldAndBordered.setFont(fontTextBold);
+		csBoldAndBordered.setBorderBottom(BorderStyle.THIN);
+		csBoldAndBordered.setBorderTop(BorderStyle.THIN);
+		csBoldAndBordered.setBorderLeft(BorderStyle.THIN);
+		csBoldAndBordered.setBorderRight(BorderStyle.THIN);
+		
+		CellStyle csBordered = wb.createCellStyle();
+		csBordered.setBorderBottom(BorderStyle.THIN);
+		csBordered.setBorderTop(BorderStyle.THIN);
+		csBordered.setBorderLeft(BorderStyle.THIN);
+		csBordered.setBorderRight(BorderStyle.THIN);
+
+		CellStyle csTextColourRed = wb.createCellStyle();
+		csTextColourRed.setFont(fontTextColourRed);
+
+		CellStyle csTextBold= wb.createCellStyle();
+		csTextBold.setFont(fontTextBold);
+
+		CellStyle csCenter = wb.createCellStyle();
+		csCenter.setAlignment(HorizontalAlignment.CENTER);
+		csCenter.setFont(ftArial);
+
+		XSSFSheet sheet = wb.createSheet("Detaylı İstemci Raporu");
+		
+		//Add header
+		Row row = null; 
+		Cell cell = null;
+		
+		List<Integer> colWidthList = new ArrayList<Integer>();
+		List<String> headers = new ArrayList<String>();
+		
+		Collections.addAll(headers, " ", "Eklenti", "Görev",
+				"Oluşturulma Tarihi", "Gönderen", "Toplam", "Başarılı", "Gönderildi", "Hata", "Zamanlı Çalıştırılan");
+		Collections.addAll(colWidthList, 3500, 7500, 16000, 4000, 4000, 4000, 4000, 4000, 4000, 6000);
+		
+		row = sheet.createRow(rowCount++);
+		for (int i = 0; i < headers.size(); i++) {
+			sheet.setColumnWidth(i, colWidthList.get(i));
+			cell = row.createCell(i);
+			cell.setCellValue(headers.get(i));
+			cell.setCellStyle(csBoldAndBordered);
+		}
+		int counter = 1;
+		
+		for (CommandImpl command: commands) {
+			int colCount = 0;
+			row = sheet.createRow(rowCount++);  
+			cell = row.createCell(colCount++);
+			cell.setCellValue(String.valueOf(counter++));
+			cell.setCellStyle(csBordered);
+			
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(command.getTask().getPlugin().getDescription());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(command.getTask().getPlugin().getDescription());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(command.getCreateDate()));
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(command.getCommandOwnerUid());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(command.getUidList().size());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(command.getCommandExecutions().size());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(command.getCommandExecutions().size());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(command.getCommandExecutions().size());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue("HAYIR");
+			cell.setCellStyle(csBordered);
+			
+			colCount= 0;
+			
+		}
+		
+		
+		try {
+			FileOutputStream outputStream = new FileOutputStream(exportFile);
+			wb.write(outputStream);
+			wb.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return fileToByteCode(exportFile);
+
+	}
+	
+	
+	
+	
 
 	private String getFileWriteLocation() {
 		if(System.getProperty("user.dir").equals("/")) {
