@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
 import tr.org.lider.entities.CommandImpl;
+import tr.org.lider.entities.OperationLogImpl;
 
 @Service
 public class ExcelExportService {
@@ -388,6 +389,119 @@ public class ExcelExportService {
 
 	}
 	
+	
+	
+	public byte[] generateOperationLogReport(List<OperationLogImpl> logs) {
+		int rowCount = 0;
+		String exportFile = getFileWriteLocation() 
+				+ "Task Raporu_" 
+				+ new SimpleDateFormat("ddMMyyyyHH:mm:ss.SSS").format(new Date())
+				+ ".xlsx";
+		XSSFWorkbook wb = new XSSFWorkbook();
+
+		Font fontTextColourRed = wb.createFont();
+		fontTextColourRed.setColor(IndexedColors.RED.getIndex());
+
+		Font ftArial = wb.createFont();
+		ftArial.setFontName("Arial");
+
+		Font fontTextBold = wb.createFont();
+		fontTextBold.setBold(true);
+		fontTextBold.setFontName("Arial");
+		fontTextBold.setFontHeightInPoints((short) 10);
+
+		CellStyle csBoldAndBordered = wb.createCellStyle();
+		csBoldAndBordered.setFont(fontTextBold);
+		csBoldAndBordered.setBorderBottom(BorderStyle.THIN);
+		csBoldAndBordered.setBorderTop(BorderStyle.THIN);
+		csBoldAndBordered.setBorderLeft(BorderStyle.THIN);
+		csBoldAndBordered.setBorderRight(BorderStyle.THIN);
+		
+		CellStyle csBordered = wb.createCellStyle();
+		csBordered.setBorderBottom(BorderStyle.THIN);
+		csBordered.setBorderTop(BorderStyle.THIN);
+		csBordered.setBorderLeft(BorderStyle.THIN);
+		csBordered.setBorderRight(BorderStyle.THIN);
+
+		CellStyle csTextColourRed = wb.createCellStyle();
+		csTextColourRed.setFont(fontTextColourRed);
+
+		CellStyle csTextBold= wb.createCellStyle();
+		csTextBold.setFont(fontTextBold);
+
+		CellStyle csCenter = wb.createCellStyle();
+		csCenter.setAlignment(HorizontalAlignment.CENTER);
+		csCenter.setFont(ftArial);
+
+		XSSFSheet sheet = wb.createSheet("Detaylı İstemci Raporu");
+		
+		//Add header
+		Row row = null; 
+		Cell cell = null;
+		
+		List<Integer> colWidthList = new ArrayList<Integer>();
+		List<String> headers = new ArrayList<String>();
+		
+		Collections.addAll(headers, " ", "Günce Tipi",
+				"Oluşturulma Tarihi", "Mesaj", "Kullanıcı Adı", "IP Adresi");
+		Collections.addAll(colWidthList, 3500, 5500, 5500 ,16000, 14000, 4000);
+		
+		row = sheet.createRow(rowCount++);
+		for (int i = 0; i < headers.size(); i++) {
+			sheet.setColumnWidth(i, colWidthList.get(i));
+			cell = row.createCell(i);
+			cell.setCellValue(headers.get(i));
+			cell.setCellStyle(csBoldAndBordered);
+		}
+		int counter = 1;
+		
+		for (OperationLogImpl log: logs) {
+			int colCount = 0;
+			row = sheet.createRow(rowCount++);  
+			cell = row.createCell(colCount++);
+			cell.setCellValue(String.valueOf(counter++));
+			cell.setCellStyle(csBordered);
+			
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(log.getCrudType().toString());
+			cell.setCellStyle(csBordered);
+			
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(log.getCreateDate()));
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(log.getLogMessage());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(log.getUserId());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(log.getRequestIp());
+			cell.setCellStyle(csBordered);
+			
+			
+			colCount= 0;
+			
+		}
+		
+		
+		try {
+			FileOutputStream outputStream = new FileOutputStream(exportFile);
+			wb.write(outputStream);
+			wb.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return fileToByteCode(exportFile);
+
+	}
 	
 	
 	

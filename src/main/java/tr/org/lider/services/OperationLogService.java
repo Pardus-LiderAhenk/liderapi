@@ -40,6 +40,10 @@ public class OperationLogService {
 
 	@Autowired 
 	private HttpServletRequest httpRequest;
+	
+	public Long count() {
+		return operationLogRepository.count();
+	}
 
 	public void saveOperationLog(OperationType operationType,String logMessage,byte[] requestData ) {
 		logger.info("Operation log saving. Log Type {} Log Message {}",operationType.name(),logMessage);
@@ -129,7 +133,7 @@ public class OperationLogService {
 		Page<OperationLogImpl> result = null;
 
 		if (type.equals("ALL")) {
-			if (!searchText.isEmpty() && searchText != null) {
+			if (searchText != null && !searchText.isEmpty()) {
 				if (field.equals("userId")) {
 					if (startDate.isPresent() && endDate.isPresent()) {
 						result = operationLogRepository.findByUserIdAndCreateDateGreaterThanAndCreateDateLessThan(searchText, startDate, endDate, pageable);
@@ -152,10 +156,10 @@ public class OperationLogService {
 				}
 			}
 		} else {
-			OperationType typeOfValue = OperationType.valueOf(type);
+			OperationType typeOfValue = OperationType.getType(Integer.parseInt(type));
 			int typeId = typeOfValue.getId();
 
-			if (!searchText.isEmpty() && searchText != null) {
+			if (searchText != null && !searchText.isEmpty()) {
 				if (field.equals("userId")) {
 					if (startDate.isPresent() && endDate.isPresent()) {
 						result = operationLogRepository.findByUserIdAndOperationTypeAndCreateDateGreaterThanAndCreateDateLessThan(searchText, typeId, startDate, endDate, pageable);
