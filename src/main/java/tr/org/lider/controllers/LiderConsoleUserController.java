@@ -1,15 +1,17 @@
 package tr.org.lider.controllers;
 
 import java.util.List;
+
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,9 +48,10 @@ public class LiderConsoleUserController {
 //	return lider console profile from ldap
 	@RequestMapping(method=RequestMethod.POST, value = "/profile")
 	@ResponseBody
-	public LdapEntry getLiderConsoleUser(@RequestParam(value="uid", required=true) String uid) {
+	public LdapEntry getLiderConsoleUser(Authentication authentication) {
 		String globalUserOu = configurationService.getUserLdapBaseDn();
 		LdapEntry liderConsoleUser = null;
+		String uid = authentication.getName();
 		try {
 			String filter="(&(uid="+ uid +"))";
 			List<LdapEntry> usersEntrylist = ldapService.findSubEntries(globalUserOu, filter,new String[] { "*" }, SearchScope.SUBTREE);
@@ -67,7 +70,7 @@ public class LiderConsoleUserController {
 	 */
 	@RequestMapping(method=RequestMethod.POST, value = "/updatePassword",produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public boolean updateLiderConsoleUserPassword(LdapEntry selectedEntry) {
+	public boolean updateLiderConsoleUserPassword(@RequestBody LdapEntry selectedEntry) {
 		try {
 		
 			if(!"".equals(selectedEntry.getUserPassword())){
@@ -84,7 +87,7 @@ public class LiderConsoleUserController {
 //	updated profile of lider console
 	@RequestMapping(method=RequestMethod.POST, value = "/updateProfile",produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public LdapEntry updateLiderConsoleUser(LdapEntry selectedEntry) {
+	public LdapEntry updateLiderConsoleUser(@RequestBody LdapEntry selectedEntry) {
 		try {
 			if(!"".equals(selectedEntry.getCn())){
 				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "cn", selectedEntry.getCn());
