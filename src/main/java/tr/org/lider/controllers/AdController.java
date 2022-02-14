@@ -188,27 +188,25 @@ public class AdController {
 	}
 	
 	@RequestMapping(value = "/addOu2AD")
-	public Boolean addOu2AD(HttpServletRequest request, LdapEntry selectedEntry) {
+	public LdapEntry addOu2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding OU to AD. Ou info {} {}", selectedEntry.getDistinguishedName(),selectedEntry.getOu());
-		
 		Map<String, String[]> attributes = new HashMap<String, String[]>();
-		
 		attributes.put("objectClass", new String[] {"top","organizationalUnit"});
 		attributes.put("ou", new String[] {selectedEntry.getOu()});
-	
 		try {
-			String rdn="OU="+selectedEntry.getOu()+","+selectedEntry.getParentName();
+			String rdn = "OU="+selectedEntry.getOu()+","+selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
-			
+			selectedEntry = service.getEntryDetail(rdn);
 			operationLogService.saveOperationLog(OperationType.CREATE,"Dizin yapısına organizasyon birimi eklendi. Ou: "+rdn,null);
+			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return null;
 	}
 	
 	@RequestMapping(value = "/addGroup2AD")
-	public Boolean addGroup2AD(HttpServletRequest request, LdapEntry selectedEntry) {
+	public LdapEntry addGroup2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding Group to AD. Group info {} {}", selectedEntry.getDistinguishedName(),selectedEntry.getCn());
 		
 		Map<String, String[]> attributes = new HashMap<String, String[]>();
@@ -220,24 +218,28 @@ public class AdController {
 		try {
 			String rdn="CN="+selectedEntry.getCn()+","+selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
+			selectedEntry = service.getEntryDetail(rdn);
 			operationLogService.saveOperationLog(OperationType.CREATE,"Dizin yapısına grup eklendi. Grup: "+rdn,null);
+			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return null;
 	}
 	
 	@RequestMapping(value = "/addMember2ADGroup")
-	public Boolean addMember2ADGroup(HttpServletRequest request, LdapEntry selectedEntry) {
+	public LdapEntry addMember2ADGroup(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding {} to group. Group info {} ", selectedEntry.getDistinguishedName(),selectedEntry.getParentName());
 		
 		try {
 			service.updateEntryAddAtribute(selectedEntry.getParentName(), "member", selectedEntry.getDistinguishedName());
 			operationLogService.saveOperationLog(OperationType.CREATE,"Gruba üye eklendi. Üye: "+selectedEntry.getDistinguishedName(),null);
+			selectedEntry = service.getEntryDetail(selectedEntry.getParentName());
+			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return null;
 	}
 	
 	@RequestMapping(value = "/searchEntryUser")
