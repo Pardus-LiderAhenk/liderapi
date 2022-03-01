@@ -120,7 +120,7 @@ public class PolicyService {
 		return policyRepository.save(existPolicy);
 	}
 
-	public PolicyImpl del(PolicyImpl policy) {
+	public PolicyImpl delete(PolicyImpl policy) {
 		PolicyImpl existPolicy = policyRepository.findOne(policy.getId());
 		existPolicy.setDeleted(true);
 		existPolicy.setModifyDate(new Date());
