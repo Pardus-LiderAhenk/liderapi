@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.OperationType;
+import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.ExcelExportService;
 import tr.org.lider.services.OperationLogService;
 
@@ -43,11 +44,11 @@ public class OperationLogController {
 //	lider interface usage history by login console user
 	@RequestMapping(method=RequestMethod.POST, value = "/login")
 	@ResponseBody
-	public Page<OperationLogImpl> loginConsoleUserList(@RequestParam (value = "userId") String userId,
+	public Page<OperationLogImpl> loginConsoleUserList(
 			@RequestParam (value = "pageSize") int pageSize,
 			@RequestParam (value = "pageNumber") int pageNumber,
 			@RequestParam (value = "operationType") String operationType) {
-		return logService.getLoginLogsByLiderConsole(userId, pageNumber, pageSize, operationType);
+		return logService.getLoginLogsByLiderConsole(AuthenticationService.getDn(), pageNumber, pageSize, operationType);
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value = "/types")
