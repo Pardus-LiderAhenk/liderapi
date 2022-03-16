@@ -48,7 +48,7 @@ public class ProfileService {
 		return existProfile;
 	}
 
-	public ProfileImpl del(ProfileImpl profile) {
+	public ProfileImpl delete(ProfileImpl profile) {
 		ProfileImpl existProfile = findProfileByID(profile.getId());
 		existProfile.setDeleted(true);
 		existProfile.setModifyDate(new Date());
