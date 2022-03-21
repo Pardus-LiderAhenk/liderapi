@@ -132,13 +132,14 @@ public class PolicyService {
 	public PolicyImpl update(PolicyImpl policy) {
 		PolicyImpl existPolicy = policyRepository.findOne(policy.getId());
 		existPolicy.setLabel(policy.getLabel());
+		existPolicy.setActive(policy.isActive());
 		existPolicy.setDescription(policy.getDescription());
 		existPolicy.setProfiles(policy.getProfiles());
 		String oldVersion = existPolicy.getPolicyVersion().split("-")[1];
 		Integer newVersion = new Integer(oldVersion) + 1;
 		existPolicy.setPolicyVersion(policy.getId() + "-" + newVersion);
 		existPolicy.setModifyDate(new Date());
-		String logMessage = "[ "+ existPolicy.getLabel() + " ] politikası günllendi.";
+		String logMessage = "[ "+ existPolicy.getLabel() + " ] politikası güncellendi.";
 		operationLogService.saveOperationLog(OperationType.UPDATE, logMessage, existPolicy.getLabel().getBytes(), null, existPolicy.getId(), null);
 		return policyRepository.save(existPolicy);
 	}

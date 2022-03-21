@@ -80,4 +80,10 @@ public class ProfileController {
 			return null;
 		}
 	}
+	
+	//return profile detail by plugin name and by deleted is false
+	@RequestMapping(method=RequestMethod.POST ,value = "/allList", produces = MediaType.APPLICATION_JSON_VALUE)
+		public List<ProfileImpl> getAllProfiles() {
+			return profileService.list();
+		}
 }

@@ -2,6 +2,7 @@ package tr.org.lider.services;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,13 +36,14 @@ public class ProfileService {
 	private OperationLogService operationLogService;
 	
 	public List<ProfileImpl> list(){
-		return profileRepository.findAll();
+		return profileRepository.findAllByDeleted(false);
+//		return profileRepository.findAll();
 	}
 
 	public ProfileImpl add(ProfileImpl profile) {
 		ProfileImpl existProfile = profileRepository.save(profile);
 		try {
-			operationLogService.saveOperationLog(OperationType.CREATE, "Ayar(profil) oluşturuldu.", existProfile.getProfileDataBlob(), null, null, existProfile.getId());
+			operationLogService.saveOperationLog(OperationType.CREATE, "Profil oluşturuldu.", existProfile.getProfileDataBlob(), null, null, existProfile.getId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -52,8 +54,15 @@ public class ProfileService {
 		ProfileImpl existProfile = findProfileByID(profile.getId());
 		existProfile.setDeleted(true);
 		existProfile.setModifyDate(new Date());
+		List<PolicyImpl> policies = policyProfileRepository.findAllByProfileId(profile.getId());
+		for (PolicyImpl policy : policies) {
+			Set<ProfileImpl> profiles = policy.getProfiles();
+			profiles.removeIf(p -> p.getId() == profile.getId());
+			policy.setProfiles(profiles);
+			policyService.update(policy);
+		}
 		try {
-			operationLogService.saveOperationLog(OperationType.DELETE, "Ayar(profil) silindi.", existProfile.getProfileDataBlob(), null, null, existProfile.getId());
+			operationLogService.saveOperationLog(OperationType.DELETE, "Profil silindi.", existProfile.getProfileDataBlob(), null, null, existProfile.getId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -67,7 +76,7 @@ public class ProfileService {
 		existProfile.setDescription(profile.getDescription());
 		existProfile.setProfileData(profile.getProfileData());
 		try {
-			operationLogService.saveOperationLog(OperationType.UPDATE, "Ayar(profil) güncellendi.", existProfile.getProfileDataBlob(), null, null, existProfile.getId());
+			operationLogService.saveOperationLog(OperationType.UPDATE, "Profil güncellendi.", existProfile.getProfileDataBlob(), null, null, existProfile.getId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

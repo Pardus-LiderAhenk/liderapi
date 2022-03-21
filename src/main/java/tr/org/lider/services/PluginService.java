@@ -158,14 +158,14 @@ public class PluginService {
 		List<PluginProfile> pluginProfileList2 = new ArrayList<>();
 		
 //		String name(1), String page(2), String description(3), String command_id(4), PluginImpl plugin_id(5), Integer state(6)
-		pluginProfileList.add(new PluginProfile("Sistem Gözlemcisi Ayarı", "conky-profile", "Sistem gözlemcisi politika ayarı", "EXECUTE_CONKY", findPluginIdByName("conky"), 1));
-		pluginProfileList.add(new PluginProfile("Betik Ayarı", "execute-script-profile", "Betik politika ayarı", "EXECUTE_SCRIPT", findPluginIdByName("script"), 1));
-		pluginProfileList.add(new PluginProfile("Ağ Tarayıcı Ayarı", "browser-profile", "Ağ tarayıcı politika ayarı", "BROWSER", findPluginIdByName("browser"), 1));
-		pluginProfileList.add(new PluginProfile("Disk Kota Ayarı", "disk-quota-profile", "Disk kota politika ayarı", "GET_QUOTA", findPluginIdByName("disk-quota"), 1));
-		pluginProfileList.add(new PluginProfile("Oturum Yönetimi Ayarı", "login-manager-profile", "Oturum yönetimi politika ayarı", "MANAGE", findPluginIdByName("login-manager"), 1));
-		pluginProfileList.add(new PluginProfile("Rsyslog Ayarı", "rsyslog-profile", "Rsyslog politika ayarı", "CONFIGURE_RSYSLOG", findPluginIdByName("rsyslog"), 1));
-		pluginProfileList.add(new PluginProfile("USB Ayarı", "usb-profile", "USB politika ayarı", "MANAGE-USB", findPluginIdByName("usb"), 1));
-		pluginProfileList.add(new PluginProfile("Kullanıcı Ayrıcalıkları Ayarı", "user-privilege-profile", "Kullanıcı ayrıcalıkları ayarı", "USER-PRIVILEGE", findPluginIdByName("user-privilege"), 1));
+		pluginProfileList.add(new PluginProfile("Sistem Gözlemcisi Profili", "conky-profile", "Masaüstü mesaj yönetimi", "EXECUTE_CONKY", findPluginIdByName("conky"), 1));
+		pluginProfileList.add(new PluginProfile("Betik Profili", "execute-script-profile", "Betik çalıştır", "EXECUTE_SCRIPT", findPluginIdByName("script"), 1));
+		pluginProfileList.add(new PluginProfile("Ağ Tarayıcı Profili", "browser-profile", "Ağ tarayıcı yönetimi", "BROWSER", findPluginIdByName("browser"), 1));
+		pluginProfileList.add(new PluginProfile("Disk Kota Profili", "disk-quota-profile", "Kullanıcı disk kota yönetimi", "GET_QUOTA", findPluginIdByName("disk-quota"), 0));
+		pluginProfileList.add(new PluginProfile("Oturum Yönetimi Profili", "login-manager-profile", "Kullanıcı oturum yönetimi", "MANAGE", findPluginIdByName("login-manager"), 1));
+		pluginProfileList.add(new PluginProfile("Rsyslog Profili", "rsyslog-profile", "Rsyslog ile log yönetimi", "CONFIGURE_RSYSLOG", findPluginIdByName("rsyslog"), 1));
+		pluginProfileList.add(new PluginProfile("USB Profili", "usb-profile", "I/O yönetimi", "MANAGE-USB", findPluginIdByName("usb"), 1));
+		pluginProfileList.add(new PluginProfile("Kullanıcı Ayrıcalıkları Profili", "user-privilege-profile", "Kullanıcı ayrıcalıkları yönetimi", "USER-PRIVILEGE", findPluginIdByName("user-privilege"), 0));
 		
 		for (int i = 0; i < pluginProfileList.size(); i++) {
 			if (findPluginProfileByPage(pluginProfileList.get(i).getPage()).isEmpty()) {
