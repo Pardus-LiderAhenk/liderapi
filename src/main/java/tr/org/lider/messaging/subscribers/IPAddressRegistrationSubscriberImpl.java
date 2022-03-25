@@ -1,11 +1,12 @@
 /**
- * Registration suscriber for BTK
- * if hostname does not match with any registration rules agent will be
+ * Registration suscriber for IP Address
+ * if ip address does not match with any registration rules agent will be
  * added to Agent ou as default
  * 
  * @author <a href="mailto:hasan.kara@pardus.org.tr">Hasan Kara</a>
  * 
  */
+
 package tr.org.lider.messaging.subscribers;
 
 import java.util.ArrayList;
@@ -46,12 +47,11 @@ import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.RegistrationTemplateService;
 
-
 @Component
-@ConditionalOnProperty(name = "registrationSubscriber.class", havingValue = "btk")
-public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
+@ConditionalOnProperty(name = "registrationSubscriber.class", havingValue = "ip_address")
+public class IPAddressRegistrationSubscriberImpl implements IRegistrationSubscriber {
 
-	private static Logger logger = LoggerFactory.getLogger(BTKRegistrationSubscriberImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(IPAddressRegistrationSubscriberImpl.class);
 
 	@Autowired
 	private LDAPServiceImpl ldapService;
@@ -69,7 +69,6 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 	private XMPPClientImpl xmppClient;
 	
 	private String LDAP_VERSION = "3";
-
 	private static String DIRECTORY_SERVER_LDAP="LDAP";
 	private static String DIRECTORY_SERVER_AD="ACTIVE_DIRECTORY";
 	//private static String DIRECTORY_SERVER_NONE="NONE";
@@ -81,15 +80,12 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 	 */
 	@Override
 	public ILiderMessage messageReceived(RegistrationMessageImpl message) throws Exception {
-
 		String jid = message.getFrom().split("@")[0];
-
+		String ipAddresses[] = message.getIpAddresses().replaceAll(" ", "").replaceAll("'", "").split(",");
 		// Register agent
 		if (AgentMessageType.REGISTER == message.getType()) {
-
 			boolean alreadyExists = false;
 			String dn = null;
-
 			String userName = message.getUserName();
 			String userPassword = message.getUserPassword();
 			String directoryServer =DIRECTORY_SERVER_LDAP;
@@ -99,11 +95,9 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 			}
 
 			LdapEntry ldapUserEntry= getUserFromLdap(userName, userPassword);
-
 			if(ldapUserEntry==null) {
-
 				RegistrationResponseMessageImpl	respMessage = new RegistrationResponseMessageImpl(StatusCode.NOT_AUTHORIZED,
-						"User Not Found", dn, null, new Date());
+						"User Not Found!!!", dn, null, new Date());
 				return respMessage;
 			}
 
@@ -111,28 +105,29 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 			final List<LdapEntry> entries = ldapService.search(configurationService.getAgentLdapJidAttribute(), jid,
 					new String[] { configurationService.getAgentLdapJidAttribute() });
 			LdapEntry entry = entries != null && !entries.isEmpty() ? entries.get(0) : null;
-
 			if (entry != null) {
 				alreadyExists = true;
 				dn = entry.getDistinguishedName();
 				logger.info("{} Already exist in LDAP ",new Object[] {dn});
-//				logger.info("Updating LDAP entry: {} with password: {}",new Object[] { message.getFrom(), message.getPassword() });
-//				// Update agent LDAP entry.
-//				ldapService.updateEntry(dn, "userPassword", message.getPassword());
-//
-//				logger.info("Agent LDAP entry {} updated successfully!", dn);
 			} else {
-				//check if there are templates and if agent has any rule for its hostname
+				//check if there are templates and if agent has any rule for its ip address
 				List<RegistrationTemplateImpl> templates = registrationTemplateService.findAllOrderByUnitLength();
 				RegistrationTemplateImpl agentTemplate = null;
+				Boolean isTemplateFound = false;
 				for (RegistrationTemplateImpl template : templates) {
-					if(jid.startsWith(template.getUnitId())) {
-						agentTemplate = template;
+					for (String ip : ipAddresses) {
+						if(ip.startsWith(template.getUnitId())) {
+							agentTemplate = template;
+							isTemplateFound = true;
+							logger.info("Registration template found: " + agentTemplate.toString());
+							break;
+						}
+					}
+					if(isTemplateFound) {
 						break;
 					}
 				}
-
-				//if agent has regstration template rule check if user is authorized for that
+				//if agent has registration template rule check if user is authorized for that
 				if(agentTemplate != null) {
 					Boolean ldapUserAllowedForRegistration = false;
 					LdapEntry templateLdapEntry = ldapService.getEntryDetail(agentTemplate.getAuthGroup());
@@ -148,6 +143,12 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 							if(ldapUserEntry.getDistinguishedName().equals(agentTemplate.getAuthGroup())) {
 								ldapUserAllowedForRegistration = true;
 							}
+						}
+						if(ldapUserAllowedForRegistration) {
+							logger.info("User is allowed for agent registration. " + ldapUserEntry.getDistinguishedName() + " is member of agent template auth group: " + agentTemplate.getAuthGroup());
+						} else {
+							logger.error(ldapUserEntry.getDistinguishedName() + " is not allowed to register agent:" + message.getHostname());
+							logger.error(ldapUserEntry.getDistinguishedName() + " is not member of agent template auth group: " + agentTemplate.getAuthGroup());
 						}
 						if(ldapUserAllowedForRegistration) {
 
@@ -196,12 +197,10 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 					}
 				}
 				ldapService.updateEntryAddAtribute(dn, "liderDeviceOSType", osType);
-
 			}
 
 			// Try to find related agent database record
 			List<? extends AgentImpl> agents = agentDao.findByJid(jid);
-
 			AgentImpl agent = agents != null && !agents.isEmpty() ? agents.get(0) : null;
 			// Update the record
 			if (agent != null) {
@@ -236,7 +235,6 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 							false,
 							(Set<AgentPropertyImpl>) agent.getProperties(),
 							(Set<UserSessionImpl>) agent.getSessions(),directoryServer);
-
 					if (message.getData() != null) {
 						for (Entry<String, Object>  entryy : message.getData().entrySet()) {
 							if (entryy.getKey() != null && entryy.getValue() != null) {
@@ -245,11 +243,11 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 							}
 						}
 					}
-					//Update agent Database.
+					// Update agentDatabase.
 					logger.info("Updating agentJid: {} with password: {} in database",new Object[] {agent.getJid(), message.getPassword()});
 					agentDao.save(agent);
 					logger.info("Agent Database {} updated successfully!", agent.getJid());
-					//Update agent LDAP entry
+					// Update agent LDAP entry
 					logger.info("Updating LDAP entry: {} with password: {}",new Object[] { message.getFrom(), message.getPassword() });
 					ldapService.updateEntry(dn, "userPassword", message.getPassword());
 					logger.info("Agent LDAP entry {} updated successfully!", dn);
@@ -276,21 +274,17 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 				agentDao.save(agentImpl);
 			}
 			IRegistrationResponseMessage respMessage=null;
-
 			if (alreadyExists) {
 				logger.warn("Agent {} already exists! Hostname already in use", dn);
-
 				respMessage =new RegistrationResponseMessageImpl(StatusCode.ALREADY_EXISTS,
 						dn + " already exists! Updated its password and database properties with the values submitted.",
 						dn, null, new Date());
-
 			} else {
 				logger.info("Agent {} and its related database record created successfully!", dn);
 
 				respMessage = new RegistrationResponseMessageImpl(StatusCode.REGISTERED,
 						dn + " and its related database record created successfully!", dn, null, new Date());
 			}
-
 			respMessage.setDisableLocalUser(configurationService.getDisableLocalUser());
 			respMessage.setDirectoryServer(directoryServer);
 
@@ -299,14 +293,12 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 				respMessage.setLdapBaseDn(configurationService.getLdapRootDn());
 				respMessage.setLdapVersion(LDAP_VERSION);
 				respMessage.setLdapUserDn(dn);
-
 				logger.info("Registration message created..  "
 						+ "Message details ldap base dn : " +respMessage.getLdapBaseDn() 
 						+ "  ldap server =" + respMessage.getLdapBaseDn()
 						+ "  ldap userdn =" + respMessage.getLdapUserDn()
 						+ "  ldap version =" + respMessage.getLdapVersion()
 						);
-
 			}
 			else if(directoryServer.equals(DIRECTORY_SERVER_AD)) {
 				respMessage.setAdDomainName(configurationService.getAdDomainName());
@@ -322,11 +314,10 @@ public class BTKRegistrationSubscriberImpl implements IRegistrationSubscriber {
 						+ "  ldap version =" + respMessage.getLdapVersion()
 						);
 			}
-			xmppClient.addClientToRoster(jid + "@" + configurationService.getXmppServiceName());
+			xmppClient.addClientToRoster(jid + "@"+configurationService.getXmppServiceName());
 			return respMessage;
 
 		} else if (AgentMessageType.UNREGISTER == message.getType()) {
-
 			logger.info("Unregister message from jid : "+jid);
 			logger.info("Unregister message UserName: "+message.getUserName());
 			String userName = message.getUserName();

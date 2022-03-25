@@ -1,11 +1,12 @@
 /**
- * Registration suscriber for DİB
+ * Registration subscriber for hostname
  * if hostname does not match with any registration rules agent will be
  * added to Agent ou as default
  * 
  * @author <a href="mailto:hasan.kara@pardus.org.tr">Hasan Kara</a>
  * 
  */
+
 package tr.org.lider.messaging.subscribers;
 
 import java.util.ArrayList;
@@ -48,10 +49,10 @@ import tr.org.lider.services.RegistrationTemplateService;
 
 
 @Component
-@ConditionalOnProperty(name = "registrationSubscriber.class", havingValue = "iski")
-public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
+@ConditionalOnProperty(name = "registrationSubscriber.class", havingValue = "hostname")
+public class HostNameRegistrationSubscriberImpl implements IRegistrationSubscriber {
 
-	private static Logger logger = LoggerFactory.getLogger(IskiRegistrationSubscriberImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(HostNameRegistrationSubscriberImpl.class);
 
 	@Autowired
 	private LDAPServiceImpl ldapService;
@@ -63,13 +64,12 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 	private AgentRepository agentDao;
 
 	@Autowired
-	private RegistrationTemplateService registrationTemplateService;
+	private XMPPClientImpl xmppClient;
 
 	@Autowired
-	private XMPPClientImpl xmppClient;
-	
-	private String LDAP_VERSION = "3";
+	private RegistrationTemplateService registrationTemplateService;
 
+	private String LDAP_VERSION = "3";
 	private static String DIRECTORY_SERVER_LDAP="LDAP";
 	private static String DIRECTORY_SERVER_AD="ACTIVE_DIRECTORY";
 	//private static String DIRECTORY_SERVER_NONE="NONE";
@@ -81,10 +81,7 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 	 */
 	@Override
 	public ILiderMessage messageReceived(RegistrationMessageImpl message) throws Exception {
-
 		String jid = message.getFrom().split("@")[0];
-		String ipAddresses[] = message.getIpAddresses().replaceAll(" ", "").replaceAll("'", "").split(",");
-
 		// Register agent
 		if (AgentMessageType.REGISTER == message.getType()) {
 
@@ -104,7 +101,7 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 			if(ldapUserEntry==null) {
 
 				RegistrationResponseMessageImpl	respMessage = new RegistrationResponseMessageImpl(StatusCode.NOT_AUTHORIZED,
-						"User Not Found!!!", dn, null, new Date());
+						"User Not Found", dn, null, new Date());
 				return respMessage;
 			}
 
@@ -117,26 +114,13 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 				alreadyExists = true;
 				dn = entry.getDistinguishedName();
 				logger.info("{} Already exist in LDAP ",new Object[] {dn});
-//				logger.info("Updating LDAP entry: {} with password: {}",new Object[] { message.getFrom(), message.getPassword() });
-//				// Update agent LDAP entry.
-//				ldapService.updateEntry(dn, "userPassword", message.getPassword());
-//
-//				logger.info("Agent LDAP entry {} updated successfully!", dn);
 			} else {
-				//check if there are templates and if agent has any rule for its ip address
+				//check if there are templates and if agent has any rule for its hostname
 				List<RegistrationTemplateImpl> templates = registrationTemplateService.findAllOrderByUnitLength();
 				RegistrationTemplateImpl agentTemplate = null;
-				Boolean isTemplateFound = false;
 				for (RegistrationTemplateImpl template : templates) {
-					for (String ip : ipAddresses) {
-						if(ip.startsWith(template.getUnitId())) {
-							agentTemplate = template;
-							isTemplateFound = true;
-							logger.info("Registration template found: " + agentTemplate.toString());
-							break;
-						}
-					}
-					if(isTemplateFound) {
+					if(jid.startsWith(template.getUnitId())) {
+						agentTemplate = template;
 						break;
 					}
 				}
@@ -159,12 +143,6 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 							}
 						}
 						if(ldapUserAllowedForRegistration) {
-							logger.info("User is allowed for agent registration. " + ldapUserEntry.getDistinguishedName() + " is member of agent template auth group: " + agentTemplate.getAuthGroup());
-						} else {
-							logger.error(ldapUserEntry.getDistinguishedName() + " is not allowed to register agent:" + message.getHostname());
-							logger.error(ldapUserEntry.getDistinguishedName() + " is not member of agent template auth group: " + agentTemplate.getAuthGroup());
-						}
-						if(ldapUserAllowedForRegistration) {
 
 							LdapName dnList = new LdapName(agentTemplate.getParentDn());
 							List<String> subDNList = new ArrayList<>();
@@ -184,26 +162,6 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 									createOrganizationalUnit(subDNList.get(i));
 								}
 							}
-							/*
-							LdapName dnList = new LdapName(agentTemplate.getParentDn());
-							List<String> listOfDNToCreate = new ArrayList<>();
-							for (int i = 1; i <= dnList.size(); i++) {
-								String parentDN = "";
-								for (int j = dnList.size()-i; j >= 0; j--) {
-									parentDN += dnList.get(j) + ',';
-								}
-								parentDN = parentDN.substring(0,parentDN.length()-1);
-								if(configurationService.getAgentLdapBaseDn().equals(parentDN)) {
-									break;
-								}
-								listOfDNToCreate.add(parentDN);
-							}
-							for (int i = listOfDNToCreate.size() -1 ; i >=0; i--) {
-								if(!organizationUnitDoesExist(listOfDNToCreate.get(i))) {
-									createOrganizationalUnit(listOfDNToCreate.get(i));
-								}
-							}
-							*/
 						} else {
 							RegistrationResponseMessageImpl	respMessage = new RegistrationResponseMessageImpl(StatusCode.NOT_AUTHORIZED,
 									"User is not authorized", dn, null, new Date());
@@ -231,7 +189,6 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 					}
 				}
 				ldapService.updateEntryAddAtribute(dn, "liderDeviceOSType", osType);
-
 			}
 
 			// Try to find related agent database record
@@ -280,11 +237,11 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 							}
 						}
 					}
-					// Update agentDatabase.
+					//Update agent Database.
 					logger.info("Updating agentJid: {} with password: {} in database",new Object[] {agent.getJid(), message.getPassword()});
 					agentDao.save(agent);
 					logger.info("Agent Database {} updated successfully!", agent.getJid());
-					// Update agent LDAP entry
+					//Update agent LDAP entry
 					logger.info("Updating LDAP entry: {} with password: {}",new Object[] { message.getFrom(), message.getPassword() });
 					ldapService.updateEntry(dn, "userPassword", message.getPassword());
 					logger.info("Agent LDAP entry {} updated successfully!", dn);
@@ -311,37 +268,30 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 				agentDao.save(agentImpl);
 			}
 			IRegistrationResponseMessage respMessage=null;
-
 			if (alreadyExists) {
 				logger.warn("Agent {} already exists! Hostname already in use", dn);
 
 				respMessage =new RegistrationResponseMessageImpl(StatusCode.ALREADY_EXISTS,
 						dn + " already exists! Updated its password and database properties with the values submitted.",
 						dn, null, new Date());
-
 			} else {
 				logger.info("Agent {} and its related database record created successfully!", dn);
-
 				respMessage = new RegistrationResponseMessageImpl(StatusCode.REGISTERED,
 						dn + " and its related database record created successfully!", dn, null, new Date());
 			}
-
 			respMessage.setDisableLocalUser(configurationService.getDisableLocalUser());
 			respMessage.setDirectoryServer(directoryServer);
-
 			if(directoryServer.equals(DIRECTORY_SERVER_LDAP)) {
 				respMessage.setLdapServer(configurationService.getLdapServer());
 				respMessage.setLdapBaseDn(configurationService.getLdapRootDn());
 				respMessage.setLdapVersion(LDAP_VERSION);
 				respMessage.setLdapUserDn(dn);
-
 				logger.info("Registration message created..  "
 						+ "Message details ldap base dn : " +respMessage.getLdapBaseDn() 
 						+ "  ldap server =" + respMessage.getLdapBaseDn()
 						+ "  ldap userdn =" + respMessage.getLdapUserDn()
 						+ "  ldap version =" + respMessage.getLdapVersion()
 						);
-
 			}
 			else if(directoryServer.equals(DIRECTORY_SERVER_AD)) {
 				respMessage.setAdDomainName(configurationService.getAdDomainName());
@@ -349,7 +299,6 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 				respMessage.setAdIpAddress(configurationService.getAdIpAddress());
 				respMessage.setAdAdminPassword(configurationService.getAdAdminPassword());
 				respMessage.setAdAdminUserName(configurationService.getAdAdminUserName());
-
 				logger.info("Registration message created..  "
 						+ "Message details ldap base dn : " +respMessage.getLdapBaseDn() 
 						+ "  ldap server =" + respMessage.getLdapBaseDn()
@@ -358,6 +307,7 @@ public class IskiRegistrationSubscriberImpl implements IRegistrationSubscriber {
 						);
 			}
 			xmppClient.addClientToRoster(jid + "@"+configurationService.getXmppServiceName());
+			logger.info("Agent {} added successfully as a member lider_sunucu roster", jid);
 			return respMessage;
 
 		} else if (AgentMessageType.UNREGISTER == message.getType()) {
