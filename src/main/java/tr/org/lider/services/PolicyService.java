@@ -110,6 +110,11 @@ public class PolicyService {
 		Boolean deleted = false;
 		return policyRepository.findAllByDeleted(deleted);
 	}
+	
+	public List<PolicyImpl> activePolicies( ){
+		Boolean active = true;
+		return policyRepository.findAllByActive(active);
+	}
 
 	public PolicyImpl add(PolicyImpl policy) {
 		policy.setCommandOwnerUid(null);
