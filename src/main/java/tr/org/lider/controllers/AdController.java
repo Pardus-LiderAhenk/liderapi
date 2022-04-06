@@ -648,7 +648,7 @@ public class AdController {
 		}
 	}
 	
-	@RequestMapping(value = "/getChildUSer")
+	@RequestMapping(value = "/getChildUser")
 	public List<LdapEntry>  getChildUSer(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
@@ -662,8 +662,28 @@ public class AdController {
 			}
 			List<LdapSearchFilterAttribute> filterAttributes = new ArrayList<LdapSearchFilterAttribute>();
 			filterAttributes.add(new LdapSearchFilterAttribute(key, value, SearchFilterEnum.EQ));
-			filterAttributes.add(new LdapSearchFilterAttribute("objectclass", "user", SearchFilterEnum.EQ)); 
 			filterAttributes.add(new LdapSearchFilterAttribute("objectclass", "person", SearchFilterEnum.EQ)); 
+			results = service.search(searchDn,filterAttributes, new String[] {"*"});
+		} catch (LdapException e) {
+			e.printStackTrace();
+		}
+		return results;
+	}
+	
+	@RequestMapping(value = "/getChildGroup")
+	public List<LdapEntry>  getChildGroup(HttpServletRequest request,
+			@RequestParam(value="searchDn", required=true) String searchDn,
+			@RequestParam(value="key", required=true) String key, 
+			@RequestParam(value="value", required=true) String value) {
+		List<LdapEntry> results=null;
+		
+		logger.info("Search for key {} value {}  only users ",key, value);
+		try {
+			if(searchDn.equals("")) {
+				searchDn=service.getADDomainName();
+			}
+			List<LdapSearchFilterAttribute> filterAttributes = new ArrayList<LdapSearchFilterAttribute>();
+			filterAttributes.add(new LdapSearchFilterAttribute(key, value, SearchFilterEnum.EQ));
 			results = service.search(searchDn,filterAttributes, new String[] {"*"});
 		} catch (LdapException e) {
 			e.printStackTrace();
