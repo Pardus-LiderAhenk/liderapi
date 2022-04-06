@@ -82,6 +82,7 @@ public class PagesController {
         	else if(innerPage.equals("directory-manager")) {
         		String enableDelete4Directory = env.getProperty("lider.enableDelete4Directory");
         		model.put("enableDeleteUpdate", enableDelete4Directory);
+        		model.put("domainType", configurationService.getDomainType());
         	}
         	return model;
         } else {

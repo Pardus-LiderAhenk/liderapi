@@ -499,9 +499,11 @@ public class AdController {
 			attributes.put("telephoneNumber", new String[] { adUser.get("telephoneNumber") });
 		
 		String rdn="uid="+sAMAccountName+","+destinationDistinguishedName;
-		
-		ldapService.addEntry(rdn, attributes);
-		
+		try {
+			ldapService.addEntry(rdn, attributes);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 		return rdn;
 	}
 
@@ -644,6 +646,29 @@ public class AdController {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	@RequestMapping(value = "/getChildUSer")
+	public List<LdapEntry>  getChildUSer(HttpServletRequest request,
+			@RequestParam(value="searchDn", required=true) String searchDn,
+			@RequestParam(value="key", required=true) String key, 
+			@RequestParam(value="value", required=true) String value) {
+		List<LdapEntry> results=null;
+		
+		logger.info("Search for key {} value {}  only users ",key, value);
+		try {
+			if(searchDn.equals("")) {
+				searchDn=service.getADDomainName();
+			}
+			List<LdapSearchFilterAttribute> filterAttributes = new ArrayList<LdapSearchFilterAttribute>();
+			filterAttributes.add(new LdapSearchFilterAttribute(key, value, SearchFilterEnum.EQ));
+			filterAttributes.add(new LdapSearchFilterAttribute("objectclass", "user", SearchFilterEnum.EQ)); 
+			filterAttributes.add(new LdapSearchFilterAttribute("objectclass", "person", SearchFilterEnum.EQ)); 
+			results = service.search(searchDn,filterAttributes, new String[] {"*"});
+		} catch (LdapException e) {
+			e.printStackTrace();
+		}
+		return results;
 	}
 
 	
