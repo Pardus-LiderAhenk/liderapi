@@ -13,7 +13,9 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -125,7 +127,7 @@ public class AdController {
 		return oneLevelSubList;
 	}
 	@RequestMapping(value = "/addUser2AD")
-	public IRestResponse addUser2AD(HttpServletRequest request, LdapEntry selectedEntry) {
+	public ResponseEntity<?> addUser2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		 logger.info("Adding user to AD. User info : "+ selectedEntry.getDistinguishedName());
 		 
 		 Map<String, String[]> attributes = new HashMap<String, String[]>();
@@ -153,8 +155,6 @@ public class AdController {
 				e1.printStackTrace();
 		}
 
-		 //mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
-		 
 		// some useful constants from lmaccess.h
 		 int UF_ACCOUNTENABLE = 0x0001;   
 		 int UF_ACCOUNTDISABLE = 0x0002;
@@ -164,7 +164,6 @@ public class AdController {
 	     int UF_DONT_EXPIRE_PASSWD = 0x10000;
 	     int UF_PASSWORD_EXPIRED = 0x800000;
 	        
-//	     String uacStr=   Integer.toString(UF_NORMAL_ACCOUNT + UF_PASSWD_NOTREQD + UF_DONT_EXPIRE_PASSWD + UF_ACCOUNTENABLE);
 	     String uacStr=   Integer.toString(UF_NORMAL_ACCOUNT + UF_PASSWD_NOTREQD + UF_PASSWORD_EXPIRED + UF_ACCOUNTENABLE);
 	     attributes.put("userAccountControl", new String[] {uacStr});
 	     attributes.put("pwdLastSet", new String[] {"0"});
@@ -172,16 +171,16 @@ public class AdController {
 		 try {
 			String rdn="CN="+selectedEntry.getCn()+","+selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
-			
+			selectedEntry = service.getEntryDetail(rdn);
 			operationLogService.saveOperationLog(OperationType.CREATE,"Dizin yapısına kullanıcı eklendi.Kullanıcı: "+rdn,null);
-			return responseFactoryService.createResponse(RestResponseStatus.OK,"Kullanıcı Başarı ile oluşturuldu.");
-			
-//			service.updateEntryAddAtribute(rdn, "pwdLastSet", "0");
+//			return responseFactoryService.createResponse(RestResponseStatus.OK,"Kullanıcı Başarı ile oluşturuldu.");
+			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
 			e.printStackTrace();
 			String message=e.getLocalizedMessage();
-			if(message!=null && message.contains("CONSTRAINT_ATT_TYPE")) {
-			return 	responseFactoryService.createResponse(RestResponseStatus.WARNING,"Aynı kullanıcı giriş ismine sahip kullanıcı bulunmaktadır.");
+			if(message!=null && message.contains("ENTRY_EXISTS")) {
+//			return 	responseFactoryService.createResponse(RestResponseStatus.WARNING,"Aynı kullanıcı giriş ismine sahip kullanıcı bulunmaktadır.");
+				return new ResponseEntity<>(null, HttpStatus.ALREADY_REPORTED);
 			}
 		}
 		return null;
