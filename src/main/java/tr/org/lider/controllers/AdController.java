@@ -33,9 +33,6 @@ import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.PolicyService;
-import tr.org.lider.utils.IRestResponse;
-import tr.org.lider.utils.ResponseFactoryService;
-import tr.org.lider.utils.RestResponseStatus;
 
 /**
  * 
@@ -55,9 +52,6 @@ public class AdController {
 	
 	@Autowired
 	private ConfigurationService configurationService;
-	
-	@Autowired
-	private ResponseFactoryService responseFactoryService;
 	
 	@Autowired
 	private OperationLogService operationLogService; 
