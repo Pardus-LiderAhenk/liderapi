@@ -628,4 +628,26 @@ public class ComputerController {
 		}
 		return isExist;
 	}
+	
+	@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
+	public LdapEntry addOu(LdapEntry selectedEntry) {
+		try {
+			Map<String, String[]> attributes = new HashMap<String,String[]>();
+			attributes.put("objectClass", new String[] {"organizationalUnit", "top", "pardusLider"} );
+			attributes.put("ou", new String[] { selectedEntry.getOu() });
+
+			String dn="ou="+selectedEntry.getOu()+","+selectedEntry.getParentName();
+			
+			ldapService.addEntry(dn, attributes);
+			logger.info("OU created successfully RDN ="+dn);
+			
+			//get full of ou details after creation
+			selectedEntry = ldapService.getEntryDetail(dn);
+			
+			return selectedEntry;
+		} catch (LdapException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }
