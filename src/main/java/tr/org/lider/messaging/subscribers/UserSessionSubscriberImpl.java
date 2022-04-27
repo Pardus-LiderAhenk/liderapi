@@ -126,6 +126,7 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 				}
 			}
 			// Merge records
+			agent.setLastLoginDate(new Date());
 			agentRepository.save(agent);
 			// find user authority for sudo role
 			// if user has sudo role user get sudoRole on agent

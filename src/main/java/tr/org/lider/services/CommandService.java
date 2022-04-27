@@ -123,6 +123,11 @@ public class CommandService {
 		return commandExecutionRepository.count();
 	}
 	
+	public int getTotalCountOfAssignedPolicy() {
+		List<CommandImpl> commandImpl = commandRepository.findCommandAllByPolicy();
+		return commandImpl.size();
+	}
+	
 	public Long count() {
 		return commandExecutionRepository.count();
 	}

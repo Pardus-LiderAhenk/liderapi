@@ -74,6 +74,11 @@ public class AgentImpl implements Serializable{
 	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone="Europe/Istanbul")
 	private Date modifyDate;
 	
+	@Column(name="LAST_LOGIN_DATE")
+	@Temporal(TemporalType.TIMESTAMP)
+	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone = "Europe/Istanbul")
+	private Date lastLoginDate;
+	
 	@Transient
 	private Boolean isOnline = false;
 
@@ -214,6 +219,14 @@ public class AgentImpl implements Serializable{
 
 	public void setModifyDate(Date modifyDate) {
 		this.modifyDate = modifyDate;
+	}
+	
+	public Date getLastLoginDate() {
+		return lastLoginDate;
+	}
+
+	public void setLastLoginDate(Date lastLoginDate) {
+		this.lastLoginDate = lastLoginDate;
 	}
 
 	

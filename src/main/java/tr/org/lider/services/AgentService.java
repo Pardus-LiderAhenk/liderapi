@@ -40,8 +40,8 @@ public class AgentService {
         return agentRepository.findAll();
 	}
 	
-	public Long count() {
-        return agentRepository.count();
+	public int count() {
+        return (int) agentRepository.count();
 	}
 	
 	public Optional<AgentImpl> findAgentByID(Long agentID) {
@@ -173,4 +173,18 @@ public class AgentService {
 	public List<String> getAgentVersions() {
 		return agentRepository.getPropertyValueByName("agentVersion");
 	}
+	
+	public int getCountByCreateDate(Date startDate, Date endDate) {
+		return agentRepository.getCountByCreateDate(startDate, endDate);
+	}
+	
+	public int getCountByTodayCreateDate(Date startDate) {
+		return agentRepository.getCountByTodayCreateDate(startDate);
+	}
+	
+	public int getCountByTodayLastLogin(Date startDate) {
+		return agentRepository.getCountByLastLoginToday(startDate);
+	}
+	
+	
 }

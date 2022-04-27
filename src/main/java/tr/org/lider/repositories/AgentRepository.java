@@ -1,5 +1,6 @@
 package tr.org.lider.repositories;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -66,6 +67,18 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 			+ "where property_name= :name "
 			+ "AND property_value != \"\" GROUP BY property ORDER BY property ASC", nativeQuery = true)
 	List<String> getPropertyValueByName(@Param("name") String name);
+	
+	@Query(value = "SELECT count(*) FROM c_agent as a "
+			+ "where a.create_date > :startDate AND a.create_date < :endDate", nativeQuery = true)
+	int getCountByCreateDate(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+	
+	@Query(value = "SELECT count(*) FROM c_agent as a "
+			+ "where a.create_date >:startDate", nativeQuery = true)
+	int getCountByTodayCreateDate(@Param("startDate") Date startDate);
+	
+	@Query(value = "SELECT count(*) FROM c_agent as a "
+			+ "where a.last_login_date >:startDate", nativeQuery = true)
+	int getCountByLastLoginToday(@Param("startDate") Date startDate);
 	
 }
 

@@ -38,4 +38,7 @@ public interface CommandRepository extends BaseJpaRepository<CommandImpl, Long>{
 	void deleteByUidListJsonString(String uidListJsonString);
 	
 	List<CommandImpl> findByUidListJsonStringContaining(String uid);
+	
+	@Query("SELECT c FROM CommandImpl c WHERE c.policy is not null")
+	List<CommandImpl> findCommandAllByPolicy();
 }
