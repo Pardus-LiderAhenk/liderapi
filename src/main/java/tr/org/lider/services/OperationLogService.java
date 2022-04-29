@@ -185,4 +185,9 @@ public class OperationLogService {
 		}
 		return result;
 	}
+	
+	public Page<OperationLogImpl> getLastActivityByUserIdDescLimitTen(String userId) {
+		PageRequest pageable = PageRequest.of(1 - 1, 10, Sort.by("createDate").descending());
+		return operationLogRepository.findOrderByCreateDateDesc10ByUserId(userId, pageable);
+	}
 }

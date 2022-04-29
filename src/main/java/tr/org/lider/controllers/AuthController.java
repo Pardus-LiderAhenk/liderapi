@@ -28,10 +28,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.security.JwtProvider;
 import tr.org.lider.security.JwtResponse;
 import tr.org.lider.security.LoginParams;
 import tr.org.lider.security.User;
+import tr.org.lider.services.OperationLogService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -42,6 +44,9 @@ public class AuthController {
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private OperationLogService operationLogService; 
 
 	@Autowired
 	private JwtProvider jwtProvider;
@@ -56,6 +61,7 @@ public class AuthController {
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			User userPrincipal = (User)authentication.getPrincipal();
 			String jwt = jwtProvider.generateJwtToken(authentication);
+			operationLogService.saveOperationLog(OperationType.LOGIN,"Lider Arayüze Giriş Yapıldı.",null);
 			return ResponseEntity.ok(new JwtResponse(jwt, userPrincipal.getName(), userPrincipal.getSurname()));
 		} catch (BadCredentialsException e) {
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but username or password is wrong. Returned: " + HttpStatus.NOT_FOUND);

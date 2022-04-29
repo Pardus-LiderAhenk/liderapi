@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.services.AuthenticationService;
+import tr.org.lider.services.CommandService;
+import tr.org.lider.services.AgentService;
 
 @Service
 public class DashboardService {
@@ -28,6 +31,9 @@ public class DashboardService {
 	
 	@Autowired
 	private XMPPClientImpl messagingService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	@Autowired
 	private AgentService agentService;
@@ -45,7 +51,7 @@ public class DashboardService {
 			List<LdapEntry> ldapComputerList = ldapService.findSubEntries(configurationService.getLdapRootDn(), 
 					"(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
 			countOfLDAPUsers = ldapUserList.size();
-			countOfComputers = agentService.count();
+			countOfComputers = agentService.count().intValue();
 			
 			for (int i = 0; i < ldapComputerList.size(); i++) {
 				if (messagingService.isRecipientOnline(ldapComputerList.get(i).getUid())) {
@@ -102,6 +108,10 @@ public class DashboardService {
 		nowDate.set(Calendar.HOUR_OF_DAY, 0);
 		model.put("totalRegisteredComputerTodayNumber", agentService.getCountByTodayCreateDate(nowDate.getTime()));
 		model.put("totalSessionsTodayNumber", agentService.getCountByTodayLastLogin(nowDate.getTime()));
+		
+//		Last 10 activity by lider_console user
+		String userDn = AuthenticationService.getDn();
+		model.put("liderConsoleLastActivity", operationLogService.getLastActivityByUserIdDescLimitTen(userDn));
 		
 		return model;
 	}

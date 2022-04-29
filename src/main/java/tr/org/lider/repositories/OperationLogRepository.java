@@ -51,5 +51,8 @@ public interface OperationLogRepository extends BaseJpaRepository<OperationLogIm
 	@Query(value = "SELECT o FROM OperationLogImpl o WHERE o.requestIp LIKE %?1% AND o.operationType = ?2")
 	Page<OperationLogImpl> findByrequestIpAndOperationType(String requestIp, int typeId, PageRequest pageable);
 	
+	@Query(value = "SELECT o FROM OperationLogImpl o WHERE o.userId LIKE %?1%")
+	Page<OperationLogImpl> findOrderByCreateDateDesc10ByUserId(String userId, Pageable pageable);
+	
 }
 

@@ -40,8 +40,8 @@ public class AgentService {
         return agentRepository.findAll();
 	}
 	
-	public int count() {
-        return (int) agentRepository.count();
+	public Long count() {
+        return agentRepository.count();
 	}
 	
 	public Optional<AgentImpl> findAgentByID(Long agentID) {

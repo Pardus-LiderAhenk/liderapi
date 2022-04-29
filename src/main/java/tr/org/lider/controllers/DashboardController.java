@@ -22,11 +22,5 @@ public class DashboardController {
 		
 		return dashboardService.getDashboardReport();
 	}
-	
-//	@RequestMapping(value="/getPluginList", method = {RequestMethod.POST })
-//	public List<PluginImpl> getPluginTaskList(Model model, PluginTask pluginTask) {
-//		List<PluginImpl>  list = pluginService.findAllPlugins();
-//		return list;
-//	}
 
 }
