@@ -154,7 +154,7 @@ public class AgentInfoCriteriaBuilder {
 			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
 		}
 		
-		if(osVersion.isPresent() && !osVersion.get().equals("")) {
+		if(osVersion.isPresent() && !osVersion.get().equals("" ) && !osVersion.get().equals("null")) {
 			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
 			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "os.version");
 			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), osVersion.get());
