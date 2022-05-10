@@ -3,9 +3,11 @@ package tr.org.lider.controllers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.naming.ldap.LdapName;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +17,8 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,11 +33,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
+import tr.org.lider.services.AgentService;
 import tr.org.lider.services.ConfigurationService;
 
 /**
@@ -50,6 +56,9 @@ public class ComputerGroupsController {
 
 	@Autowired
 	private LDAPServiceImpl ldapService;
+	
+	@Autowired
+	private AgentService agentService;
 	
 	@Autowired
 	private ConfigurationService configurationService;
@@ -373,4 +382,59 @@ public class ComputerGroupsController {
 		return ahenks;
 	}
 	
+	@RequestMapping(method=RequestMethod.POST, value = "/agentReport/createAgentGroup", produces = MediaType.APPLICATION_JSON_VALUE)
+	public LdapEntry findAllAgents(
+			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
+			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
+			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
+			@RequestParam (value = "status") Optional<String> status,
+			@RequestParam (value = "dn") Optional<String> dn,
+			@RequestParam (value = "hostname") Optional<String> hostname,
+			@RequestParam (value = "macAddress") Optional<String> macAddress,
+			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
+			@RequestParam (value = "brand") Optional<String> brand,
+			@RequestParam (value = "model") Optional<String> model,
+			@RequestParam (value = "processor") Optional<String> processor,
+			@RequestParam (value = "osVersion") Optional<String> osVersion,
+			@RequestParam(value = "selectedOUDN", required=false) String selectedOUDN,
+			@RequestParam(value = "groupName", required=true) String groupName,
+			@RequestParam (value = "agentVersion") Optional<String> agentVersion) {
+		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
+				1, 
+				agentService.count().intValue(), 
+				registrationStartDate, 
+				registrationEndDate, 
+				status, 
+				dn,
+				hostname, 
+				macAddress, 
+				ipAddress, 
+				brand, 
+				model, 
+				processor, 
+				osVersion, 
+				agentVersion);
+				
+		String newGroupDN = "";
+		LdapEntry entry;
+		if(selectedOUDN == null || selectedOUDN.equals("")) {
+			newGroupDN = "cn=" +  groupName +","+ configurationService.getAhenkGroupLdapBaseDn();
+		} else {
+			newGroupDN = "cn=" +  groupName +","+ selectedOUDN;
+		}
+		Map<String, String[]> attributes = new HashMap<String,String[]>();
+		attributes.put("objectClass", new String[] {"groupOfNames", "top", "pardusLider"} );
+		attributes.put("liderGroupType", new String[] {"AHENK"} );
+		try {
+			String selectedAgentDNList[] = new String[listOfAgents.getContent().size()];
+			selectedAgentDNList = listOfAgents.getContent().stream().map(t -> t.getDn()).toArray(String[]::new);
+			attributes.put("member", selectedAgentDNList);
+			ldapService.addEntry(newGroupDN , attributes);
+			entry = ldapService.getEntryDetail(newGroupDN);
+		} catch (LdapException e) {
+			logger.error("Error occured while adding new group.");
+			return null;
+		}
+		return entry;
+	}
 }
