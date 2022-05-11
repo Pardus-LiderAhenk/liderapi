@@ -437,4 +437,52 @@ public class ComputerGroupsController {
 		}
 		return entry;
 	}
+	
+	@RequestMapping(method=RequestMethod.POST, value = "/agentReport/existing/group", produces = MediaType.APPLICATION_JSON_VALUE)
+	public LdapEntry addClientToExistGroup(
+			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
+			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
+			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
+			@RequestParam (value = "status") Optional<String> status,
+			@RequestParam (value = "dn") Optional<String> dn,
+			@RequestParam (value = "hostname") Optional<String> hostname,
+			@RequestParam (value = "macAddress") Optional<String> macAddress,
+			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
+			@RequestParam (value = "brand") Optional<String> brand,
+			@RequestParam (value = "model") Optional<String> model,
+			@RequestParam (value = "processor") Optional<String> processor,
+			@RequestParam (value = "osVersion") Optional<String> osVersion,
+			@RequestParam(value = "groupDN", required=false) String groupDN,
+			@RequestParam (value = "agentVersion") Optional<String> agentVersion) {
+		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
+				1, 
+				agentService.count().intValue(), 
+				registrationStartDate, 
+				registrationEndDate, 
+				status, 
+				dn,
+				hostname, 
+				macAddress, 
+				ipAddress, 
+				brand, 
+				model, 
+				processor, 
+				osVersion, 
+				agentVersion);
+		LdapEntry entry;				
+		if(listOfAgents.getContent() == null || listOfAgents.getContent().size() == 0) {
+			logger.error("No agents found to add to group!");
+			return null;
+		}
+		try {
+			for (AgentImpl agentImpl : listOfAgents.getContent()) {
+				ldapService.updateEntryAddAtribute(groupDN, "member", agentImpl.getDn());
+			}
+		} catch (LdapException e) {
+			logger.error("Error occured while adding agents to existing group.");
+			return null;
+		}
+		entry = ldapService.getEntryDetail(groupDN);
+		return entry;
+	}
 }
