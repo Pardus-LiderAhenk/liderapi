@@ -16,10 +16,8 @@ public class DashboardController {
 	@Autowired
 	private DashboardService dashboardService;
 
-	
 	@RequestMapping(value = "/info", method = RequestMethod.POST)
 	public Map<String, Object> getDashboardInfo() {
-		
 		return dashboardService.getDashboardReport();
 	}
 

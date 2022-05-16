@@ -249,7 +249,10 @@ public class TaskService {
 		return null;
 	}
 
-
+	public List<Object[]> findExecutedTaskWithCount() {
+		List<Object[]> tasks = taskRepository.findExecutedTaskWithCount(AuthenticationService.getUserName());
+		return tasks;
+	}
 
 
 }

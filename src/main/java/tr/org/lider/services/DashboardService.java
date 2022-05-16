@@ -14,34 +14,35 @@ import org.springframework.stereotype.Service;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
-import tr.org.lider.services.AuthenticationService;
-import tr.org.lider.services.CommandService;
-import tr.org.lider.services.AgentService;
 
 @Service
 public class DashboardService {
+
 	@Autowired
 	private ConfigurationService configurationService;
 
 	@Autowired
 	private LDAPServiceImpl ldapService;
-	
+
 	@Autowired
 	private CommandService commandService;
-	
+
 	@Autowired
 	private XMPPClientImpl messagingService;
-	
+
 	@Autowired
 	private OperationLogService operationLogService;
-	
+
 	@Autowired
 	private AgentService agentService;
-	
+
+	@Autowired
+	public TaskService taskService;
+
 	public HashMap<String, Object> getDashboardReport() {
-		
+
 		HashMap<String, Object> model = new HashMap<>();
-//		count of total computer, user, sent task and assigned policy
+		//count of total computer, user, sent task and assigned policy
 		int countOfLDAPUsers = 0;
 		int countOfComputers = 0;
 		int countOfOnlineComputers = 0;
@@ -52,12 +53,12 @@ public class DashboardService {
 					"(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
 			countOfLDAPUsers = ldapUserList.size();
 			countOfComputers = agentService.count().intValue();
-			
+
 			for (int i = 0; i < ldapComputerList.size(); i++) {
 				if (messagingService.isRecipientOnline(ldapComputerList.get(i).getUid())) {
 					countOfOnlineComputers ++ ;
 				}
-				
+
 			}
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -67,12 +68,12 @@ public class DashboardService {
 		model.put("totalSentTaskNumber", commandService.getTotalCountOfSentTasks());
 		model.put("totalAssignedPolicyNumber", commandService.getTotalCountOfAssignedPolicy());
 		model.put("totalOnlineComputerNumber", countOfOnlineComputers);
-		
-//		Registered agents in last 2 years
+
+		//Registered agents in last 2 years
 		List<String> dateRanges = new ArrayList<>();
 		List<Integer> dateRangeValuesAgent = new ArrayList<>();
 		int monthCount = 24;
-	
+
 		for (int i = monthCount-1; i >= 0; i--) {
 			Calendar startDate = Calendar.getInstance();
 			startDate.add(Calendar.MONTH, -i);
@@ -81,7 +82,7 @@ public class DashboardService {
 			startDate.set(Calendar.SECOND, 0);
 			startDate.set(Calendar.MILLISECOND, 0);
 			startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
-	
+
 			Calendar endDate = Calendar.getInstance();
 			endDate.add(Calendar.MONTH, -i);
 			endDate.set(Calendar.HOUR, 0);
@@ -90,16 +91,16 @@ public class DashboardService {
 			endDate.set(Calendar.MILLISECOND, 0);
 			endDate.set(Calendar.DAY_OF_MONTH, endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
 			endDate.add(Calendar.DATE, 1);
-	
+
 			String monthNameForStartDate = startDate.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.forLanguageTag("tr-TR"));
 			dateRangeValuesAgent.add(agentService.getCountByCreateDate(startDate.getTime(), endDate.getTime()));
-	
+
 			dateRanges.add(monthNameForStartDate + "-" + startDate.get(Calendar.YEAR));
 		}
 		model.put("dateRangeValuesAgent", dateRangeValuesAgent);
 		model.put("dateRanges", dateRanges);
-		
-//		Registered agents and login user in today
+
+		//Registered agents and login user in today
 		Calendar nowDate = Calendar.getInstance();
 		nowDate.set(Calendar.HOUR, 0);
 		nowDate.set(Calendar.MINUTE, 0);
@@ -108,11 +109,14 @@ public class DashboardService {
 		nowDate.set(Calendar.HOUR_OF_DAY, 0);
 		model.put("totalRegisteredComputerTodayNumber", agentService.getCountByTodayCreateDate(nowDate.getTime()));
 		model.put("totalSessionsTodayNumber", agentService.getCountByTodayLastLogin(nowDate.getTime()));
-		
-//		Last 10 activity by lider_console user
+
+		//Last 10 activity by lider_console user
 		String userDn = AuthenticationService.getDn();
 		model.put("liderConsoleLastActivity", operationLogService.getLastActivityByUserIdDescLimitTen(userDn));
-		
+
+		//executed tasks by logged in user with total count for each
+		List<Object[]> userTasks = taskService.findExecutedTaskWithCount();
+		model.put("userTasks", userTasks);
 		return model;
 	}
 }
