@@ -281,7 +281,7 @@ public class ComputerController {
 		return results ;
 	}
 
-	@RequestMapping(value = "/getAgentList")
+	@RequestMapping(value = "/getAgentListSize")
 	public LdapEntry getAgentList(@RequestParam(value="searchDn") String searchDn) {
 		LdapEntry returnLdapEntry=null;
 		List<LdapEntry> retList = new ArrayList<LdapEntry>();
@@ -289,7 +289,7 @@ public class ComputerController {
 		try {
 
 			returnLdapEntry=new LdapEntry();
-			retList=ldapService.findSubEntries(searchDn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
+			retList = ldapService.findSubEntries(searchDn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
 
 			for (LdapEntry ldapEntry : retList) {
 				if(ldapEntry.isOnline()) {
@@ -297,7 +297,7 @@ public class ComputerController {
 				}
 			}
 
-			returnLdapEntry.setOnlineAgentList(onlineRetList);
+			returnLdapEntry.setOnlineAgentListSize(onlineRetList.size());
 			returnLdapEntry.setAgentListSize(retList.size());
 		} catch (LdapException e) {
 			e.printStackTrace();
