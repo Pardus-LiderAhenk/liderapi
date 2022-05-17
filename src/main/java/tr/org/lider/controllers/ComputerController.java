@@ -287,7 +287,10 @@ public class ComputerController {
 		List<LdapEntry> retList = new ArrayList<LdapEntry>();
 		List<LdapEntry> onlineRetList = new ArrayList<LdapEntry>();
 		try {
-
+			
+			if (searchDn.equals("agents")) {
+				searchDn = configurationService.getAgentLdapBaseDn();
+			}
 			returnLdapEntry=new LdapEntry();
 			retList = ldapService.findSubEntries(searchDn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
 
