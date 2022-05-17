@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.messaging.enums.Protocol;
+import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.messaging.messages.FileServerConf;
 
 /**
@@ -134,6 +135,7 @@ public class ConfigParams {
 	//other settings
 	private Boolean disableLocalUser;
 	private DomainType domainType;
+	private SudoRoleType sudoRoleType;
 	private String ahenkRepoAddress;
 	private String ahenkRepoKeyAddress;
 
@@ -196,7 +198,7 @@ public class ConfigParams {
 		this.domainType = DomainType.LDAP;
 		this.ahenkRepoAddress = "";
 		this.ahenkRepoKeyAddress = "";
-		
+		this.sudoRoleType = SudoRoleType.LDAP;
 		this.allowDynamicDNSUpdate = false;
 	}
 
@@ -863,6 +865,14 @@ public class ConfigParams {
 	public void setDomainType(DomainType domainType) {
 		this.domainType = domainType;
 	}
+	
+	public SudoRoleType getSudoRoleType() {
+		return sudoRoleType;
+	}
+
+	public void setsudoRoleType(SudoRoleType sudoRoleType) {
+		this.sudoRoleType = sudoRoleType;
+	}
 
 	public String getAhenkRepoAddress() {
 		return ahenkRepoAddress;
@@ -930,4 +940,5 @@ public class ConfigParams {
 	public void setXmppBoshAddress(String xmppBoshAddress) {
 		this.xmppBoshAddress = xmppBoshAddress;
 	}
+
 }

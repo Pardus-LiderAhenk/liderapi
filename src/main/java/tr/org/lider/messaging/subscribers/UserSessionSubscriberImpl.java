@@ -23,10 +23,13 @@ import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.messaging.enums.AgentMessageType;
+import tr.org.lider.messaging.enums.DomainType;
+import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.messaging.messages.ILiderMessage;
 import tr.org.lider.messaging.messages.IUserSessionMessage;
 import tr.org.lider.messaging.messages.UserSessionResponseMessageImpl;
 import tr.org.lider.repositories.AgentRepository;
+import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
 
 /**
@@ -51,6 +54,9 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 
 	@Autowired
 	private LDAPServiceImpl ldapService;
+	
+	@Autowired
+	private AdService adService;
 
 	@Override
 	public ILiderMessage messageReceived(IUserSessionMessage message) throws Exception {
@@ -156,24 +162,56 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 
 	private List<LdapEntry> getUserRoleGroupList(String userLdapRolesDn, String userName, String hostName)
 			throws LdapException {
-		List<LdapEntry> userAuthDomainGroupList;
+		List<LdapEntry> userAuthDomainGroupList = null;
 		List<LdapSearchFilterAttribute> filterAttt = new ArrayList<>();
-
-		filterAttt.add(new LdapSearchFilterAttribute("sudoUser", userName, SearchFilterEnum.EQ));
-		filterAttt.add(new LdapSearchFilterAttribute("sudoHost", "ALL", SearchFilterEnum.EQ));
-		logger.info("Serching for username " + userName + " in OU " + userLdapRolesDn);
-		userAuthDomainGroupList = ldapService.search(userLdapRolesDn, filterAttt,
-				new String[] { "cn", "dn", "sudoCommand", "sudoHost", "sudoUser" });
-
-		if (userAuthDomainGroupList.size() == 0) {
-			filterAttt = new ArrayList<>();
-			filterAttt.add(new LdapSearchFilterAttribute("sudoUser", userName, SearchFilterEnum.EQ));
-			filterAttt.add(new LdapSearchFilterAttribute("sudoHost", hostName, SearchFilterEnum.EQ));
-
-			userAuthDomainGroupList = ldapService.search(userLdapRolesDn, filterAttt,
-					new String[] { "cn", "dn", "sudoCommand", "sudoHost", "sudoUser" });
+		try {
+			if(configurationService.getSudoRoleType().equals(SudoRoleType.LDAP)) {
+				filterAttt.add(new LdapSearchFilterAttribute("sudoUser", userName, SearchFilterEnum.EQ));
+				filterAttt.add(new LdapSearchFilterAttribute("sudoHost", "ALL", SearchFilterEnum.EQ));
+				logger.info("Serching for username " + userName + " in OU " + userLdapRolesDn);
+				userAuthDomainGroupList = ldapService.search(userLdapRolesDn, filterAttt,
+						new String[] { "cn", "dn", "sudoCommand", "sudoHost", "sudoUser" });
+	
+				if (userAuthDomainGroupList.size() == 0) {
+					filterAttt = new ArrayList<>();
+					filterAttt.add(new LdapSearchFilterAttribute("sudoUser", userName, SearchFilterEnum.EQ));
+					filterAttt.add(new LdapSearchFilterAttribute("sudoHost", hostName, SearchFilterEnum.EQ));
+	
+					userAuthDomainGroupList = ldapService.search(userLdapRolesDn, filterAttt,
+							new String[] { "cn", "dn", "sudoCommand", "sudoHost", "sudoUser" });
+				}
+			} else if(configurationService.getSudoRoleType().equals(SudoRoleType.ACTIVE_DIRECTORY)) {
+				userAuthDomainGroupList = getUserRoleGroupListForAd(findUserDnForSudoRoleType(userName));
+				if (userAuthDomainGroupList.size() == 0) {
+					List<LdapEntry> groups = findGroups(findUserDnForSudoRoleType(userName), DomainType.ACTIVE_DIRECTORY);
+					if (groups.size() > 0) {
+						for (int i = 0; i < groups.size(); i++) {
+							userAuthDomainGroupList = getUserRoleGroupListForAd(groups.get(i).getDistinguishedName());
+							if (userAuthDomainGroupList.size() > 0) {
+								break;
+							}
+						}
+					}
+				}
+			} else {
+				userAuthDomainGroupList = null;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			userAuthDomainGroupList = null;
 		}
-
+		return userAuthDomainGroupList;
+	}
+	
+	private List<LdapEntry> getUserRoleGroupListForAd(String entryDn) throws LdapException {
+		List<LdapEntry> userAuthDomainGroupList = null;
+		List<LdapSearchFilterAttribute> filterAttt = new ArrayList<>();
+		
+		filterAttt.add(new LdapSearchFilterAttribute("objectClass", "group", SearchFilterEnum.EQ));
+		filterAttt.add(new LdapSearchFilterAttribute("sAMAccountName", "sudo", SearchFilterEnum.EQ));
+		filterAttt.add(new LdapSearchFilterAttribute("member", entryDn, SearchFilterEnum.EQ));
+		String baseDn = adService.getADDomainName();
+		userAuthDomainGroupList = adService.search(baseDn, filterAttt, new String[] {"*"});
 		return userAuthDomainGroupList;
 	}
 
@@ -213,5 +251,45 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 			}
 		}
 		return isExist;
+	}
+	
+	/**
+	 * Find user DN by given UID for only sudoRoleType
+	 * 
+	 * @param userUid
+	 * @return
+	 * @throws LdapException
+	 */
+	private String findUserDnForSudoRoleType(String userUid) throws LdapException {
+		String userDN = null;
+		if(configurationService.getSudoRoleType().equals(SudoRoleType.ACTIVE_DIRECTORY)) {
+			List<LdapSearchFilterAttribute> filterAttributes = new ArrayList<LdapSearchFilterAttribute>();
+			filterAttributes.add(new LdapSearchFilterAttribute("sAMAccountName", userUid, SearchFilterEnum.EQ));
+			List<LdapEntry> users= adService.search(adService.getADDomainName(),filterAttributes, new String[] {"*"});
+			if(users.size()>0) {
+				userDN = users.get(0).getDistinguishedName();
+			}
+		} else if (configurationService.getSudoRoleType().equals(SudoRoleType.LDAP)) {
+			userDN = ldapService.getDN(configurationService.getLdapRootDn(), configurationService.getUserLdapUidAttribute(),
+					userUid);
+		}
+		return userDN;
+	}
+	
+	private List<LdapEntry> findGroups(String userDn, DomainType domainType) throws LdapException {
+		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+		List<LdapEntry> groups = null;
+		if(domainType.equals(DomainType.ACTIVE_DIRECTORY)) {
+			filterAttributesList.add(new LdapSearchFilterAttribute("objectClass", "group", SearchFilterEnum.EQ));
+			filterAttributesList.add(new LdapSearchFilterAttribute("member", userDn, SearchFilterEnum.EQ));
+			String baseDn = adService.getADDomainName();
+			groups = adService.search(baseDn, filterAttributesList, new String[] {"*"});
+		}
+		else {
+			filterAttributesList.add(new LdapSearchFilterAttribute("objectClass", configurationService.getGroupLdapObjectClasses(), SearchFilterEnum.EQ));
+			filterAttributesList.add(new LdapSearchFilterAttribute("member", userDn, SearchFilterEnum.EQ));
+			groups = ldapService.search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
+		}
+		return groups;
 	}
 }
