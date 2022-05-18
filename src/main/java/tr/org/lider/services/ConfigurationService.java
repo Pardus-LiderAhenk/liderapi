@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import tr.org.lider.entities.ConfigImpl;
 import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.messaging.enums.Protocol;
+import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.repositories.ConfigRepository;
@@ -467,6 +468,13 @@ public class ConfigurationService {
 			return DomainType.LDAP;
 		else
 			return getConfigParams().getDomainType();
+	}
+	
+	public SudoRoleType getSudoRoleType() {
+		if(getConfigParams().getSudoRoleType() == null)
+			return SudoRoleType.LDAP;
+		else
+			return getConfigParams().getSudoRoleType();
 	}
 
 	public String getAhenkRepoAddress() {

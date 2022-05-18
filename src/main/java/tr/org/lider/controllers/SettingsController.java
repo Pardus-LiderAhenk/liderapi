@@ -36,6 +36,7 @@ import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.RoleService;
+import tr.org.lider.messaging.enums.SudoRoleType;
 
 /**
  * This controller is used for showing and updating all settings for lider
@@ -191,19 +192,13 @@ public class SettingsController {
 			@RequestParam (value = "domainType", required = true) DomainType domainType,
 			@RequestParam (value = "ahenkRepoAddress", required = true) String ahenkRepoAddress,
 			@RequestParam (value = "ahenkRepoKeyAddress", required = true) String ahenkRepoKeyAddress,
-			
-			@RequestParam (value = "emailHost", required = false) String emailHost,
-			@RequestParam (value = "emailPort", required = false) String emailPort,
-			@RequestParam (value = "emailUsername", required = false) String emailUsername,
-			@RequestParam (value = "emailPassword", required = false) String emailPassword,
-			@RequestParam (value = "smtpAuth", required = false) Boolean smtpAuth,
-			@RequestParam (value = "tlsEnabled", required = false) Boolean tlsEnabled) {
+			@RequestParam (value = "sudoRoleType", required = true) SudoRoleType sudoRoleType) {
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setDisableLocalUser(disableLocalUser);
 		configParams.setDomainType(domainType);
+		configParams.setsudoRoleType(sudoRoleType);
 		configParams.setAhenkRepoAddress(ahenkRepoAddress);
 		configParams.setAhenkRepoKeyAddress(ahenkRepoKeyAddress);
-		
 		
 		return configurationService.updateConfigParams(configParams);
 	}
