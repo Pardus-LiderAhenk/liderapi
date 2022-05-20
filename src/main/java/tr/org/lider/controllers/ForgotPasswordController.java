@@ -1,26 +1,25 @@
 package tr.org.lider.controllers;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RestController;
 
 import tr.org.lider.entities.ForgotPasswordImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -33,7 +32,7 @@ import tr.org.lider.services.ForgotPasswordService;
  * 
  * @author Hasan Kara
  */
-@Controller
+@RestController
 @RequestMapping(value = "/forgot_password")
 public class ForgotPasswordController {
 
@@ -51,32 +50,27 @@ public class ForgotPasswordController {
 	@Autowired
 	private ForgotPasswordService forgotPasswordService;
 
-
-	@RequestMapping(method = { RequestMethod.GET })
-	public String forgotPassword(Model model) {
-		if(isUserLoggedIn()) {
-			return "redirect:/";
-		}
-		return "forgot_password";
-	}
-
-	@RequestMapping(method = { RequestMethod.POST })
-	public String forgotPasswordSendLink(Model model, 
-			RedirectAttributes redirectAttrs,
-			HttpServletRequest request,
-			@RequestParam(value = "username", required=true) String username) {
+	@Value("${lider.url}")
+	private String liderURL;
+	
+	/*
+	 * creates a uuuid for password change and sends an email to user with a link.
+	 * Link is valid for 60 minutes.
+	 */
+	@PostMapping(value = "/")
+	public ResponseEntity<?> forgotPasswordSendLink(@RequestBody Map<String,String> params) {
 		//get full current url of lider server to send reset link to user
-		String fullURL = request.getRequestURL().toString();
-		fullURL = fullURL.substring(0, StringUtils.ordinalIndexOf(fullURL, "/", 3)); 
-		
-		if(isUserLoggedIn()) {
-			return "redirect:/";
+		if(!params.containsKey("username")) {
+			return new ResponseEntity<List<String>>(Arrays.asList("Email parametresi zorunludur."), HttpStatus.NOT_FOUND);
 		}
+		String username = params.get("username");
+		String fullURL = liderURL;
+		
 		Boolean isEmailSent = false;
 		if(!configurationService.isEmailConfigurationComplete()) {
-			model.addAttribute("errorMessage", "Henüz Lider üzerinden email ayarlarınız yapılmamıştır. "
-					+ "Lütfen email sıfırlama linki alabilmek için öncelikle Ayarlar > Email Ayarları sayfasından email ayarlarınızı tamamlayınız.");
-			return "forgot_password";
+			String errorMessage = "Henüz Lider üzerinden email ayarlarınız yapılmamıştır. "
+					+ "Lütfen email sıfırlama linki alabilmek için öncelikle Ayarlar > Email Ayarları sayfasından email ayarlarınızı tamamlayınız.";
+			return new ResponseEntity<List<String>>(Arrays.asList(errorMessage), HttpStatus.EXPECTATION_FAILED);
 		}
 		LdapEntry ldapEntry=null;
 		try {
@@ -93,81 +87,84 @@ public class ForgotPasswordController {
 		}
 		if(ldapEntry!=null) {
 			if(!ldapEntry.getAttributes().containsKey("mail")) {
-				model.addAttribute("errorMessage", "Bu kullanıcı için henüz mail bilgisi eklenmemiştir.");
-				return "forgot_password";
+				return new ResponseEntity<List<String>>(Arrays.asList("Bu kullanıcı için henüz mail bilgisi eklenmemiştir."), HttpStatus.EXPECTATION_FAILED);
 			}
-			//if user has active link do not send again.
 			Optional<ForgotPasswordImpl> fp = forgotPasswordService.findAllByUsername(username);
 			if(fp.isPresent()) {
-				long linkAllowedTill= fp.get().getCreateDate().getTime() + 1000*60*60;
-				long nowMillis = new Date().getTime();
-				if(linkAllowedTill > nowMillis) {
-					model.addAttribute("errorMessage", "Emailinize gönderilmiş aktif şifre yenileme linki bulunmaktadır.");
-					return "forgot_password";
-				} else {
-					forgotPasswordService.deleteByUsername(username);
-				}
+				forgotPasswordService.deleteByUsername(username);
 			}
 			String userEmail = ldapEntry.getAttributes().get("mail");
 			isEmailSent = emailService.sendmail(username, userEmail, fullURL);
 		}
 		else {
-			redirectAttrs.addFlashAttribute("errorMessage", "Kullanıcı bulunamadı.");
-			return "redirect:/login";
+			return new ResponseEntity<List<String>>(Arrays.asList("Kullanıcı adı bulunamadı."), 
+					HttpStatus.NOT_FOUND);
 		}
 		if(isEmailSent) {
-			redirectAttrs.addFlashAttribute("infoMessage", "Email yenileme linki email adresinize gönderildi.");
-			return "redirect:/login";
+			return new ResponseEntity<List<String>>(Arrays.asList("Email yenileme linki email adresinize gönderildi."), 
+					HttpStatus.OK);
 		} else {
-			redirectAttrs.addFlashAttribute("errorMessage", "Email gönderilirken hata oluştu lütfen tekrar deneyiniz.");
-			return "redirect:/login";
+			return new ResponseEntity<List<String>>(Arrays.asList("Email gönderilirken hata oluştu lütfen tekrar deneyiniz."), 
+					HttpStatus.EXPECTATION_FAILED);
 		}
 
 	}
 	
-	@RequestMapping(value = "/reset/{uuid}", method = { RequestMethod.GET })
-	public String passwordResetPage(Model model, RedirectAttributes redirectAttrs, @PathVariable String uuid) {
+	/*
+	 * checks if user password change link is still valid
+	 * 
+	 */
+	@RequestMapping(value = "/id/{uuid}", method = { RequestMethod.GET })
+	public ResponseEntity<?> passwordResetPage(@PathVariable String uuid) {
 		
 		Optional<ForgotPasswordImpl> fp = forgotPasswordService.findAllByUUID(uuid);
 		if(!fp.isPresent()) {
-			redirectAttrs.addFlashAttribute("errorMessage", "Email yenileme linki bulunamadı veya bu linkin süresi doldu.");
-			return "redirect:/login";
+			return new ResponseEntity<List<String>>(Arrays.asList("Email yenileme linki bulunamadı veya bu linkin süresi doldu."), 
+					HttpStatus.EXPECTATION_FAILED);
 		} else {
 			long linkAllowedTill= fp.get().getCreateDate().getTime() + 1000*60*60;
 			long nowMillis = new Date().getTime();
 			if(linkAllowedTill < nowMillis) {
-				model.addAttribute("errorMessage", "Email yenileme linki bulunamadı veya bu linkin süresi doldu.");
-				return "forgot_password";
+				return new ResponseEntity<List<String>>(Arrays.asList("Link süresi doldu."), 
+						HttpStatus.EXPECTATION_FAILED);
 			} else {
-				if(isUserLoggedIn()) {
-					SecurityContextHolder.getContext().setAuthentication(null);
-				}
-				model.addAttribute("uuid", uuid);
-				return "password_reset";
+				return new ResponseEntity<List<String>>(Arrays.asList(uuid), 
+						HttpStatus.OK);
 			}
 		}
 	}
 	
+	/*
+	 * changes user password
+	 * 
+	 */
 	@RequestMapping(value = "/reset/{uuid}", method = { RequestMethod.POST })
-	public String passwordResetSave(Model model, 
-			RedirectAttributes redirectAttrs,
-			@PathVariable String uuid, 
-			@RequestParam(value = "password", required=true) String password,
-			@RequestParam(value = "repeatPassword", required=true) String repeatPassword) {
-		//if user has active link do not send again.
+	public ResponseEntity<?> passwordResetSave(@PathVariable String uuid, 
+			@RequestBody Map<String,String> params) {
+		String password = "";
+		String repeatPassword = "";
+
 		Optional<ForgotPasswordImpl> fp = forgotPasswordService.findAllByUUID(uuid);
 		if(!fp.isPresent()) {
-			redirectAttrs.addFlashAttribute("errorMessage", "Email yenileme linki bulunamadı veya bu linkin süresi doldu.");
-			return "redirect:/login";
+			return new ResponseEntity<List<String>>(Arrays.asList("Email yenileme linki bulunamadı veya bu linkin süresi doldu."), 
+					HttpStatus.EXPECTATION_FAILED);
 		} else {
 			long linkAllowedTill= fp.get().getCreateDate().getTime() + 1000*60*60;
 			long nowMillis = new Date().getTime();
 			if(linkAllowedTill < nowMillis) {
-				model.addAttribute("errorMessage", "Email yenileme linki bulunamadı veya bu linkin süresi doldu.");
-				return "forgot_password";
+				return new ResponseEntity<List<String>>(Arrays.asList("Email yenileme linki bulunamadı veya bu linkin süresi doldu."), 
+						HttpStatus.EXPECTATION_FAILED);
 			} else {
-				if(isUserLoggedIn()) {
-					SecurityContextHolder.getContext().setAuthentication(null);
+				if(!params.containsKey("password")) {
+					return new ResponseEntity<List<String>>(Arrays.asList("Şifre parametresi zorunludur."), HttpStatus.NOT_FOUND);
+				}
+				password = params.get("password");
+				if(!params.containsKey("repeatPassword")) {
+					return new ResponseEntity<List<String>>(Arrays.asList("Şifre tekrarı parametresi zorunludur."), HttpStatus.NOT_FOUND);
+				}
+				repeatPassword = params.get("repeatPassword");
+				if(!password.equals(repeatPassword)) {
+					return new ResponseEntity<List<String>>(Arrays.asList("Şifreler uyuşmamaktadır."), HttpStatus.NOT_FOUND);
 				}
 				//update user password
 				LdapEntry ldapEntry=null;
@@ -184,24 +181,23 @@ public class ForgotPasswordController {
 					e.printStackTrace();
 				}
 				try {
+					//change password history
+					for (int i = 0; i < 5; i++) {
+						int p = (int)((Math.random() * 1234) + 1111);
+						ldapService.updateConsoleUserPassword(ldapEntry.getDistinguishedName(), "userPassword", String.valueOf(p));
+					}
 					ldapService.updateConsoleUserPassword(ldapEntry.getDistinguishedName(), "userPassword", password);
 				} catch (LdapException e) {
 					logger.error("Error occured while updating user password. Error: " + e.getMessage());
-					redirectAttrs.addFlashAttribute("errorMessage", "Şifreniz değiştirilirken hata oluştu lütfen tekrar deneyiniz.");
-					return "redirect:/forgot_password/reset/" + uuid;
+					return new ResponseEntity<List<String>>(Arrays.asList("Şifreniz değiştirilirken hata oluştu lütfen tekrar deneyiniz."), 
+							HttpStatus.EXPECTATION_FAILED);
 				}
 				//delete forgot password key
 				forgotPasswordService.deleteByUsername(fp.get().getUsername());
-				
-				model.addAttribute("uuid", uuid);
-				redirectAttrs.addFlashAttribute("infoMessage", "Şifreniz başarılı bir şekilde yenilendi. Şimdi giriş yapabilirsiniz.");
-				return "redirect:/login";
+				return new ResponseEntity<List<String>>(Arrays.asList("Şifreniz başarılı bir şekilde yenilendi. Şimdi giriş yapabilirsiniz."), 
+						HttpStatus.OK);
 			}
 		}
 
-	}
-	public Boolean isUserLoggedIn() {
-		final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return null != authentication && !("anonymousUser").equals(authentication.getName());
 	}
 }
