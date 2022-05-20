@@ -73,8 +73,8 @@ public class AgentInfoCriteriaBuilder {
 
 
 		if(dn.isPresent() && !dn.get().equals("")) {
-			predicates.add(cb.like(from.get("dn").as(String.class), "%" + dn + "%"));
-			predicatesCount.add(cbCount.like(fromCount.get("dn").as(String.class), "%" + dn + "%"));
+			predicates.add(cb.like(from.get("dn").as(String.class), "%" + dn.get() + "%"));
+			predicatesCount.add(cbCount.like(fromCount.get("dn").as(String.class), "%" + dn.get() + "%"));
 		}
 
 		if (registrationStartDate.isPresent()) {
