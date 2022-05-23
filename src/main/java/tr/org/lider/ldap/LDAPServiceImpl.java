@@ -445,7 +445,7 @@ public class LDAPServiceImpl implements ILDAPService {
 	}
 
 	public void updateConsoleUserPassword(String entryDn, String attribute, String value) throws LdapException {
-		logger.info("Replacing attribute " + attribute + " value " + value);
+		logger.info("Replacing attribute " + attribute + " value ***");
 		LdapConnection connection = null;
 
 		connection = getConnectionForAdmin();
