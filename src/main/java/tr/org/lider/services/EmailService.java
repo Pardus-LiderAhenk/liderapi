@@ -49,9 +49,9 @@ public class EmailService {
 		try {
 			msg.setFrom(new InternetAddress(to, false));
 			msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-			msg.setSubject("LiderAhenk Şifre Yenileme Linki");
-			String content = "Merhaba,<br><br>Şifrenizi aşağıdaki linkten 1 saat içerisinde yenileyebilirsiniz.<br><br>";
-			content += "<a href=\"" + liderURL +"/forgot_password/id/" + uuid + "\">Şifre Yenile</a>";
+			msg.setSubject("Liderahenk Parola Yenileme Linki");
+			String content = "Merhaba,<br><br>Parolanızı aşağıdaki linkten 1 saat içerisinde yenileyebilirsiniz.<br><br>";
+			content += "<a href=\"" + liderURL +"/forgot_password/id/" + uuid + "\">Parola Yenile</a>";
 			msg.setContent(content, "text/html; charset=UTF-8");
 			msg.setSentDate(new Date());
 
