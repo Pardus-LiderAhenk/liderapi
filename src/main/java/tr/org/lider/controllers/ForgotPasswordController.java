@@ -69,7 +69,7 @@ public class ForgotPasswordController {
 		Boolean isEmailSent = false;
 		if(!configurationService.isEmailConfigurationComplete()) {
 			String errorMessage = "Henüz Lider üzerinden email ayarlarınız yapılmamıştır. "
-					+ "Lütfen email sıfırlama linki alabilmek için öncelikle Ayarlar > Email Ayarları sayfasından email ayarlarınızı tamamlayınız.";
+					+ "Lütfen parola sıfırlama linki alabilmek için öncelikle Ayarlar > Email Ayarları sayfasından email ayarlarınızı tamamlayınız.";
 			return new ResponseEntity<List<String>>(Arrays.asList(errorMessage), HttpStatus.EXPECTATION_FAILED);
 		}
 		LdapEntry ldapEntry=null;
@@ -101,7 +101,7 @@ public class ForgotPasswordController {
 					HttpStatus.NOT_FOUND);
 		}
 		if(isEmailSent) {
-			return new ResponseEntity<List<String>>(Arrays.asList("Email yenileme linki email adresinize gönderildi."), 
+			return new ResponseEntity<List<String>>(Arrays.asList("Parola yenileme linki email adresinize gönderildi."), 
 					HttpStatus.OK);
 		} else {
 			return new ResponseEntity<List<String>>(Arrays.asList("Email gönderilirken hata oluştu lütfen tekrar deneyiniz."), 
@@ -119,7 +119,7 @@ public class ForgotPasswordController {
 		
 		Optional<ForgotPasswordImpl> fp = forgotPasswordService.findAllByUUID(uuid);
 		if(!fp.isPresent()) {
-			return new ResponseEntity<List<String>>(Arrays.asList("Email yenileme linki bulunamadı veya bu linkin süresi doldu."), 
+			return new ResponseEntity<List<String>>(Arrays.asList("Parola yenileme linki bulunamadı veya bu linkin süresi doldu."), 
 					HttpStatus.EXPECTATION_FAILED);
 		} else {
 			long linkAllowedTill= fp.get().getCreateDate().getTime() + 1000*60*60;
@@ -146,25 +146,25 @@ public class ForgotPasswordController {
 
 		Optional<ForgotPasswordImpl> fp = forgotPasswordService.findAllByUUID(uuid);
 		if(!fp.isPresent()) {
-			return new ResponseEntity<List<String>>(Arrays.asList("Email yenileme linki bulunamadı veya bu linkin süresi doldu."), 
+			return new ResponseEntity<List<String>>(Arrays.asList("Parola yenileme linki bulunamadı veya bu linkin süresi doldu."), 
 					HttpStatus.EXPECTATION_FAILED);
 		} else {
 			long linkAllowedTill= fp.get().getCreateDate().getTime() + 1000*60*60;
 			long nowMillis = new Date().getTime();
 			if(linkAllowedTill < nowMillis) {
-				return new ResponseEntity<List<String>>(Arrays.asList("Email yenileme linki bulunamadı veya bu linkin süresi doldu."), 
+				return new ResponseEntity<List<String>>(Arrays.asList("Link süresi doldu."), 
 						HttpStatus.EXPECTATION_FAILED);
 			} else {
 				if(!params.containsKey("password")) {
-					return new ResponseEntity<List<String>>(Arrays.asList("Şifre parametresi zorunludur."), HttpStatus.NOT_FOUND);
+					return new ResponseEntity<List<String>>(Arrays.asList("Parola parametresi zorunludur."), HttpStatus.NOT_FOUND);
 				}
 				password = params.get("password");
 				if(!params.containsKey("repeatPassword")) {
-					return new ResponseEntity<List<String>>(Arrays.asList("Şifre tekrarı parametresi zorunludur."), HttpStatus.NOT_FOUND);
+					return new ResponseEntity<List<String>>(Arrays.asList("Parola tekrarı parametresi zorunludur."), HttpStatus.NOT_FOUND);
 				}
 				repeatPassword = params.get("repeatPassword");
 				if(!password.equals(repeatPassword)) {
-					return new ResponseEntity<List<String>>(Arrays.asList("Şifreler uyuşmamaktadır."), HttpStatus.NOT_FOUND);
+					return new ResponseEntity<List<String>>(Arrays.asList("Parolalar uyuşmamaktadır."), HttpStatus.NOT_FOUND);
 				}
 				//update user password
 				LdapEntry ldapEntry=null;
@@ -189,12 +189,12 @@ public class ForgotPasswordController {
 					ldapService.updateConsoleUserPassword(ldapEntry.getDistinguishedName(), "userPassword", password);
 				} catch (LdapException e) {
 					logger.error("Error occured while updating user password. Error: " + e.getMessage());
-					return new ResponseEntity<List<String>>(Arrays.asList("Şifreniz değiştirilirken hata oluştu lütfen tekrar deneyiniz."), 
+					return new ResponseEntity<List<String>>(Arrays.asList("Parola değiştirilirken hata oluştu, lütfen tekrar deneyiniz."), 
 							HttpStatus.EXPECTATION_FAILED);
 				}
 				//delete forgot password key
 				forgotPasswordService.deleteByUsername(fp.get().getUsername());
-				return new ResponseEntity<List<String>>(Arrays.asList("Şifreniz başarılı bir şekilde yenilendi. Şimdi giriş yapabilirsiniz."), 
+				return new ResponseEntity<List<String>>(Arrays.asList("Parolanız başarılı bir şekilde yenilendi. Şimdi giriş yapabilirsiniz."), 
 						HttpStatus.OK);
 			}
 		}
