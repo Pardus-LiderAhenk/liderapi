@@ -59,7 +59,7 @@ public class AuthController {
 					new UsernamePasswordAuthenticationToken(
 							loginParams.getUsername().trim(), loginParams.getPassword().trim()));
 			SecurityContextHolder.getContext().setAuthentication(authentication);
-			User userPrincipal = (User)authentication.getPrincipal();
+			User userPrincipal = (User)authentication.getDetails();
 			String jwt = jwtProvider.generateJwtToken(authentication);
 			operationLogService.saveOperationLog(OperationType.LOGIN,"Lider Arayüze Giriş Yapıldı.",null);
 			return ResponseEntity.ok(new JwtResponse(jwt, userPrincipal.getName(), userPrincipal.getSurname()));
@@ -73,6 +73,7 @@ public class AuthController {
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but user account is disabled. Returned: " + HttpStatus.FORBIDDEN);
 			return new ResponseEntity<String>("User account is disabled", HttpStatus.FORBIDDEN);
 		} catch(Exception e) {
+			logger.error(e.getMessage());
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but other exception occured. Returned: " + HttpStatus.SEE_OTHER);
 			return new ResponseEntity<String>("Login failed", HttpStatus.SEE_OTHER);
 		}

@@ -5,7 +5,7 @@
 @host = {{hostname}}:{{port}}
 @contentType = application/json
 
-@token = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJoYXNhbi5rYXJhIiwiaWF0IjoxNjUzMDM1OTU1LCJleHAiOjE2NTM4OTk5NTV9.Mer-ASa5hirUCS00T2VEIP0hRCFLNAXMDEgbWFYnqsoTWKfIvQa5F-iztoeR8kC56lVEUjHfJIJEsTxqHWj5uA
+@token = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJoYXNhbi5rYXJhIiwiaWF0IjoxNjUzMzkwNDE5LCJleHAiOjE2NTQyNTQ0MTl9.4lsamM6ZzAnSQle9Qbs2aprgG3zs63vZI43D7miVWEJgJbpdhf5-PmI-mJJ3o5woRlNOnER8d5m30mCT7I3mcg
 POST http://{{host}}/api/auth/signin
 Content-Type: {{contentType}}
 

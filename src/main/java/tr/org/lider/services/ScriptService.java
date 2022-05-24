@@ -7,7 +7,6 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.OperationType;

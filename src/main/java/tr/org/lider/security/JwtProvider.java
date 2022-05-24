@@ -36,7 +36,7 @@ public class JwtProvider {
 
 	public String generateJwtToken(Authentication authentication) {
 
-		User user = (User) authentication.getPrincipal();
+		User user = (User) authentication.getDetails();
 		return Jwts.builder()
 				.setSubject((user.getUsername()))
 				.setIssuedAt(new Date())

@@ -20,6 +20,7 @@
 package tr.org.lider.entities;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
 
@@ -54,9 +55,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @JsonIgnoreProperties({ "profileDataBlob" })
 @Entity
 @Table(name = "C_PROFILE")
-public class ProfileImpl  {
+public class ProfileImpl implements Serializable {
 
-	private static final long serialVersionUID = -2350478758850736003L;
+	private static final long serialVersionUID = 4891531016823828068L;
 
 	@Id
 	@GeneratedValue

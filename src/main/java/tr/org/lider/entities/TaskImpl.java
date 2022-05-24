@@ -51,6 +51,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Table(name = "c_task")
 public class TaskImpl implements Serializable {
 
+	private static final long serialVersionUID = 2088263110201481196L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "task_id", unique = true, nullable = false)

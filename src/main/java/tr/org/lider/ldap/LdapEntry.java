@@ -4,11 +4,12 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import tr.org.lider.entities.AgentImpl;
-import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.models.UserSessionsModel;
 
 public class LdapEntry implements Serializable , Comparable<LdapEntry>{
+
+	private static final long serialVersionUID = 2602764974371665642L;
+
 	/**
 	 * distinguished name
 	 */
@@ -121,13 +122,12 @@ public class LdapEntry implements Serializable , Comparable<LdapEntry>{
 		if(attributes!=null) {
 			String dateStr= get("createTimestamp");
 			if(dateStr!=null) {
-				String year=dateStr.substring(0,4);
-				String month=dateStr.substring(4,6);
-				String day=dateStr.substring(6,8);
-				String hour=dateStr.substring(8,10);
-				String min=dateStr.substring(10,12);
-				String sec=dateStr.substring(12,14);
-				String crtDate=day+"/"+ month+"/"+ year+" "+ hour +":"+min;
+				String year = dateStr.substring(0,4);
+				String month = dateStr.substring(4,6);
+				String day = dateStr.substring(6,8);
+				String hour = dateStr.substring(8,10);
+				String min = dateStr.substring(10,12);
+				String crtDate = day + "/" + month + "/" + year + " " + hour + ":" + min;
 				setCreateDateStr(crtDate);
 			}
 		}
