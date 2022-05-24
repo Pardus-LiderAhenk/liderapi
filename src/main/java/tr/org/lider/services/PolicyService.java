@@ -113,7 +113,8 @@ public class PolicyService {
 	
 	public List<PolicyImpl> activePolicies( ){
 		Boolean active = true;
-		return policyRepository.findAllByActive(active);
+		Boolean deleted = false;
+		return policyRepository.findAllByActiveAndDeleted(active, deleted);
 	}
 
 	public PolicyImpl add(PolicyImpl policy) {
