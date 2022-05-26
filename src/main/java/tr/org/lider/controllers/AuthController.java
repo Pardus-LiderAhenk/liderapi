@@ -80,12 +80,6 @@ public class AuthController {
 			String tokenData = AESHash.encrypt(loginParams.getPassword(), jwtSecret + jwt);
 			Cache cache = cacheManager.getCache("userCache");
 			cache.put(jwt, tokenData);
-			
-		    tokenData = cache.get(jwt, String.class);
-		    System.err.println(AESHash.decrypt(tokenData, jwtSecret + jwt));
-		    
-		    
-		    
 			operationLogService.saveOperationLog(OperationType.LOGIN,"Lider Arayüze Giriş Yapıldı.",null);
 			return ResponseEntity.ok(new JwtResponse(jwt, userPrincipal.getName(), userPrincipal.getSurname()));
 		} catch (BadCredentialsException e) {

@@ -61,14 +61,12 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 			String jwt = getJwt(request);
 			if (jwt != null && tokenProvider.validateJwtToken(jwt)) {
 				String username = tokenProvider.getUserNameFromJwtToken(jwt);
-
 				User userDetails = userService.loadUserByUsername(username);
 				Cache cache = cacheManager.getCache("userCache");
 				try {
 				    String tokenData = cache.get(jwt, String.class);
 				    userDetails.setPasswordHashed(userDetails.getPassword());
 				    userDetails.setPassword(AESHash.decrypt(tokenData, jwtSecret + jwt));
-				    System.err.println("PWD: " + userDetails.getPassword());
 				} catch (Exception e) {
 					throw new MalformedJwtException("JWT not found in cache!");
 				}
