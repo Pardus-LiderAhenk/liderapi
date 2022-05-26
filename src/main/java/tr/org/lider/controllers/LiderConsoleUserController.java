@@ -77,7 +77,7 @@ public class LiderConsoleUserController {
 		try {
 		
 			if(!"".equals(selectedEntry.getUserPassword())){
-				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", customPasswordEncoder.encode(selectedEntry.getUserPassword()));
+				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", "{ARGON2}" + customPasswordEncoder.encode(selectedEntry.getUserPassword()));
 			}
 			operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD,"Lider Arayüz kullanıcı parolası güncellendi.",null);
 			return true;

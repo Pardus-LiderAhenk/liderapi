@@ -133,7 +133,7 @@ public class UserController {
 			attributes.put("uid", new String[] { selectedEntry.getUid() });
 			attributes.put("uidNumber", new String[] { uidNumber });
 			attributes.put("loginShell", new String[] { "/bin/bash" });
-			attributes.put("userPassword", new String[] { customPasswordEncoder.encode(selectedEntry.getUserPassword()) });
+			attributes.put("userPassword", new String[] { "{ARGON2}" + customPasswordEncoder.encode(selectedEntry.getUserPassword()) });
 			attributes.put("homePostalAddress", new String[] { selectedEntry.getHomePostalAddress() });
 			if(selectedEntry.getTelephoneNumber()!=null && selectedEntry.getTelephoneNumber()!="")
 				attributes.put("telephoneNumber", new String[] { selectedEntry.getTelephoneNumber() });
@@ -242,7 +242,7 @@ public class UserController {
 		try {
 		
 			if(!"".equals(selectedEntry.getUserPassword())){
-				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", customPasswordEncoder.encode(selectedEntry.getUserPassword()));
+				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", "{ARGON2}" + customPasswordEncoder.encode(selectedEntry.getUserPassword()));
 			}
 			selectedEntry = ldapService.findSubEntries(selectedEntry.getDistinguishedName(), "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
 			

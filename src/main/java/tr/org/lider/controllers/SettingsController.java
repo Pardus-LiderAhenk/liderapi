@@ -363,7 +363,7 @@ public class SettingsController {
 			attributes.put("uid", new String[] { user.getUid() });
 			attributes.put("uidNumber", new String[] { uidNumber });
 			attributes.put("loginShell", new String[] { "/bin/bash" });
-			attributes.put("userPassword", new String[] { customPasswordEncoder.encode(user.getUserPassword()) });
+			attributes.put("userPassword", new String[] { "{ARGON2}" + customPasswordEncoder.encode(user.getUserPassword()) });
 			attributes.put("homePostalAddress", new String[] { user.getHomePostalAddress() });
 			if(user.getTelephoneNumber()!=null && user.getTelephoneNumber()!="")
 				attributes.put("telephoneNumber", new String[] { user.getTelephoneNumber() });
