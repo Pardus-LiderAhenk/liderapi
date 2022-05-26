@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.Ordered;
@@ -32,6 +33,7 @@ import tr.org.lider.security.CustomPasswordEncoder;
 @EnableJpaRepositories(basePackages = {"tr.org.lider"})
 @EntityScan(basePackages = {"tr.org.lider"})
 @ComponentScan(basePackages = {"tr.org.lider"})
+@EnableCaching
 public class Lider2Application extends SpringBootServletInitializer {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
