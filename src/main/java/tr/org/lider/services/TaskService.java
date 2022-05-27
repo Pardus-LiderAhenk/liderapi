@@ -12,10 +12,6 @@ import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -236,15 +232,9 @@ public class TaskService {
 
 
 	private String findCommandOwnerJid() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-		if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			if ( principal instanceof UserDetails) {
-				logger.info(" task owner jid : " + AuthenticationService.getUser().getName());
-				return AuthenticationService.getUser().getName();
-			} 
-
+		if (AuthenticationService.isLogged()) {
+			logger.info(" task owner jid : " + AuthenticationService.getUser().getName());
+			return AuthenticationService.getUser().getName();
 		}
 		return null;
 	}

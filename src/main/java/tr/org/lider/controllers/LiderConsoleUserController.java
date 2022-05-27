@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
+import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 
@@ -43,6 +44,8 @@ public class LiderConsoleUserController {
 	@Autowired
 	private OperationLogService operationLogService; 
 	
+	@Autowired
+	private CustomPasswordEncoder customPasswordEncoder;
 	
 //	LIDER_CONSOLE USER
 //	return lider console profile from ldap
@@ -74,7 +77,7 @@ public class LiderConsoleUserController {
 		try {
 		
 			if(!"".equals(selectedEntry.getUserPassword())){
-				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", selectedEntry.getUserPassword());
+				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", "{ARGON2}" + customPasswordEncoder.encode(selectedEntry.getUserPassword()));
 			}
 			operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD,"Lider Arayüz kullanıcı parolası güncellendi.",null);
 			return true;

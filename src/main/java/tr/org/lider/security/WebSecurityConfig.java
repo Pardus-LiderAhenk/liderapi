@@ -19,10 +19,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import tr.org.lider.services.UserService;
 
 
 @Configuration
@@ -33,47 +30,32 @@ import tr.org.lider.services.UserService;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
-	private UserService userService;
-
-	@Autowired
 	private JwtAuthEntryPoint unauthorizedHandler;
 
-	//	@Bean
-	//	public CustomOncePerRequestFilter customIPFilter() {
-	//		return new CustomOncePerRequestFilter();
-	//	}
+	@Autowired 
+	private CustomAuthenticationProvider authenticationProvider;
+	
 	@Bean
 	public JwtAuthTokenFilter authenticationJwtTokenFilter() {
 		return new JwtAuthTokenFilter();
 	}
 
 	@Override
-	public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-		authenticationManagerBuilder
-		.userDetailsService(userService)
-		.passwordEncoder(passwordEncoder());
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.authenticationProvider(authenticationProvider);
 	}
+	
+//	@Override
+//	public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+//		authenticationManagerBuilder
+//		.userDetailsService(userService)
+//		.passwordEncoder(passwordEncoder());
+//	}
 
 	@Bean
 	@Override
 	public AuthenticationManager authenticationManagerBean() throws Exception {
 		return super.authenticationManagerBean();
-	}
-
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new PasswordEncoder() {
-			
-			@Override
-			public boolean matches(CharSequence rawPassword, String encodedPassword) {
-				return rawPassword.toString().equals(encodedPassword);
-			}
-			
-			@Override
-			public String encode(CharSequence rawPassword) {
-				return rawPassword.toString();
-			}
-		};
 	}
 
 	@Override

@@ -19,6 +19,7 @@
 */
 package tr.org.lider.entities;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,9 +48,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  */
 @Entity
 @Table(name = "C_POLICY")
-public class PolicyImpl  {
+public class PolicyImpl implements Serializable {
 
-	private static final long serialVersionUID = -4469386148365541028L;
+	private static final long serialVersionUID = 7634830693350923198L;
 
 	@Id
 	@GeneratedValue

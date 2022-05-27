@@ -29,6 +29,7 @@ import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.models.PolicyResponse;
+import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
@@ -58,6 +59,9 @@ public class AdController {
 	
 	@Autowired
 	private PolicyService policyService; 
+	
+	@Autowired
+	private CustomPasswordEncoder customPasswordEncoder;
 	
 	@RequestMapping(value = "/getDomainEntry")
 	public List<LdapEntry> getDomainEntry(HttpServletRequest request) {
@@ -362,7 +366,7 @@ public class AdController {
 							, "(uid="+sAMAccountName+")", new String[] { "*" }, SearchScope.SUBTREE);
 					
 					if(adUserListForCheck!=null && adUserListForCheck.size()==0) {
-						String dn=addUserToLDAP(globalUserOu, adUser, sAMAccountName, selectedLdapDn.getUserPassword());
+						String dn=addUserToLDAP(globalUserOu, adUser, sAMAccountName, customPasswordEncoder.encode(selectedLdapDn.getUserPassword()));
 						
 						ldapService.updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_USER");
 						ldapService.updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_ADMIN");

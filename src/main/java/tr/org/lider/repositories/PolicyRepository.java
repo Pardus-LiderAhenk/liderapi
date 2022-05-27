@@ -9,7 +9,7 @@ import tr.org.lider.entities.PolicyImpl;
 public interface PolicyRepository extends BaseJpaRepository<PolicyImpl, Long>{
 
 	List<PolicyImpl> findAllByDeleted(Boolean deleted);
-	List<PolicyImpl> findAllByActive(Boolean active);
+	List<PolicyImpl> findAllByActiveAndDeleted(Boolean active, Boolean deleted);
 	
 	@Query("SELECT pol, ce, c "
 			+ "FROM CommandImpl c "

@@ -31,6 +31,7 @@ import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.UserSessionsModel;
+import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.CommandService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.UserService;
@@ -52,6 +53,9 @@ public class UserController {
 	
 	@Autowired
 	private CommandService commandService;
+	
+	@Autowired
+	private CustomPasswordEncoder customPasswordEncoder;
 	
 	@RequestMapping(value = "/getOuDetails")
 	public List<LdapEntry> task(LdapEntry selectedEntry) {
@@ -129,7 +133,7 @@ public class UserController {
 			attributes.put("uid", new String[] { selectedEntry.getUid() });
 			attributes.put("uidNumber", new String[] { uidNumber });
 			attributes.put("loginShell", new String[] { "/bin/bash" });
-			attributes.put("userPassword", new String[] { selectedEntry.getUserPassword() });
+			attributes.put("userPassword", new String[] { "{ARGON2}" + customPasswordEncoder.encode(selectedEntry.getUserPassword()) });
 			attributes.put("homePostalAddress", new String[] { selectedEntry.getHomePostalAddress() });
 			if(selectedEntry.getTelephoneNumber()!=null && selectedEntry.getTelephoneNumber()!="")
 				attributes.put("telephoneNumber", new String[] { selectedEntry.getTelephoneNumber() });
@@ -238,7 +242,7 @@ public class UserController {
 		try {
 		
 			if(!"".equals(selectedEntry.getUserPassword())){
-				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", selectedEntry.getUserPassword());
+				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", "{ARGON2}" + customPasswordEncoder.encode(selectedEntry.getUserPassword()));
 			}
 			selectedEntry = ldapService.findSubEntries(selectedEntry.getDistinguishedName(), "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
 			

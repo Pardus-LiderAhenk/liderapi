@@ -113,7 +113,8 @@ public class PolicyService {
 	
 	public List<PolicyImpl> activePolicies( ){
 		Boolean active = true;
-		return policyRepository.findAllByActive(active);
+		Boolean deleted = false;
+		return policyRepository.findAllByActiveAndDeleted(active, deleted);
 	}
 
 	public PolicyImpl add(PolicyImpl policy) {
@@ -201,13 +202,9 @@ public class PolicyService {
 	}
 
 	private String findCommandOwnerJid() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			if ( principal instanceof UserDetails) {
-				logger.info(" task owner jid : " + AuthenticationService.getUser().getName());
-				return AuthenticationService.getUser().getName();
-			} 
+		if (AuthenticationService.isLogged()) {
+			logger.info(" task owner jid : " + AuthenticationService.getUser().getName());
+			return AuthenticationService.getUser().getName();
 		}
 		return null;
 	}
