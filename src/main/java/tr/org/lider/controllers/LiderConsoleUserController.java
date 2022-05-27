@@ -47,6 +47,9 @@ public class LiderConsoleUserController {
 	@Autowired
 	private CustomPasswordEncoder customPasswordEncoder;
 	
+	@Autowired
+	private CustomPasswordEncoder encoder;
+	
 //	LIDER_CONSOLE USER
 //	return lider console profile from ldap
 	@RequestMapping(method=RequestMethod.POST, value = "/profile")
@@ -115,5 +118,31 @@ public class LiderConsoleUserController {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	@RequestMapping(method=RequestMethod.POST, value = "/matchesPassword",produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public boolean matchesLiderConsoleUserPassword(LdapEntry selectedEntry) {
+		LdapEntry ldapUserEntry= getUserFromLdap(selectedEntry.getUid());
+		if(!"".equals(selectedEntry.getUserPassword())){
+			return encoder.matches(selectedEntry.getUserPassword(), ldapUserEntry.getUserPassword());
+		} else {
+			return false;
+		}
+	}
+	
+	private LdapEntry getUserFromLdap(String userName) {
+		LdapEntry ldapEntry = null;
+		try {
+			String filter= "(&(objectClass=pardusAccount)(objectClass=pardusLider)(uid=$1))".replace("$1", userName);
+			List<LdapEntry> ldapEntries  = ldapService.findSubEntries(filter,
+					new String[] { "*" }, SearchScope.SUBTREE);
+			if(ldapEntries.size()>0) {
+				ldapEntry=ldapEntries.get(0);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return ldapEntry;
 	}
 }
