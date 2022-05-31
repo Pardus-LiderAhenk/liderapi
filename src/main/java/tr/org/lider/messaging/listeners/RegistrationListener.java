@@ -62,6 +62,7 @@ public class RegistrationListener implements StanzaListener, StanzaFilter {
 	 */
 	private IRegistrationSubscriber subscriber;
 
+    
 	// TODO IMPROVEMENT: separate xmpp client into two classes. one for
 	// configuration/setup, other for functional methods
 	private XMPPClientImpl client;

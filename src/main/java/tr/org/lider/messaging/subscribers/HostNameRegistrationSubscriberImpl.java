@@ -24,7 +24,6 @@ import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import tr.org.lider.entities.AgentImpl;
@@ -49,7 +48,6 @@ import tr.org.lider.services.RegistrationTemplateService;
 
 
 @Component
-@ConditionalOnProperty(name = "registrationSubscriber.class", havingValue = "hostname")
 public class HostNameRegistrationSubscriberImpl implements IRegistrationSubscriber {
 
 	private static Logger logger = LoggerFactory.getLogger(HostNameRegistrationSubscriberImpl.class);

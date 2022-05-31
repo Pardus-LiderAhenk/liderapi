@@ -503,10 +503,14 @@ public class ConfigurationService {
 	}
 	
 	public RegistrationTemplateType getRegistrationTemplateType() {
-		if(getConfigParams().getSelectedRegistrationType() == null)
+		try {
+			if(getConfigParams().getSelectedRegistrationType() == null)
+				return RegistrationTemplateType.DEFAULT;
+			else
+				return getConfigParams().getSelectedRegistrationType();
+		} catch (Exception e) {
 			return RegistrationTemplateType.DEFAULT;
-		else
-			return getConfigParams().getSelectedRegistrationType();
+		}
 	}
 	
 	public String getPardusRepoAddress() {
