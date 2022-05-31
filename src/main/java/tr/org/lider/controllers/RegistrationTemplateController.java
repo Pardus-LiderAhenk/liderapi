@@ -1,141 +1,120 @@
 package tr.org.lider.controllers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Optional;
 
-import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.directory.api.ldap.model.message.SearchScope;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import tr.org.lider.entities.RegistrationTemplateImpl;
-import tr.org.lider.entities.UserSessionImpl;
-import tr.org.lider.ldap.LDAPServiceImpl;
-import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.models.RegistrationTemplateType;
-import tr.org.lider.models.UserSessionsModel;
-import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.RegistrationTemplateService;
-import tr.org.lider.services.UserService;
 
 /**
- * Controller for registration template operations
+ * REST controller for managing registration template
  * 
  * @author <a href="mailto:hasan.kara@pardus.org.tr">Hasan Kara</a>
  * 
  */
 @Secured({"ROLE_ADMIN", "ROLE_REGISTRATION_TEMPLATE" })
 @RestController
-@RequestMapping("/lider/registration_template")
+@RequestMapping("/api")
 public class RegistrationTemplateController {
+	
+	private final Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
 	private RegistrationTemplateService registrationTemplateService;
 	
-	@Autowired
-	private UserService userService;
+	//find registration template by id
+	@GetMapping(value = "/registration-templates/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> findByID(@PathVariable Long id) {
+		logger.debug("Request to get template by id : {}", id);
+		Optional<RegistrationTemplateImpl> result = registrationTemplateService.findByID(id);
+		if(!result.isPresent()) {
+			logger.error("Request to get template by id : {} but id not found!", id);
+    		return ResponseEntity
+    				.status(HttpStatus.NOT_FOUND)
+    				.body(Arrays.asList("Template ID not found !"));
+		}
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(result);
+	}
 	
-	@Autowired
-	private LDAPServiceImpl ldapService;
-	
-	@Autowired
-	private ConfigurationService configService;
-	
-	@RequestMapping(method=RequestMethod.GET, value = "/{templateType}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<RegistrationTemplateImpl> findAll(@PathVariable RegistrationTemplateType templateType) {
-		return registrationTemplateService.findAllByType(templateType);
+	//find all registration templates by type
+	@GetMapping(value = "/registration-templates/type/{templateType}/page-count/{pageCount}/page-size/{pageSize}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> findAll(@PathVariable RegistrationTemplateType templateType,
+			@PathVariable int pageCount, @PathVariable int pageSize) {
+		logger.debug("Request to get all templates for type : {}", templateType);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(registrationTemplateService.findAllByType(pageCount, pageSize, templateType));
 	}
 
 	//add new registration template
-	@RequestMapping(method=RequestMethod.POST ,value = "/create/{templateType}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public RegistrationTemplateImpl createTemplate(
-			@PathVariable RegistrationTemplateType templateType, 
-			@RequestParam(value = "templateText", required=true) String templateText,
-			@RequestParam(value = "authorizedUserGroupDN", required=true) String authorizedUserGroupDN,
-			@RequestParam(value = "agentCreationDN", required=true) String agentCreationDN) {
-		
-		return registrationTemplateService.addRegistrationTemplate(
-				new RegistrationTemplateImpl(templateText.trim(), 
-												authorizedUserGroupDN.trim(), 
-												agentCreationDN.trim(),
-												templateType));
+	@PostMapping(value = "/registration-templates", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> createTemplate(@RequestBody RegistrationTemplateImpl template) {
+		logger.debug("Request to save template : {}", template);
+        if (template.getId() != null) {
+        	logger.error("Request to save template : {} but template id has to be null.", template);
+    		return ResponseEntity
+    				.status(HttpStatus.BAD_REQUEST)
+    				.body(Arrays.asList("A new template can not have an ID !"));
+        }
+        RegistrationTemplateImpl result = registrationTemplateService.save(template);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(result);
+	}
+	
+	//edit registration template
+	@PutMapping(value = "/registration-templates", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> updateTemplate(@RequestBody RegistrationTemplateImpl template) {
+		logger.debug("Request to update template : {}", template);
+		Optional<RegistrationTemplateImpl> existingTemplate = registrationTemplateService.findByID(template.getId());
+		if(!existingTemplate.isPresent()) {
+			logger.error("Request to update template {} but template not found!", template);
+    		return ResponseEntity
+    				.status(HttpStatus.NOT_FOUND)
+    				.body(Arrays.asList("Template ID not found !"));
+		}
+		//update allowed fields
+		existingTemplate.get().setAuthGroup(template.getAuthGroup());
+		existingTemplate.get().setUnitId(template.getUnitId());
+		existingTemplate.get().setParentDn(template.getParentDn());
+		RegistrationTemplateImpl result = registrationTemplateService.save(existingTemplate.get());
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(result);
 	}
 	
 	//delete registration template
-	@RequestMapping(method=RequestMethod.DELETE ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Boolean deleteTemplate(@RequestParam(value = "id", required=true) Long id) {
-		
-		try {
-			registrationTemplateService.delete(id);
-			return true;
-		} catch (Exception e) {
-			return false;
+	@DeleteMapping(value = "/registration-templates/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> deleteTemplate(@PathVariable Long id) {
+		logger.debug("Request to delete template {} ", id);
+		if(!registrationTemplateService.findByID(id).isPresent()) {
+			logger.error("Request to delete template {} but id not found!", id);
+    		return ResponseEntity
+    				.status(HttpStatus.NOT_FOUND)
+    				.body(Arrays.asList("Template ID not found !"));
 		}
+		registrationTemplateService.delete(id);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(null);
 	}
 	
-	@RequestMapping(method=RequestMethod.POST, value = "/getUserSessions")
-	@ResponseBody
-	public List<UserSessionsModel> getUserSessions(LdapEntry user) {
-		List<UserSessionsModel> userSessions=null;
-		try {
-			List<UserSessionImpl> userSessionsDb=	userService.getUserSessions(user.getUid());
-			userSessions=new ArrayList<>();
-			for (UserSessionImpl userSessionImpl : userSessionsDb) {
-				UserSessionsModel model= new UserSessionsModel();
-				model.setAgent(userSessionImpl.getAgent());
-				model.setCreateDate(userSessionImpl.getCreateDate());
-				model.setId(userSessionImpl.getId());
-				model.setSessionEvent(userSessionImpl.getSessionEvent());
-				model.setUserIp(userSessionImpl.getUserIp());
-				model.setUsername(userSessionImpl.getUsername());
-				userSessions.add(model);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return userSessions;
-	}
-	
-	@RequestMapping(value = "/getOuDetails")
-	public List<LdapEntry> task(LdapEntry selectedEntry) {
-		List<LdapEntry> subEntries = null;
-		try {
-			subEntries = ldapService.findSubEntries(selectedEntry.getUid(), "(objectclass=*)",
-					new String[] { "*" }, SearchScope.ONELEVEL);
-		} catch (LdapException e) {
-			e.printStackTrace();
-		}
-		Collections.sort(subEntries);
-		selectedEntry.setChildEntries(subEntries);
-		return subEntries;
-	}
-	
-	@RequestMapping(value = "/getComputers")
-	public List<LdapEntry> getComputers() {
-		List<LdapEntry> retList = new ArrayList<LdapEntry>();
-		retList.add(ldapService.getLdapComputersTree());
-		return retList;
-	}
-	
-	@RequestMapping(value = "/getUsers")
-	public List<LdapEntry> getUsers() {
-		List<LdapEntry> retList = new ArrayList<LdapEntry>();
-		retList.add(ldapService.getLdapUserTree());
-		return retList;
-	}
-	
-	@RequestMapping(value = "/getGroups")
-	public List<LdapEntry> getGroups() {
-		List<LdapEntry> retList = new ArrayList<LdapEntry>();
-		retList.add(ldapService.getLdapUsersGroupTree());
-		return retList;
-	}
 }
