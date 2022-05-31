@@ -20,6 +20,7 @@ import tr.org.lider.messaging.enums.Protocol;
 import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.models.ConfigParams;
+import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.repositories.ConfigRepository;
 
 /**
@@ -501,6 +502,12 @@ public class ConfigurationService {
 		return false;
 	}
 	
+	public RegistrationTemplateType getRegistrationTemplateType() {
+		if(getConfigParams().getSelectedRegistrationType() == null)
+			return RegistrationTemplateType.DEFAULT;
+		else
+			return getConfigParams().getSelectedRegistrationType();
+	}
 	
 	public String getPardusRepoAddress() {
 		if(getConfigParams().getPardusRepoAddress() == null || getConfigParams().getPardusRepoAddress().equals("")) {

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.RegistrationTemplateImpl;
+import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.repositories.RegistrationTemplateRepository;
 
 @Service
@@ -17,6 +18,10 @@ public class RegistrationTemplateService {
 
 	public List<RegistrationTemplateImpl> findAll() {
         return registrationTemplateRepository.findAll();
+	}
+	
+	public List<RegistrationTemplateImpl> findAllByType(RegistrationTemplateType templateType) {
+        return registrationTemplateRepository.findAllByTemplateType(templateType);
 	}
 	
 	public List<RegistrationTemplateImpl> findAllOrderByUnitLength() {

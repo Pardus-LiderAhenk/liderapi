@@ -9,6 +9,7 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +20,9 @@ import tr.org.lider.entities.RegistrationTemplateImpl;
 import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
+import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.models.UserSessionsModel;
+import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.RegistrationTemplateService;
 import tr.org.lider.services.UserService;
 
@@ -35,7 +38,7 @@ import tr.org.lider.services.UserService;
 public class RegistrationTemplateController {
 	
 	@Autowired
-	RegistrationTemplateService registrationTemplateService;
+	private RegistrationTemplateService registrationTemplateService;
 	
 	@Autowired
 	private UserService userService;
@@ -43,25 +46,31 @@ public class RegistrationTemplateController {
 	@Autowired
 	private LDAPServiceImpl ldapService;
 	
-	@RequestMapping(method=RequestMethod.POST, value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<RegistrationTemplateImpl> findAll() {
-		return registrationTemplateService.findAll();
+	@Autowired
+	private ConfigurationService configService;
+	
+	@RequestMapping(method=RequestMethod.GET, value = "/{templateType}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<RegistrationTemplateImpl> findAll(@PathVariable RegistrationTemplateType templateType) {
+		return registrationTemplateService.findAllByType(templateType);
 	}
 
 	//add new registration template
-	@RequestMapping(method=RequestMethod.POST ,value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-	public RegistrationTemplateImpl createTemplate(@RequestParam(value = "templateText", required=true) String templateText,
+	@RequestMapping(method=RequestMethod.POST ,value = "/create/{templateType}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public RegistrationTemplateImpl createTemplate(
+			@PathVariable RegistrationTemplateType templateType, 
+			@RequestParam(value = "templateText", required=true) String templateText,
 			@RequestParam(value = "authorizedUserGroupDN", required=true) String authorizedUserGroupDN,
 			@RequestParam(value = "agentCreationDN", required=true) String agentCreationDN) {
 		
 		return registrationTemplateService.addRegistrationTemplate(
 				new RegistrationTemplateImpl(templateText.trim(), 
 												authorizedUserGroupDN.trim(), 
-												agentCreationDN.trim()));
+												agentCreationDN.trim(),
+												templateType));
 	}
 	
 	//delete registration template
-	@RequestMapping(method=RequestMethod.POST ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method=RequestMethod.DELETE ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Boolean deleteTemplate(@RequestParam(value = "id", required=true) Long id) {
 		
 		try {

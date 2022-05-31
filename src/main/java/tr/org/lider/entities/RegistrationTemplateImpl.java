@@ -16,6 +16,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import tr.org.lider.models.RegistrationTemplateType;
+
 /**
  * Entity class for registration template 
  * 
@@ -43,6 +45,9 @@ public class RegistrationTemplateImpl implements Serializable{
 	@Column(name = "parent_dn")
 	private String parentDn;
 
+	@Column(name = "template_type", nullable = false)
+	private RegistrationTemplateType templateType;
+	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "create_date", nullable = false)
 	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss")
@@ -60,11 +65,12 @@ public class RegistrationTemplateImpl implements Serializable{
 		this.createDate = createDate;
 	}
 
-	public RegistrationTemplateImpl(String unitId, String authGroup, String parentDn) {
+	public RegistrationTemplateImpl(String unitId, String authGroup, String parentDn, RegistrationTemplateType templateType) {
 		super();
 		this.unitId = unitId;
 		this.authGroup = authGroup;
 		this.parentDn = parentDn;
+		this.templateType = templateType;
 	}
 
 	public Long getId() {
@@ -105,6 +111,14 @@ public class RegistrationTemplateImpl implements Serializable{
 
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
+	}
+
+	public RegistrationTemplateType getTemplateType() {
+		return templateType;
+	}
+
+	public void setTemplateType(RegistrationTemplateType templateType) {
+		this.templateType = templateType;
 	}
 
 	@Override

@@ -146,6 +146,8 @@ public class ConfigParams {
 	private String pardusRepoAddress;
 	private String pardusRepoComponent;
 	
+	private RegistrationTemplateType selectedRegistrationType;
+	
 	public ConfigParams() {
 		super();
 	}
@@ -200,6 +202,8 @@ public class ConfigParams {
 		this.ahenkRepoKeyAddress = "";
 		this.sudoRoleType = SudoRoleType.LDAP;
 		this.allowDynamicDNSUpdate = false;
+		
+		this.selectedRegistrationType = RegistrationTemplateType.DEFAULT;
 	}
 
 	public String getLiderLocale() {
@@ -912,6 +916,14 @@ public class ConfigParams {
 
 	public void setPardusRepoComponent(String pardusRepoComponent) {
 		this.pardusRepoComponent = pardusRepoComponent;
+	}
+
+	public RegistrationTemplateType getSelectedRegistrationType() {
+		return selectedRegistrationType;
+	}
+
+	public void setSelectedRegistrationType(RegistrationTemplateType selectedRegistrationType) {
+		this.selectedRegistrationType = selectedRegistrationType;
 	}
 
 	public FileServerConf getFileServerConf(String jid) {

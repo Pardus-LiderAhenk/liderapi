@@ -32,6 +32,7 @@ import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.messaging.enums.Protocol;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.models.ConfigParams;
+import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.ConfigurationService;
@@ -196,13 +197,15 @@ public class SettingsController {
 			@RequestParam (value = "domainType", required = true) DomainType domainType,
 			@RequestParam (value = "ahenkRepoAddress", required = true) String ahenkRepoAddress,
 			@RequestParam (value = "ahenkRepoKeyAddress", required = true) String ahenkRepoKeyAddress,
-			@RequestParam (value = "sudoRoleType", required = true) SudoRoleType sudoRoleType) {
+			@RequestParam (value = "sudoRoleType", required = true) SudoRoleType sudoRoleType,
+			@RequestParam (value = "selectedRegistrationType", required = true) RegistrationTemplateType selectedRegistrationType) {
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setDisableLocalUser(disableLocalUser);
 		configParams.setDomainType(domainType);
 		configParams.setsudoRoleType(sudoRoleType);
 		configParams.setAhenkRepoAddress(ahenkRepoAddress);
 		configParams.setAhenkRepoKeyAddress(ahenkRepoKeyAddress);
+		configParams.setSelectedRegistrationType(selectedRegistrationType);
 		
 		return configurationService.updateConfigParams(configParams);
 	}
