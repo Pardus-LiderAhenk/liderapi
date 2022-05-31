@@ -45,7 +45,7 @@ public class RegistrationTemplateImpl implements Serializable{
 	@Column(name = "parent_dn")
 	private String parentDn;
 
-	@Column(name = "template_type")
+	@Column(name = "template_type", nullable = false)
 	private RegistrationTemplateType templateType;
 	
 	@Temporal(TemporalType.TIMESTAMP)
@@ -65,11 +65,12 @@ public class RegistrationTemplateImpl implements Serializable{
 		this.createDate = createDate;
 	}
 
-	public RegistrationTemplateImpl(String unitId, String authGroup, String parentDn) {
+	public RegistrationTemplateImpl(String unitId, String authGroup, String parentDn, RegistrationTemplateType templateType) {
 		super();
 		this.unitId = unitId;
 		this.authGroup = authGroup;
 		this.parentDn = parentDn;
+		this.templateType = templateType;
 	}
 
 	public Long getId() {

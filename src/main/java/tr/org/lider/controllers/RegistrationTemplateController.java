@@ -55,19 +55,22 @@ public class RegistrationTemplateController {
 	}
 
 	//add new registration template
-	@RequestMapping(method=RequestMethod.POST ,value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-	public RegistrationTemplateImpl createTemplate(@RequestParam(value = "templateText", required=true) String templateText,
+	@RequestMapping(method=RequestMethod.POST ,value = "/create/{templateType}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public RegistrationTemplateImpl createTemplate(
+			@PathVariable RegistrationTemplateType templateType, 
+			@RequestParam(value = "templateText", required=true) String templateText,
 			@RequestParam(value = "authorizedUserGroupDN", required=true) String authorizedUserGroupDN,
 			@RequestParam(value = "agentCreationDN", required=true) String agentCreationDN) {
 		
 		return registrationTemplateService.addRegistrationTemplate(
 				new RegistrationTemplateImpl(templateText.trim(), 
 												authorizedUserGroupDN.trim(), 
-												agentCreationDN.trim()));
+												agentCreationDN.trim(),
+												templateType));
 	}
 	
 	//delete registration template
-	@RequestMapping(method=RequestMethod.POST ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(method=RequestMethod.DELETE ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Boolean deleteTemplate(@RequestParam(value = "id", required=true) Long id) {
 		
 		try {

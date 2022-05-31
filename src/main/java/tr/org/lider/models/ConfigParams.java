@@ -926,10 +926,6 @@ public class ConfigParams {
 		this.selectedRegistrationType = selectedRegistrationType;
 	}
 
-	public void setSudoRoleType(SudoRoleType sudoRoleType) {
-		this.sudoRoleType = sudoRoleType;
-	}
-
 	public FileServerConf getFileServerConf(String jid) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		switch (fileServerProtocol) {
