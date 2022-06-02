@@ -4,7 +4,7 @@
 @host = {{hostname}}:{{port}}
 @contentType = application/json
 
-@token = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJoYXNhbi5rYXJhIiwiaWF0IjoxNjUzOTk2NjM4LCJleHAiOjE2NTQ4NjA2Mzh9.ZRdX7ZZprDdJu1p4WJ9UXXtNkHpohTaODqTsTD7Tm-g-zZilW9vErB0rWgBHHJeqG586yhv1ViDdrgNO8p5O1A
+@token = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJoYXNhbi5rYXJhIiwiaWF0IjoxNjU0MTc5NjcwLCJleHAiOjE2NTUwNDM2NzB9.B4bofoP4tkNDKI9Wbk1EIgRDeYCyED6J1K4aN46qWwUXNLe87wvqU-kNAXE1ZLr8tfNKLsqqW8WJirZBiYzONw
 POST http://{{host}}/api/auth/signin
 Content-Type: {{contentType}}
 
@@ -28,6 +28,7 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
 {
+    "id": 3321,
     "unitId": "unitId1",
     "authGroup": "authGroup1",
     "parentDn": "parentDn1",
@@ -36,7 +37,7 @@ Authorization: Bearer {{token}}
 }
 
 ### Test Registration Template Get By ID
-GET http://{{host}}/api/registration-templates/5431570
+GET http://{{host}}/api/registration-templates/23321321
 Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
@@ -52,7 +53,7 @@ Content-Type: {{contentType}}
 Authorization: Bearer {{token}}
 
 {
-    "id": 5431570,
+    "id": 5431699,
     "unitId": "unitId11",
     "authGroup": "authGroup11",
     "parentDn": "parentDn11",
@@ -61,6 +62,6 @@ Authorization: Bearer {{token}}
 }
 
 ### Registration Template EDIT
-DELETE http://{{host}}/api/registration-templates/5431570
+DELETE http://{{host}}/api/registration-templates/5431699
 Content-Type: {{contentType}}
 Authorization: Bearer {{token}}

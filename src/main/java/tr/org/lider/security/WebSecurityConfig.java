@@ -70,6 +70,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers("/test/hello/**").permitAll()
 		.antMatchers("/forgot_password/**").permitAll()
 		.antMatchers("/actuator/**").permitAll()
+		.antMatchers("/api-docs/**").permitAll()
+		.antMatchers("/swagger-ui/**").permitAll()
+		.antMatchers("/v3/api-docs/**").permitAll()
+
 		.antMatchers("/test2/**").hasAuthority("ROLE_ADMIN")
 		.anyRequest().authenticated()
 		.and()

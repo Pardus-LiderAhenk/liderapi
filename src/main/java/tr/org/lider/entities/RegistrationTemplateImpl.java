@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -36,15 +38,19 @@ public class RegistrationTemplateImpl implements Serializable{
 	@Column(name = "registration_template_id", unique = true, nullable = false)
 	private Long id;
 
+	@NotNull
 	@Column(name = "unit_id")
 	private String unitId;
 
+	@NotNull
 	@Column(name = "auth_group")
 	private String authGroup;
 
+	@NotNull
 	@Column(name = "parent_dn")
 	private String parentDn;
 
+	@NotNull
 	@Column(name = "template_type", nullable = false)
 	private RegistrationTemplateType templateType;
 	
