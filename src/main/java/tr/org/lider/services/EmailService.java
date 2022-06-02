@@ -51,7 +51,7 @@ public class EmailService {
 			msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
 			msg.setSubject("Liderahenk Parola Yenileme Linki");
 			String content = "Merhaba,<br><br>Parolanızı aşağıdaki linkten 1 saat içerisinde yenileyebilirsiniz.<br><br>";
-			content += "<a href=\"" + liderURL +"/forgot_password/id/" + uuid + "\">Parola Yenile</a>";
+			content += "<a href=\"" + liderURL +"/forgot-password/id/" + uuid + "\">Parola Yenile</a>";
 			msg.setContent(content, "text/html; charset=UTF-8");
 			msg.setSentDate(new Date());
 
