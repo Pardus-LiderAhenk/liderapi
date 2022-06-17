@@ -3,7 +3,22 @@ package tr.org.lider.sambabox;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.directory.api.ldap.model.entry.DefaultEntry;
+import org.apache.directory.api.ldap.model.entry.Entry;
+import org.apache.directory.api.ldap.model.entry.ModificationOperation;
+import org.apache.directory.api.ldap.model.entry.Value;
 import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.api.ldap.model.message.AddRequest;
+import org.apache.directory.api.ldap.model.message.AddRequestImpl;
+import org.apache.directory.api.ldap.model.message.AddResponse;
+import org.apache.directory.api.ldap.model.message.LdapResult;
+import org.apache.directory.api.ldap.model.message.ModifyRequest;
+import org.apache.directory.api.ldap.model.message.ModifyRequestImpl;
+import org.apache.directory.api.ldap.model.message.ResultCodeEnum;
+import org.apache.directory.api.ldap.model.name.Dn;
+import org.apache.directory.ldap.client.api.LdapConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,6 +43,8 @@ import tr.org.lider.services.ConfigurationService;
 @RequestMapping("/api/sambabox")
 public class SambaboxController {
 	
+	private final static Logger logger = LoggerFactory.getLogger(SambaboxController.class);
+	
 	@Autowired
 	private LDAPServiceImpl ldapService;
 	
@@ -48,18 +65,20 @@ public class SambaboxController {
 	public ResponseEntity<String> createNewUser(@RequestBody UserDto user) {
 		
 		Map<String, String[]> attributes = new HashMap<String, String[]>();
-		attributes.put("objectClass", new String[] { "top", "posixAccount",
+		attributes.put("objectClass", new String[] { "top",
 				"person","pardusLider","pardusAccount","organizationalPerson","inetOrgPerson"});
 		attributes.put("cn", new String[] { user.getUsername() });
 		attributes.put("sn", new String[] {  user.getUsername()  });
 		attributes.put("uid", new String[] {  user.getUsername()  });
 		attributes.put("userPassword", new String[] { "{ARGON2}" + customPasswordEncoder.encode(user.getPassword()) });
+		attributes.put("liderPrivilege", new String[] {"ROLE_USER"});
+		
 		
 		
 		String rdn="uid="+user.getUsername()+","+configurationService.getUserLdapBaseDn();
 		
 		try {
-			ldapService.addEntry(rdn, attributes);
+			addEntry(rdn, attributes);
 		} catch (LdapException e) {
 			HttpHeaders headers = new HttpHeaders();
         	headers.add("message", "User not created");
@@ -70,6 +89,42 @@ public class SambaboxController {
 		}
 		
 		return ResponseEntity.status(HttpStatus.OK).body("");
+	}
+	
+	
+	private void addEntry(String newDn, Map<String, String[]> attributes) throws LdapException {
+		LdapConnection connection = null;
+		try {
+			connection = ldapService.getConnectionForAdmin();
+			Dn dn = new Dn(newDn);
+			Entry entry = new DefaultEntry(dn);
+
+			for (Map.Entry<String, String[]> Entry : attributes.entrySet()) {
+				String[] entryValues = Entry.getValue();
+				for (String value : entryValues) {
+					entry.add(Entry.getKey(), value);
+				}
+			}
+
+			AddRequest addRequest = new AddRequestImpl();
+			addRequest.setEntry(entry);
+
+			AddResponse addResponse = connection.add(addRequest);
+			LdapResult ldapResult = addResponse.getLdapResult();
+
+			if (ResultCodeEnum.SUCCESS.equals(ldapResult.getResultCode())) {
+				return;
+			} else {
+				logger.error("Could not create LDAP entry: {}", ldapResult.getDiagnosticMessage());
+				throw new LdapException(ldapResult.getDiagnosticMessage());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage(), e);
+			throw new LdapException(e);
+		} finally {
+			ldapService.releaseConnection(connection);
+		}
 	}
 	
 	
@@ -84,7 +139,7 @@ public class SambaboxController {
 		String dn = "uid="+user.getUsername()+","+configurationService.getUserLdapBaseDn();
 		
 		try {
-			ldapService.updateEntry(dn, "userPassword", "{ARGON2}" + customPasswordEncoder.encode(user.getPassword()));
+			updateEntry(dn, "userPassword", "{ARGON2}" + customPasswordEncoder.encode(user.getPassword()));
 		} catch (LdapException e) {
 			HttpHeaders headers = new HttpHeaders();
         	headers.add("message", "Changing user password unsuccess!");
@@ -95,6 +150,30 @@ public class SambaboxController {
 		}
 		
 		return ResponseEntity.status(HttpStatus.OK).body("Success");
+	}
+	
+	private void updateEntry(String entryDn, String attribute, String value) throws LdapException {
+		logger.info("Replacing attribute " + attribute + " value " + value);
+		LdapConnection connection = null;
+
+		connection = ldapService.getConnectionForAdmin();
+		Entry entry = null;
+		try {
+			entry = connection.lookup(entryDn);
+			if (entry != null) {
+				if (entry.get(attribute) != null) {
+					Value<?> oldValue = entry.get(attribute).get();
+					entry.remove(attribute, oldValue);
+				}
+				entry.add(attribute, value);
+				connection.modify(entry, ModificationOperation.REPLACE_ATTRIBUTE);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw new LdapException(e);
+		} finally {
+			ldapService.releaseConnection(connection);
+		}
 	}
 	
 	
@@ -132,7 +211,7 @@ public class SambaboxController {
 		} else {
 			
 			try {
-				ldapService.updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_USER");
+				updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_USER");
 			} catch (LdapException e) {
 				HttpHeaders headers = new HttpHeaders();
 	        	headers.add("message", "Activating user unsuccess!");
@@ -144,6 +223,31 @@ public class SambaboxController {
 		}
 		
 		return ResponseEntity.status(HttpStatus.OK).body("Success");
+	}
+	
+	public void updateEntryAddAtribute(String entryDn, String attribute, String value) throws LdapException {
+		logger.info("Adding attribute " + attribute + " value " + value);
+		LdapConnection connection = null;
+
+		connection = ldapService.getConnectionForAdmin();
+		Entry entry = null;
+		try {
+			entry = connection.lookup(entryDn);
+			if (entry != null) {
+				entry.put(attribute, value);
+
+				ModifyRequest mr = new ModifyRequestImpl();
+				mr.setName(new Dn(entryDn));
+				mr.add(attribute, value);
+
+				connection.modify(mr);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+			throw new LdapException(e);
+		} finally {
+			ldapService.releaseConnection(connection);
+		}
 	}
 
 }

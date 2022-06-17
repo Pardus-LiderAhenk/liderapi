@@ -7,6 +7,9 @@ package tr.org.lider.security;
  * 
  */
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -29,6 +32,9 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                          HttpServletResponse response,
                          AuthenticationException e) 
                         		 throws IOException, ServletException {
+    	
+    	
+    	
         logger.error("Unauthorized error. Message - {}", e.getMessage());
         if(response.getHeader("reason") != null && !response.getHeader("reason").equals("")) {
         	String reason = response.getHeader("reason");
