@@ -31,7 +31,6 @@ import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import tr.org.lider.entities.AgentImpl;
@@ -49,7 +48,6 @@ import tr.org.lider.messaging.messages.RegistrationMessageImpl;
 import tr.org.lider.messaging.messages.RegistrationResponseMessageImpl;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
-import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
 
 
@@ -78,7 +76,6 @@ import tr.org.lider.services.ConfigurationService;
  */
 
 @Component
-@ConditionalOnProperty(name = "registrationSubscriber.class", havingValue = "default")
 public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscriber {
 
 	private static Logger logger = LoggerFactory.getLogger(DefaultRegistrationSubscriberImpl.class);
@@ -90,8 +87,6 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 	@Autowired
 	private LDAPServiceImpl ldapService;
 	
-	@Autowired
-	private AdService adService;
 	
 	@Autowired
 	private ConfigurationService configurationService;
@@ -103,7 +98,6 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 	
 	private static String DIRECTORY_SERVER_LDAP="LDAP";
 	private static String DIRECTORY_SERVER_AD="ACTIVE_DIRECTORY";
-	private static String DIRECTORY_SERVER_NONE="NONE";
 
 	/**
 	 * Check if agent defined in the received message is already registered, if
@@ -175,14 +169,14 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 			
 			AgentImpl agent = agents != null && !agents.isEmpty() ? agents.get(0) : null;
 
-			String userDirectoryDomain = null;
-			// get directory server
-			if(directoryServer.equals(DIRECTORY_SERVER_LDAP)) {
-				userDirectoryDomain=configurationService.getLdapRootDn();
-			}
-			else if(directoryServer.equals(DIRECTORY_SERVER_AD)) {
-				userDirectoryDomain =configurationService.getAdDomainName();
-			}
+//			String userDirectoryDomain = null;
+//			// get directory server
+//			if(directoryServer.equals(DIRECTORY_SERVER_LDAP)) {
+//				userDirectoryDomain=configurationService.getLdapRootDn();
+//			}
+//			else if(directoryServer.equals(DIRECTORY_SERVER_AD)) {
+//				userDirectoryDomain =configurationService.getAdDomainName();
+//			}
 			
 			// Update the record
 			if (agent != null) {
@@ -423,7 +417,7 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 
 		LdapEntry user = null;
 
-		List<LdapSearchFilterAttribute> filterAtt = new ArrayList();
+		List<LdapSearchFilterAttribute> filterAtt = new ArrayList<LdapSearchFilterAttribute>();
 		filterAtt.add(new LdapSearchFilterAttribute("uid", userName, SearchFilterEnum.EQ));
 		filterAtt.add(new LdapSearchFilterAttribute("userPassword", userPassword, SearchFilterEnum.EQ));
 

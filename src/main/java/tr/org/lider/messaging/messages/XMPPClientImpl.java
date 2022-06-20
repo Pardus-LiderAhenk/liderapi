@@ -97,12 +97,15 @@ import tr.org.lider.messaging.listeners.RegistrationListener;
 import tr.org.lider.messaging.listeners.TaskStatusListener;
 import tr.org.lider.messaging.listeners.UserSessionListener;
 import tr.org.lider.messaging.listeners.XMPPConnectionListener;
+import tr.org.lider.messaging.subscribers.DefaultRegistrationSubscriberImpl;
+import tr.org.lider.messaging.subscribers.HostNameRegistrationSubscriberImpl;
+import tr.org.lider.messaging.subscribers.IPAddressRegistrationSubscriberImpl;
 import tr.org.lider.messaging.subscribers.IPolicyStatusSubscriber;
 import tr.org.lider.messaging.subscribers.IPolicySubscriber;
 import tr.org.lider.messaging.subscribers.IPresenceSubscriber;
-import tr.org.lider.messaging.subscribers.IRegistrationSubscriber;
 import tr.org.lider.messaging.subscribers.ITaskStatusSubscriber;
 import tr.org.lider.messaging.subscribers.IUserSessionSubscriber;
+import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.services.ConfigurationService;
 
 /**
@@ -140,10 +143,6 @@ public class XMPPClientImpl {
 	private RegistrationListener registrationListener;
 	private UserSessionListener userSessionListener;
 	private PolicyListener policyListener;
-	//	private RequestAgreementListener reqAggrementListener;
-	//	private AgreementStatusListener aggrementStatusListener;
-	//	private ScriptResultListener scriptResultListener;
-	//	private MissingPluginListener missingPluginListener;
 
 	/**
 	 * Packet subscribers
@@ -160,17 +159,19 @@ public class XMPPClientImpl {
 
 	@Autowired
 	private IUserSessionSubscriber userSessionSubscriber;
-	//	private IMissingPluginSubscriber missingPluginSubscriber;
+
 	@Autowired
 	private IPolicySubscriber policySubscriber;
-	//	private IRequestAgreementSubscriber reqAggrementSubscriber;
-
+	
 	@Autowired
-	private IRegistrationSubscriber registrationSubscriber;
-	//	private IAgreementStatusSubscriber aggrementStatusSubscriber;
-	//	private IScriptResultSubscriber scriptResultSubscriber;
-	//	private IRegistrationSubscriber defaultRegistrationSubscriber;
-
+	private DefaultRegistrationSubscriberImpl defaultRegistrationSubscriberImpl;
+	
+	@Autowired
+	private HostNameRegistrationSubscriberImpl hostnameRegistrationSubscriberImpl;
+	
+	@Autowired
+	private IPAddressRegistrationSubscriberImpl ipAddressRegistrationSubscriberImpl;
+	
 	/**
 	 * Lider services
 	 */
@@ -360,8 +361,15 @@ public class XMPPClientImpl {
 		connection.addAsyncStanzaListener(policyStatusListener, policyStatusListener);
 		// Hook listener for registration messages
 		registrationListener = new RegistrationListener(this);
-		registrationListener.setSubscriber(registrationSubscriber);
-		//registrationListener.setDefaultSubcriber(defaultRegistrationSubscriber);
+		
+		if(configurationService.getRegistrationTemplateType().equals(RegistrationTemplateType.HOSTNAME)) {
+			registrationListener.setSubscriber(hostnameRegistrationSubscriberImpl);
+		} else if(configurationService.getRegistrationTemplateType().equals(RegistrationTemplateType.IP_ADDRESS)) {
+			registrationListener.setSubscriber(ipAddressRegistrationSubscriberImpl);
+		} else {
+			registrationListener.setSubscriber(defaultRegistrationSubscriberImpl);
+		}
+
 		connection.addAsyncStanzaListener(registrationListener, registrationListener);
 		// Hook listener for user session messages
 		userSessionListener = new UserSessionListener(this);
