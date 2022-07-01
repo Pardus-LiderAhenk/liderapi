@@ -11,11 +11,11 @@
 
 	</parent>
 	<groupId>tr.com.lider</groupId>
-	<artifactId>Lider2</artifactId>
-	<version>2.0</version>
-	<name>Lider2</name>
+	<artifactId>Lider3</artifactId>
+	<version>3.0</version>
+	<name>Lider V3 Beta</name>
 	<packaging>war</packaging>
-	<description>Lider2 Merkezi Yonetim Sistemi</description>
+	<description>Lider(V3) Merkezi Yonetim Sistemi</description>
 
 	<properties>
 		<java.version>11</java.version>
@@ -292,7 +292,72 @@
 					</overlays>
 				</configuration>
 			</plugin>
+			
+			
 
 		</plugins>
 	</build>
+	
+	
+	<!-- 
+		For packaging lider app with ui run mvn clean package -P build-with-vue
+	 -->
+	
+	
+	<profiles>
+		<profile>
+			<id>build-with-vue</id>
+			<build>
+				<finalName>ROOT</finalName>
+				<plugins>
+				<!--  
+					This will enable when lider ui node version problem fixed.
+					<plugin>
+						<artifactId>exec-maven-plugin</artifactId>
+						<groupId>org.codehaus.mojo</groupId>
+						<executions>
+		                    <execution>
+		                        <id>npm build the lider vue app</id>
+		                        <phase>generate-resources</phase>
+		                        <goals>
+		                            <goal>exec</goal>
+		                        </goals>
+		                        <configuration>
+		                            <workingDirectory>${basedir}/../liderui</workingDirectory>
+		                            <executable>npm</executable>
+		                            <arguments>
+		                                <argument>run</argument>
+		                                <argument>build</argument>
+		                            </arguments>
+		                        </configuration>
+		                    </execution>
+	                	</executions>
+					</plugin>
+					-->
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>validate</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${basedir}/target/classes/static/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${basedir}/../liderui/dist</directory>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	
+	
 </project>
