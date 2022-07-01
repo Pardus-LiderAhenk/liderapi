@@ -62,10 +62,10 @@ public class PolicyController {
 	}
 
 	//	return deleted policy. Never truly delete, just mark as deleted!
-	@RequestMapping(method=RequestMethod.POST ,value = "/del", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PolicyImpl policyDel(@RequestBody PolicyImpl params) {
+	@RequestMapping(method=RequestMethod.POST ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	public PolicyImpl policyDelete(@RequestBody PolicyImpl params) {
 		try {
-			return policyService.del(params);
+			return policyService.delete(params);
 		} catch (DataAccessException e) {
 			logger.error("Error delete policy: " + e.getCause().getMessage());
 			return null;
@@ -117,7 +117,7 @@ public class PolicyController {
 	// 
 	@RequestMapping(method=RequestMethod.POST ,value = "/getPoliciesForGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<PolicyResponse> getPolicies4Group(@RequestBody LdapEntry dn) {
-		logger.info("Getting executed policies for group. DN : " +dn);
+		logger.info("Getting executed policies for group. DN : " +dn.getDistinguishedName());
 		return policyService.getPoliciesForGroup(dn.getDistinguishedName());
 	}
 	
@@ -125,5 +125,15 @@ public class PolicyController {
 	public CommandImpl unassignmentPolicyOfUser(@RequestBody CommandImpl id) {
 		logger.info("Getting executed policies for group. DN : " +id);
 		return policyService.unassignmentCommandForUserPolicy(id);
+	}
+	
+	@RequestMapping(method=RequestMethod.POST ,value = "/activePolicies", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<PolicyImpl> activePolicyList() {
+		try {
+			return policyService.activePolicies();
+		} catch (DataAccessException e) {
+			logger.error("Error get active policy list: " + e.getCause().getMessage());
+			return null;
+		}
 	}
 }

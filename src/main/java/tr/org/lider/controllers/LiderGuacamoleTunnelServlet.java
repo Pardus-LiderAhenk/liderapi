@@ -1,5 +1,8 @@
 package tr.org.lider.controllers;
 
+import java.net.InetSocketAddress;
+import java.net.Socket;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,115 +36,157 @@ public class LiderGuacamoleTunnelServlet extends GuacamoleHTTPTunnelServlet {
 	private static final long serialVersionUID = 1L;
 
 	Logger logger = LoggerFactory.getLogger(LiderGuacamoleTunnelServlet.class);
-	
-	private static String PROTOCOL="";
-	private static String HOST="";
-	private static String PORT="";
-	private static String USERNAME="";
-	private static String PASSWORD="";
-	private static String DOMAIN="";
-	
-	@Autowired
-	private OperationLogService operationLogService; 
 
-    @Override
-    protected GuacamoleTunnel doConnect(HttpServletRequest request)
-         {
-    	try {
-        // Create our configuration
+	private static String PROTOCOL = "";
+	private static String HOST = "";
+	private static String PORT = "";
+	private static String USERNAME = "";
+	private static String PASSWORD = "";
+	private static String DOMAIN = "";
+
+	@Autowired
+	private OperationLogService operationLogService;
+
+	@Override
+	protected GuacamoleTunnel doConnect(HttpServletRequest request) {
+
+		// Create our configuration
 //    		PROTOCOL="rdp";
 //    		HOST="rdp";
 //    		PORT="rdp";
 //    		PASSWORD="rdp";
-    		
-	    	if(PROTOCOL!="" && HOST!="" && PORT!="" && PASSWORD!="") {
-	    		logger.info("Starting Remote Connection HOST: "+ HOST+ " PORT: "+ PORT +" PROTOCOL"+ PROTOCOL);
-		        GuacamoleConfiguration config = new GuacamoleConfiguration();
-		        config.setProtocol(PROTOCOL);
-		        if(PROTOCOL.equals("ssh")) {
-		        	String host= HOST.trim();
-		            config.setParameter("hostname", host);
-		            config.setParameter("port", PORT);
-		            config.setParameter("password", PASSWORD);
-		            config.setParameter("username", USERNAME);
-		        }
-		        else if(PROTOCOL.equals("vnc")) {
-		        	String host="";
-		        	if(HOST.contains(",")){
-			        	String[] hostArr=	HOST.replace("'", "").split(",");
-			        	if(hostArr.length>0) {
-			        		host= hostArr[0];
-			        	}else {
-			        		host=hostArr[0];
-			        	}
-		        	}
-		        	else {
-		        		host=HOST.replace("'", "");
-		        	}
-		          config.setParameter("hostname", host.trim());
-		          logger.info("Connection remote to host: "+host.trim());
-		          logger.info("Connection remote to password: "+PASSWORD);
-		          
-		          
-		          config.setParameter("port", PORT);
-		          config.setParameter("password", PASSWORD);
-		        }
-		        else if(PROTOCOL.equals("rdp")) {
-		       
-		        	config.setParameter("hostname", HOST);
-		        	config.setParameter("port", "3389");
-		        	config.setParameter("username", USERNAME);
-		        	config.setParameter("password", PASSWORD);
-		        	config.setParameter("domain", DOMAIN);
-		        	config.setParameter("ignore-cert", "true");
-		        	
-		        }
-		        // Connect to guacd - everything is hard-coded here.
-		        GuacamoleSocket socket = new ConfiguredGuacamoleSocket(new InetGuacamoleSocket("localhost", 4822), config);
-				
-		        // Return a new tunnel which uses the connected socket
-		        GuacamoleTunnel tunnel=new SimpleGuacamoleTunnel(socket);
-		        
-		        operationLogService.saveOperationLog(OperationType.EXECUTE_TASK,"Uzak Erişim Görevi Çalıştırıldı. Host:"+HOST+" Protokol: "+PROTOCOL+" User:"+ USERNAME ,null);
-		        
-		        return tunnel;
-		    	}
-	    	else {
-	    		return null;
-    		}
-    
-    	} catch (GuacamoleException e) {
-    		logger.error(" Error occured when cretaing remote tunnel. Error:" + e.getMessage());
-			e.printStackTrace();
+//    		HOST="192.168.56.108";
+//    		PROTOCOL="vnc";
+//    		PORT = "5900";
+//    		PASSWORD ="123";
+
+		if (PROTOCOL != "" && HOST != "" && PORT != "" && PASSWORD != "") {
+
+			logger.info("Starting Remote Connection HOST: " + HOST + " PORT: " + PORT + " PROTOCOL" + PROTOCOL);
+			
+			String host = HOST.replace("'", "");
+			
+			if (host != null) {
+				try {
+					GuacamoleConfiguration config = new GuacamoleConfiguration();
+					config.setProtocol(PROTOCOL);
+					if (PROTOCOL.equals("ssh")) {
+						config.setParameter("hostname", host.trim());
+						config.setParameter("port", PORT);
+						config.setParameter("password", PASSWORD);
+						config.setParameter("username", USERNAME);
+					} else if (PROTOCOL.equals("vnc")) {
+
+						config.setParameter("hostname", host.trim());
+						logger.info("Connection remote to host: " + host.trim());
+						logger.info("Connection remote to password: " + PASSWORD);
+						config.setParameter("port", PORT);
+						config.setParameter("password", PASSWORD);
+					} else if (PROTOCOL.equals("rdp")) {
+
+						config.setParameter("hostname", HOST);
+						config.setParameter("port", "3389");
+						config.setParameter("username", USERNAME);
+						config.setParameter("password", PASSWORD);
+						config.setParameter("domain", DOMAIN);
+						config.setParameter("ignore-cert", "true");
+
+					}
+					// Connect to guacd
+					GuacamoleSocket socket = new ConfiguredGuacamoleSocket(new InetGuacamoleSocket("localhost", 4822),
+							config);
+					// Return a new tunnel which uses the connected socket
+					GuacamoleTunnel tunnel = new SimpleGuacamoleTunnel(socket);
+
+					System.out.println("Uzak Erişim Görevi Çalıştırıldı. Host:" + HOST + " Protokol: " + PROTOCOL
+							+ " User:" + USERNAME);
+
+					operationLogService.saveOperationLog(OperationType.EXECUTE_TASK,
+							"Uzak Erişim Görevi Çalıştırıldı. Host:" + HOST + " Protokol: " + PROTOCOL + " User:"
+									+ USERNAME,
+							null);
+
+					return tunnel;
+
+				} catch (Exception e) {
+					logger.error(" Error occured when cretaing remote tunnel. Error:" + e.getMessage());
+					e.printStackTrace();
+					return null;
+				}
+			} else {
+				return null;
+			}
+
+		} else {
 			return null;
 		}
-    }
-    
-    @Override
-    @RequestMapping(path = "tunnel", method = { RequestMethod.POST, RequestMethod.GET })
-    protected void handleTunnelRequest(HttpServletRequest request,
-            HttpServletResponse response) throws ServletException {
-        super.handleTunnelRequest(request, response);
-    }
-    
-    
-    @RequestMapping(value = "/sendremote",method = {RequestMethod.POST})
-	public  ResponseEntity<String> getRemote(
-			@RequestParam(value="protocol") String protocol,
-			@RequestParam(value="host") String host, 
-			@RequestParam(value="port") String port,	
-			@RequestParam(value="username") String username,	
-			@RequestParam(value="password") String password ) {
-		
-    	LiderGuacamoleTunnelServlet.PROTOCOL=protocol;
-    	LiderGuacamoleTunnelServlet.HOST=host;
-		LiderGuacamoleTunnelServlet.PORT=port;
-		LiderGuacamoleTunnelServlet.USERNAME=username;
-		LiderGuacamoleTunnelServlet.PASSWORD=password;
-		return new ResponseEntity<String>("OK",HttpStatus.OK);
+
 	}
-    @RequestMapping(value = "/remote",method = {RequestMethod.GET,RequestMethod.POST})
-    public  String getRemote() {
-    	return "guac";
-    }
+
+	private boolean checkIpPortAvailable(String ip, String port) {
+
+		Socket socket = null;
+		InetSocketAddress address = new InetSocketAddress(ip, Integer.parseInt(port));
+		try {
+			socket = new Socket();
+			socket.connect(address, 1000);
+			socket.close();
+			return true;
+		} catch (Exception e) {
+			return false;
+		} finally {
+			if (socket != null) {
+				try {
+					socket.close();
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
+			}
+		}
+	}
+
+	@Override
+	@RequestMapping(path = "tunnel", method = { RequestMethod.POST, RequestMethod.GET })
+	protected void handleTunnelRequest(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException {
+		super.handleTunnelRequest(request, response);
+	}
+
+	@RequestMapping(value = "/sendremote", method = { RequestMethod.POST })
+	public ResponseEntity<String> getRemote(@RequestParam(value = "protocol") String protocol,
+			@RequestParam(value = "host") String host, @RequestParam(value = "port") String port,
+			@RequestParam(value = "username") String username, @RequestParam(value = "password") String password) {
+
+		LiderGuacamoleTunnelServlet.PROTOCOL = protocol;
+		LiderGuacamoleTunnelServlet.HOST = host;
+		LiderGuacamoleTunnelServlet.PORT = port;
+		LiderGuacamoleTunnelServlet.USERNAME = username;
+		LiderGuacamoleTunnelServlet.PASSWORD = password;
+		return new ResponseEntity<String>("OK", HttpStatus.OK);
+	}
+
+	@RequestMapping(value = "/remote", method = { RequestMethod.GET, RequestMethod.POST })
+	public String getRemote() {
+		return "guac";
+	}
+	
+	@RequestMapping(value = "/checkhost", method = { RequestMethod.GET, RequestMethod.POST })
+	public ResponseEntity<String> getAvailableHostAddress(@RequestParam(value = "host") String hostStr,@RequestParam(value = "port") String port) {
+		String[] hostArr = null;
+		String host = null;
+		if (hostStr.contains(",")) {
+			hostArr = hostStr.replace("'", "").split(",");
+		} else {
+			hostArr = new String[1];
+			hostArr[0] = hostStr.replace("'", "");
+		}
+
+		for (String availablehost : hostArr) {
+			if (checkIpPortAvailable(availablehost.trim(), port)) {
+				host = availablehost;
+			}
+		}
+		
+		return new ResponseEntity<String>(host, HttpStatus.OK);
+	}
 }

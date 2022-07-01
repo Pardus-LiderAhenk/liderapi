@@ -33,19 +33,21 @@ public class NotifyService {
 		return notifyFile;
 	}
 
-	public NotifyTemplate del(NotifyTemplate file) {
+	public NotifyTemplate delete(NotifyTemplate file) {
 		NotifyTemplate existNotify = notifyRepository.findOne(file.getId());
-		notifyRepository.deleteById(file.getId());
+		existNotify.setDeleted(true);
+		NotifyTemplate notifyFile = notifyRepository.save(existNotify);
 		try {
 			operationLogService.saveOperationLog(OperationType.CREATE, "ETA Mesaj Tanımı silindi.", existNotify.getContents().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return file;
+		return notifyFile;
 	}
 
 	public NotifyTemplate update(NotifyTemplate file) {
 		file.setModifyDate(new Date());
+		file.setDeleted(false);
 		NotifyTemplate notifyFile = notifyRepository.save(file);
 		try {
 			operationLogService.saveOperationLog(OperationType.CREATE, "ETA Mesaj Tanımı güncellendi.", file.getContents().getBytes());

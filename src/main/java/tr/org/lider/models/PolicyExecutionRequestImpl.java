@@ -1,5 +1,6 @@
 package tr.org.lider.models;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -8,9 +9,9 @@ import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LdapEntry;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PolicyExecutionRequestImpl {
+public class PolicyExecutionRequestImpl implements Serializable {
 
-	private static final long serialVersionUID = -4023348875434687232L;
+	private static final long serialVersionUID = -6146397806169142559L;
 
 	private Long id;
 

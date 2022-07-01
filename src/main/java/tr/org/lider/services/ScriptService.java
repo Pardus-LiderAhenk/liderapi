@@ -2,6 +2,7 @@ package tr.org.lider.services;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -30,43 +31,50 @@ public class ScriptService {
 			String label = "Dosya Oluştur";
 			String contents = "#!/bin/bash\n" + 
 					"touch /tmp/test.txt";
-			scriptRepository.save(new ScriptTemplate(scriptType, label, contents, new Date(), null));
+			scriptRepository.save(new ScriptTemplate(scriptType, label, contents, new Date(), null, false));
 		}
 	}
 
-	public List<ScriptTemplate> list(){
-		return scriptRepository.findAll();
-	}
-
-	public ScriptTemplate add(ScriptTemplate file) {
-		ScriptTemplate scriptFile = scriptRepository.save(file);
-		try {
-			operationLogService.saveOperationLog(OperationType.CREATE, "Betik Tanımı oluşturuldu.", file.getContents().getBytes());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return scriptFile;
-	}
-
-	public ScriptTemplate del(ScriptTemplate file) {
-		ScriptTemplate existFile = scriptRepository.findOne(file.getId());
-		scriptRepository.deleteById(file.getId());
-		try {
-			operationLogService.saveOperationLog(OperationType.DELETE, "Betik Tanımı silindi.", existFile.getContents().getBytes());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return file;
+	public Optional<ScriptTemplate> find(Long id){
+		return scriptRepository.findById(id);
 	}
 	
-	public ScriptTemplate update(ScriptTemplate file) {
-		file.setModifyDate(new Date());
-		ScriptTemplate scriptFile = scriptRepository.save(file);
+	public List<ScriptTemplate> list(){
+		return scriptRepository.findByDeletedOrderByCreateDateDesc(false);
+	}
+
+	public ScriptTemplate add(ScriptTemplate script) {
+		script.setDeleted(false);
+		ScriptTemplate savedScript = scriptRepository.save(script);
 		try {
-			operationLogService.saveOperationLog(OperationType.UPDATE, "Betik Tanımı güncellendi.", file.getContents().getBytes());
+			operationLogService.saveOperationLog(OperationType.CREATE, "Betik Tanımı oluşturuldu.", script.getContents().getBytes());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return savedScript;
+	}
+
+	public ScriptTemplate delete(ScriptTemplate script) {
+		ScriptTemplate existScript = scriptRepository.findOne(script.getId());
+		existScript.setDeleted(true);
+		ScriptTemplate savedScript = scriptRepository.save(existScript);
+		try {
+			operationLogService.saveOperationLog(OperationType.DELETE, "Betik Tanımı silindi.", existScript.getContents().getBytes());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return savedScript;
+	}
+	
+	public ScriptTemplate update(ScriptTemplate script) {
+		script.setModifyDate(new Date());
+		script.setDeleted(false);
+		ScriptTemplate savedScript = scriptRepository.save(script);
+		try {
+			operationLogService.saveOperationLog(OperationType.UPDATE, "Betik Tanımı güncellendi.", script.getContents().getBytes());
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		return scriptFile;
+		return savedScript;
 	}
 }

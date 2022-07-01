@@ -92,9 +92,9 @@ public class PluginService {
 		pluginTaskList.add(new PluginTask("AD Oturum Açma Ayarları Uygula", "ad-login", "İstemcide AD ayarlarını uygular", "EXECUTE_AD_LOGIN", true, findPluginIdByName("ldap-login"), 0));
 		pluginTaskList.add(new PluginTask("Oturum Açma Ayarları İptal Et", "cancel-ldap-login", "İstemcinin oturum açma ayarlarını iptal eder", "EXECUTE_CANCEL_LDAP_LOGIN", true, findPluginIdByName("ldap-login"), 0));
 //		ldap plugin tasks
-		pluginTaskList.add(new PluginTask("İstemci Sil", "delete-agent", "İstemciyi siler", "DELETE_AGENT", true, findPluginIdByName("ldap"), 0));
-		pluginTaskList.add(new PluginTask("İstemci Taşı", "move-agent", "İstemciyi taşır", "MOVE_AGENT", true, findPluginIdByName("ldap"), 0));
-		pluginTaskList.add(new PluginTask("İstemci Adını Değiştir", "rename-agent", "İstemci adını değiştirir", "RENAME_AGENT", true, findPluginIdByName("ldap"), 0));
+		pluginTaskList.add(new PluginTask("İstemci Sil", "delete-agent", "İstemciyi siler", "DELETE_AGENT", false, findPluginIdByName("ldap"), 0));
+		pluginTaskList.add(new PluginTask("İstemci Taşı", "move-agent", "İstemciyi taşır", "MOVE_AGENT", false, findPluginIdByName("ldap"), 1));
+		pluginTaskList.add(new PluginTask("İstemci Adını Değiştir", "rename-agent", "İstemci adını değiştirir", "RENAME_ENTRY", false, findPluginIdByName("ldap"), 0));
 //		local-user plugin tasks
 		pluginTaskList.add(new PluginTask("Yerel Kullanıcıları Listele", "local-user", "İstemciye bulunan yerel kullanıcıları listeler", "GET_USERS", false, findPluginIdByName("local-user"), 1));
 		pluginTaskList.add(new PluginTask("Yerel Kullanıcı Ekle", "add-local-user", "İstemciye yerel kullanıcı ekler", "ADD_USER", false, findPluginIdByName("local-user"), 0));
@@ -127,7 +127,7 @@ public class PluginService {
 		pluginTaskList.add(new PluginTask("Paket Kaldır", "package-management", "İstemcide bulunan paket veya paketleri kaldırır", "PACKAGE_MANAGEMENT", false, findPluginIdByName("package-manager"), 1));
 		pluginTaskList.add(new PluginTask("Paket Kur veya Kaldır", "packages", "İstenilen paket deposundan istemciye paket kurar veya seçilen paket veya paketleri kaldırır", "PACKAGES", true, findPluginIdByName("package-manager"), 1));
 		pluginTaskList.add(new PluginTask("İsmcideki Paketleri Listele", "installed-packages", "İstemcide bulunan paketleri listeler", "INSTALLED_PACKAGES", false, findPluginIdByName("package-manager"), 0));
-//		pluginTaskList.add(new PluginTask("Paket Kontrol Et", "check-package", "Paket kontrol eder", "CHECK_PACKAGE", false, findPluginIdByName("package-manager"), 0));
+		pluginTaskList.add(new PluginTask("Paket Kontrol Et", "check-package", "Paket kontrol eder", "CHECK_PACKAGE", true, findPluginIdByName("package-manager"), 1));
 //		remote-access plugin task 
 		pluginTaskList.add(new PluginTask("Uzak Masaüstü", "remote-access", "İstemciye uzak masaüstü erişimi sağlar", "SETUP-VNC-SERVER", false, findPluginIdByName("remote-access"), 1));
 //		resource-usage plugin tasks
@@ -158,14 +158,14 @@ public class PluginService {
 		List<PluginProfile> pluginProfileList2 = new ArrayList<>();
 		
 //		String name(1), String page(2), String description(3), String command_id(4), PluginImpl plugin_id(5), Integer state(6)
-		pluginProfileList.add(new PluginProfile("Sistem Gözlemcisi Ayarı", "conky-profile", "Sistem gözlemcisi politika ayarı", "EXECUTE_CONKY", findPluginIdByName("conky"), 1));
-		pluginProfileList.add(new PluginProfile("Betik Ayarı", "execute-script-profile", "Betik politika ayarı", "EXECUTE_SCRIPT", findPluginIdByName("script"), 1));
-		pluginProfileList.add(new PluginProfile("Ağ Tarayıcı Ayarı", "browser-profile", "Ağ tarayıcı politika ayarı", "BROWSER", findPluginIdByName("browser"), 1));
-		pluginProfileList.add(new PluginProfile("Disk Kota Ayarı", "disk-quota-profile", "Disk kota politika ayarı", "GET_QUOTA", findPluginIdByName("disk-quota"), 1));
-		pluginProfileList.add(new PluginProfile("Oturum Yönetimi Ayarı", "login-manager-profile", "Oturum yönetimi politika ayarı", "MANAGE", findPluginIdByName("login-manager"), 1));
-		pluginProfileList.add(new PluginProfile("Rsyslog Ayarı", "rsyslog-profile", "Rsyslog politika ayarı", "CONFIGURE_RSYSLOG", findPluginIdByName("rsyslog"), 1));
-		pluginProfileList.add(new PluginProfile("USB Ayarı", "usb-profile", "USB politika ayarı", "MANAGE-USB", findPluginIdByName("usb"), 1));
-		pluginProfileList.add(new PluginProfile("Kullanıcı Ayrıcalıkları Ayarı", "user-privilege-profile", "Kullanıcı ayrıcalıkları ayarı", "USER-PRIVILEGE", findPluginIdByName("user-privilege"), 1));
+		pluginProfileList.add(new PluginProfile("Sistem Gözlemcisi Profili", "conky-profile", "Masaüstü mesaj yönetimi", "EXECUTE_CONKY", findPluginIdByName("conky"), 1));
+		pluginProfileList.add(new PluginProfile("Betik Profili", "execute-script-profile", "Betik çalıştır", "EXECUTE_SCRIPT", findPluginIdByName("script"), 1));
+		pluginProfileList.add(new PluginProfile("Ağ Tarayıcı Profili", "browser-profile", "Ağ tarayıcı yönetimi", "BROWSER", findPluginIdByName("browser"), 1));
+		pluginProfileList.add(new PluginProfile("Disk Kota Profili", "disk-quota-profile", "Kullanıcı disk kota yönetimi", "GET_QUOTA", findPluginIdByName("disk-quota"), 0));
+		pluginProfileList.add(new PluginProfile("Oturum Yönetimi Profili", "login-manager-profile", "Kullanıcı oturum yönetimi", "MANAGE", findPluginIdByName("login-manager"), 1));
+		pluginProfileList.add(new PluginProfile("Rsyslog Profili", "rsyslog-profile", "Rsyslog ile log yönetimi", "CONFIGURE_RSYSLOG", findPluginIdByName("rsyslog"), 1));
+		pluginProfileList.add(new PluginProfile("USB Profili", "usb-profile", "I/O yönetimi", "MANAGE-USB", findPluginIdByName("usb"), 1));
+		pluginProfileList.add(new PluginProfile("Kullanıcı Ayrıcalıkları Profili", "user-privilege-profile", "Kullanıcı ayrıcalıkları yönetimi", "USER-PRIVILEGE", findPluginIdByName("user-privilege"), 0));
 		
 		for (int i = 0; i < pluginProfileList.size(); i++) {
 			if (findPluginProfileByPage(pluginProfileList.get(i).getPage()).isEmpty()) {

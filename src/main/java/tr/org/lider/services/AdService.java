@@ -102,8 +102,7 @@ public class AdService implements ILDAPService{
 		LdapConnectionConfig lconfig = new LdapConnectionConfig();
 		lconfig.setLdapHost(host);
 		lconfig.setLdapPort(Integer.parseInt(port));
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
+		if (AuthenticationService.isLogged()) {
 				lconfig.setName(userName);
 				lconfig.setCredentials(password);
 		}  else {

@@ -13,7 +13,9 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -27,13 +29,11 @@ import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.models.PolicyResponse;
+import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.PolicyService;
-import tr.org.lider.utils.IRestResponse;
-import tr.org.lider.utils.ResponseFactoryService;
-import tr.org.lider.utils.RestResponseStatus;
 
 /**
  * 
@@ -55,13 +55,13 @@ public class AdController {
 	private ConfigurationService configurationService;
 	
 	@Autowired
-	private ResponseFactoryService responseFactoryService;
-	
-	@Autowired
 	private OperationLogService operationLogService; 
 	
 	@Autowired
 	private PolicyService policyService; 
+	
+	@Autowired
+	private CustomPasswordEncoder customPasswordEncoder;
 	
 	@RequestMapping(value = "/getDomainEntry")
 	public List<LdapEntry> getDomainEntry(HttpServletRequest request) {
@@ -84,7 +84,7 @@ public class AdController {
 	
 	@RequestMapping(value = "/getChildEntriesOu")
 	public List<LdapEntry> getChildEntriesOu(HttpServletRequest request, LdapEntry selectedEntry) {
-		logger.info("Getting AD child OU entries for dn = "+ selectedEntry.getDistinguishedName());
+		logger.info("Getting AD child OU entries for dn = "+ selectedEntry.getUid());
 		List<LdapEntry> oneLevelSubList=null;
 		try {
 			String filter="(|"
@@ -97,7 +97,7 @@ public class AdController {
 					+")";
 			
 			oneLevelSubList= new ArrayList<>();
-			oneLevelSubList = service.findSubEntries(selectedEntry.getDistinguishedName(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
+			oneLevelSubList = service.findSubEntries(selectedEntry.getUid(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
@@ -125,7 +125,7 @@ public class AdController {
 		return oneLevelSubList;
 	}
 	@RequestMapping(value = "/addUser2AD")
-	public IRestResponse addUser2AD(HttpServletRequest request, LdapEntry selectedEntry) {
+	public ResponseEntity<?> addUser2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		 logger.info("Adding user to AD. User info : "+ selectedEntry.getDistinguishedName());
 		 
 		 Map<String, String[]> attributes = new HashMap<String, String[]>();
@@ -153,8 +153,6 @@ public class AdController {
 				e1.printStackTrace();
 		}
 
-		 //mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, new BasicAttribute("unicodePwd", newUnicodePassword));
-		 
 		// some useful constants from lmaccess.h
 		 int UF_ACCOUNTENABLE = 0x0001;   
 		 int UF_ACCOUNTDISABLE = 0x0002;
@@ -164,7 +162,6 @@ public class AdController {
 	     int UF_DONT_EXPIRE_PASSWD = 0x10000;
 	     int UF_PASSWORD_EXPIRED = 0x800000;
 	        
-//	     String uacStr=   Integer.toString(UF_NORMAL_ACCOUNT + UF_PASSWD_NOTREQD + UF_DONT_EXPIRE_PASSWD + UF_ACCOUNTENABLE);
 	     String uacStr=   Integer.toString(UF_NORMAL_ACCOUNT + UF_PASSWD_NOTREQD + UF_PASSWORD_EXPIRED + UF_ACCOUNTENABLE);
 	     attributes.put("userAccountControl", new String[] {uacStr});
 	     attributes.put("pwdLastSet", new String[] {"0"});
@@ -172,43 +169,41 @@ public class AdController {
 		 try {
 			String rdn="CN="+selectedEntry.getCn()+","+selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
-			
+			selectedEntry = service.getEntryDetail(rdn);
 			operationLogService.saveOperationLog(OperationType.CREATE,"Dizin yapısına kullanıcı eklendi.Kullanıcı: "+rdn,null);
-			return responseFactoryService.createResponse(RestResponseStatus.OK,"Kullanıcı Başarı ile oluşturuldu.");
-			
-//			service.updateEntryAddAtribute(rdn, "pwdLastSet", "0");
+//			return responseFactoryService.createResponse(RestResponseStatus.OK,"Kullanıcı Başarı ile oluşturuldu.");
+			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
 			e.printStackTrace();
 			String message=e.getLocalizedMessage();
-			if(message!=null && message.contains("CONSTRAINT_ATT_TYPE")) {
-			return 	responseFactoryService.createResponse(RestResponseStatus.WARNING,"Aynı kullanıcı giriş ismine sahip kullanıcı bulunmaktadır.");
+			if(message!=null && message.contains("ENTRY_EXISTS")) {
+//			return 	responseFactoryService.createResponse(RestResponseStatus.WARNING,"Aynı kullanıcı giriş ismine sahip kullanıcı bulunmaktadır.");
+				return new ResponseEntity<>(null, HttpStatus.ALREADY_REPORTED);
 			}
 		}
 		return null;
 	}
 	
 	@RequestMapping(value = "/addOu2AD")
-	public Boolean addOu2AD(HttpServletRequest request, LdapEntry selectedEntry) {
+	public LdapEntry addOu2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding OU to AD. Ou info {} {}", selectedEntry.getDistinguishedName(),selectedEntry.getOu());
-		
 		Map<String, String[]> attributes = new HashMap<String, String[]>();
-		
 		attributes.put("objectClass", new String[] {"top","organizationalUnit"});
 		attributes.put("ou", new String[] {selectedEntry.getOu()});
-	
 		try {
-			String rdn="OU="+selectedEntry.getOu()+","+selectedEntry.getParentName();
+			String rdn = "OU="+selectedEntry.getOu()+","+selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
-			
+			selectedEntry = service.getEntryDetail(rdn);
 			operationLogService.saveOperationLog(OperationType.CREATE,"Dizin yapısına organizasyon birimi eklendi. Ou: "+rdn,null);
+			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return null;
 	}
 	
 	@RequestMapping(value = "/addGroup2AD")
-	public Boolean addGroup2AD(HttpServletRequest request, LdapEntry selectedEntry) {
+	public LdapEntry addGroup2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding Group to AD. Group info {} {}", selectedEntry.getDistinguishedName(),selectedEntry.getCn());
 		
 		Map<String, String[]> attributes = new HashMap<String, String[]>();
@@ -220,24 +215,28 @@ public class AdController {
 		try {
 			String rdn="CN="+selectedEntry.getCn()+","+selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
+			selectedEntry = service.getEntryDetail(rdn);
 			operationLogService.saveOperationLog(OperationType.CREATE,"Dizin yapısına grup eklendi. Grup: "+rdn,null);
+			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return null;
 	}
 	
 	@RequestMapping(value = "/addMember2ADGroup")
-	public Boolean addMember2ADGroup(HttpServletRequest request, LdapEntry selectedEntry) {
+	public LdapEntry addMember2ADGroup(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding {} to group. Group info {} ", selectedEntry.getDistinguishedName(),selectedEntry.getParentName());
 		
 		try {
 			service.updateEntryAddAtribute(selectedEntry.getParentName(), "member", selectedEntry.getDistinguishedName());
 			operationLogService.saveOperationLog(OperationType.CREATE,"Gruba üye eklendi. Üye: "+selectedEntry.getDistinguishedName(),null);
+			selectedEntry = service.getEntryDetail(selectedEntry.getParentName());
+			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
-		return true;
+		return null;
 	}
 	
 	@RequestMapping(value = "/searchEntryUser")
@@ -367,7 +366,7 @@ public class AdController {
 							, "(uid="+sAMAccountName+")", new String[] { "*" }, SearchScope.SUBTREE);
 					
 					if(adUserListForCheck!=null && adUserListForCheck.size()==0) {
-						String dn=addUserToLDAP(globalUserOu, adUser, sAMAccountName, selectedLdapDn.getUserPassword());
+						String dn=addUserToLDAP(globalUserOu, adUser, sAMAccountName, customPasswordEncoder.encode(selectedLdapDn.getUserPassword()));
 						
 						ldapService.updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_USER");
 						ldapService.updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_ADMIN");
@@ -497,9 +496,11 @@ public class AdController {
 			attributes.put("telephoneNumber", new String[] { adUser.get("telephoneNumber") });
 		
 		String rdn="uid="+sAMAccountName+","+destinationDistinguishedName;
-		
-		ldapService.addEntry(rdn, attributes);
-		
+		try {
+			ldapService.addEntry(rdn, attributes);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 		return rdn;
 	}
 
@@ -642,6 +643,49 @@ public class AdController {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	@RequestMapping(value = "/getChildUser")
+	public List<LdapEntry>  getChildUSer(HttpServletRequest request,
+			@RequestParam(value="searchDn", required=true) String searchDn,
+			@RequestParam(value="key", required=true) String key, 
+			@RequestParam(value="value", required=true) String value) {
+		List<LdapEntry> results=null;
+		
+		logger.info("Search for key {} value {}  only users ",key, value);
+		try {
+			if(searchDn.equals("")) {
+				searchDn=service.getADDomainName();
+			}
+			List<LdapSearchFilterAttribute> filterAttributes = new ArrayList<LdapSearchFilterAttribute>();
+			filterAttributes.add(new LdapSearchFilterAttribute(key, value, SearchFilterEnum.EQ));
+			filterAttributes.add(new LdapSearchFilterAttribute("objectclass", "person", SearchFilterEnum.EQ)); 
+			results = service.search(searchDn,filterAttributes, new String[] {"*"});
+		} catch (LdapException e) {
+			e.printStackTrace();
+		}
+		return results;
+	}
+	
+	@RequestMapping(value = "/getChildGroup")
+	public List<LdapEntry>  getChildGroup(HttpServletRequest request,
+			@RequestParam(value="searchDn", required=true) String searchDn,
+			@RequestParam(value="key", required=true) String key, 
+			@RequestParam(value="value", required=true) String value) {
+		List<LdapEntry> results=null;
+		
+		logger.info("Search for key {} value {}  only users ",key, value);
+		try {
+			if(searchDn.equals("")) {
+				searchDn=service.getADDomainName();
+			}
+			List<LdapSearchFilterAttribute> filterAttributes = new ArrayList<LdapSearchFilterAttribute>();
+			filterAttributes.add(new LdapSearchFilterAttribute(key, value, SearchFilterEnum.EQ));
+			results = service.search(searchDn,filterAttributes, new String[] {"*"});
+		} catch (LdapException e) {
+			e.printStackTrace();
+		}
+		return results;
 	}
 
 	

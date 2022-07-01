@@ -71,7 +71,7 @@ public class ExecutedTaskCriteriaBuilder {
 
 			//for count 
 			Join<CommandImpl, TaskImpl> taskJoinCount = fromCount.join("task");
-			Predicate taskJoinPredicateCount = criteriaBuilder.equal(taskJoinCount.get("commandClsId").as(String.class), taskCommand.get() );
+			Predicate taskJoinPredicateCount = criteriaBuilderCount.equal(taskJoinCount.get("commandClsId").as(String.class), taskCommand.get() );
 			predicatesCount.add(taskJoinPredicateCount);
 		}
 		

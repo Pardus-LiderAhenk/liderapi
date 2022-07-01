@@ -37,7 +37,7 @@ public class ScriptTemplate implements Serializable {
 	@Column(name = "SCRIPT_TYPE", length = 1, nullable = false)
 	private Integer scriptType;
 
-	@Column(name = "LABEL", nullable = false, unique = true, length = 255)
+	@Column(name = "LABEL", nullable = false, length = 255)
 	private String label;
 
 	@Lob
@@ -54,16 +54,20 @@ public class ScriptTemplate implements Serializable {
 	@Column(name = "MODIFY_DATE")
 	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone="Europe/Istanbul")
 	private Date modifyDate;
+	
+	@Column(name = "DELETED")
+	private boolean deleted;
 
 	public ScriptTemplate() {
 	}
 
-	public ScriptTemplate(ScriptType scriptType, String label, String contents, Date createDate, Date modifyDate) {
+	public ScriptTemplate(ScriptType scriptType, String label, String contents, Date createDate, Date modifyDate, Boolean deleted) {
 		setScriptType(scriptType);
 		this.label = label;
 		this.contents = contents;
 		this.createDate = createDate;
 		this.modifyDate = modifyDate;
+		this.deleted = deleted;
 	}
 
 	public Long getId() {
@@ -116,6 +120,14 @@ public class ScriptTemplate implements Serializable {
 
 	public void setModifyDate(Date modifyDate) {
 		this.modifyDate = modifyDate;
+	}
+	
+	public boolean getDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(Boolean deleted) {
+		this.deleted = deleted;
 	}
 
 }

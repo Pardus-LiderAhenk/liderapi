@@ -6,6 +6,7 @@ package tr.org.lider.security;
  * @author <a href="mailto:hasan.kara@pardus.org.tr">Hasan Kara</a>
  * 
  */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +17,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @JsonIgnoreProperties({ "password"})
 public class User implements Serializable, UserDetails {
 
@@ -23,6 +25,7 @@ public class User implements Serializable, UserDetails {
 
 	private String username;
 	private String password;
+	private String passwordHashed;
 	private String name;
 	private String surname;
 	private String dn;
@@ -83,6 +86,14 @@ public class User implements Serializable, UserDetails {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getPasswordHashed() {
+		return passwordHashed;
+	}
+
+	public void setPasswordHashed(String passwordHashed) {
+		this.passwordHashed = passwordHashed;
 	}
 
 	@Override

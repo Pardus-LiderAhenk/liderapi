@@ -38,6 +38,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -49,6 +50,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Entity
 @Table(name = "c_task")
 public class TaskImpl implements Serializable {
+
+	private static final long serialVersionUID = 2088263110201481196L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -77,10 +80,12 @@ public class TaskImpl implements Serializable {
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "create_date", nullable = false)
+	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone="Europe/Istanbul")
 	private Date createDate;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "modify_date")
+	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone="Europe/Istanbul")
 	private Date modifyDate;
 
 	

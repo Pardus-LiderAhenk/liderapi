@@ -17,8 +17,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import tr.org.lider.entities.ConfigImpl;
 import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.messaging.enums.Protocol;
+import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.models.ConfigParams;
+import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.repositories.ConfigRepository;
 
 /**
@@ -60,6 +62,7 @@ public class ConfigurationService {
 				ConfigImpl updatedConfigImpl = configRepository.save(configImpl.get());
 				configParams = mapper.readValue(updatedConfigImpl.getValue(), ConfigParams.class);
 				configParams.setAllowVNCConnectionWithoutPermission(getAllowVNCConnectionWithoutPermission());
+				configParams.setAllowDynamicDNSUpdate(getAllowDynamicDNSUpdate());
 				return configParams;
 			} catch (JsonProcessingException e) {
 				logger.error("Error occured while updating configuration parameters.");
@@ -467,6 +470,13 @@ public class ConfigurationService {
 		else
 			return getConfigParams().getDomainType();
 	}
+	
+	public SudoRoleType getSudoRoleType() {
+		if(getConfigParams().getSudoRoleType() == null)
+			return SudoRoleType.LDAP;
+		else
+			return getConfigParams().getSudoRoleType();
+	}
 
 	public String getAhenkRepoAddress() {
 		return getConfigParams().getAhenkRepoAddress();
@@ -482,6 +492,25 @@ public class ConfigurationService {
 			return Boolean.parseBoolean(allowVNCWithoutPermissionStr);
 		}
 		return false;
+	}
+	
+	public Boolean getAllowDynamicDNSUpdate() {
+		String allowDynamicDNSUpdateStr = env.getProperty("dynamic.dns.update");
+		if( allowDynamicDNSUpdateStr != null && !allowDynamicDNSUpdateStr.isEmpty()) {
+			return Boolean.parseBoolean(allowDynamicDNSUpdateStr);
+		}
+		return false;
+	}
+	
+	public RegistrationTemplateType getRegistrationTemplateType() {
+		try {
+			if(getConfigParams().getSelectedRegistrationType() == null)
+				return RegistrationTemplateType.DEFAULT;
+			else
+				return getConfigParams().getSelectedRegistrationType();
+		} catch (Exception e) {
+			return RegistrationTemplateType.DEFAULT;
+		}
 	}
 	
 	public String getPardusRepoAddress() {

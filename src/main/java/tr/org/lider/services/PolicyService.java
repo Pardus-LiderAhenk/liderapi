@@ -110,6 +110,12 @@ public class PolicyService {
 		Boolean deleted = false;
 		return policyRepository.findAllByDeleted(deleted);
 	}
+	
+	public List<PolicyImpl> activePolicies( ){
+		Boolean active = true;
+		Boolean deleted = false;
+		return policyRepository.findAllByActiveAndDeleted(active, deleted);
+	}
 
 	public PolicyImpl add(PolicyImpl policy) {
 		policy.setCommandOwnerUid(null);
@@ -120,7 +126,7 @@ public class PolicyService {
 		return policyRepository.save(existPolicy);
 	}
 
-	public PolicyImpl del(PolicyImpl policy) {
+	public PolicyImpl delete(PolicyImpl policy) {
 		PolicyImpl existPolicy = policyRepository.findOne(policy.getId());
 		existPolicy.setDeleted(true);
 		existPolicy.setModifyDate(new Date());
@@ -132,13 +138,14 @@ public class PolicyService {
 	public PolicyImpl update(PolicyImpl policy) {
 		PolicyImpl existPolicy = policyRepository.findOne(policy.getId());
 		existPolicy.setLabel(policy.getLabel());
+		existPolicy.setActive(policy.isActive());
 		existPolicy.setDescription(policy.getDescription());
 		existPolicy.setProfiles(policy.getProfiles());
 		String oldVersion = existPolicy.getPolicyVersion().split("-")[1];
 		Integer newVersion = new Integer(oldVersion) + 1;
 		existPolicy.setPolicyVersion(policy.getId() + "-" + newVersion);
 		existPolicy.setModifyDate(new Date());
-		String logMessage = "[ "+ existPolicy.getLabel() + " ] politikası günllendi.";
+		String logMessage = "[ "+ existPolicy.getLabel() + " ] politikası güncellendi.";
 		operationLogService.saveOperationLog(OperationType.UPDATE, logMessage, existPolicy.getLabel().getBytes(), null, existPolicy.getId(), null);
 		return policyRepository.save(existPolicy);
 	}
@@ -195,13 +202,9 @@ public class PolicyService {
 	}
 
 	private String findCommandOwnerJid() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			if ( principal instanceof UserDetails) {
-				logger.info(" task owner jid : " + AuthenticationService.getUser().getName());
-				return AuthenticationService.getUser().getName();
-			} 
+		if (AuthenticationService.isLogged()) {
+			logger.info(" task owner jid : " + AuthenticationService.getUser().getName());
+			return AuthenticationService.getUser().getName();
 		}
 		return null;
 	}

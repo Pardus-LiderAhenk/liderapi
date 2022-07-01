@@ -281,15 +281,18 @@ public class ComputerController {
 		return results ;
 	}
 
-	@RequestMapping(value = "/getAgentList")
+	@RequestMapping(value = "/getAgentListSize")
 	public LdapEntry getAgentList(@RequestParam(value="searchDn") String searchDn) {
 		LdapEntry returnLdapEntry=null;
 		List<LdapEntry> retList = new ArrayList<LdapEntry>();
 		List<LdapEntry> onlineRetList = new ArrayList<LdapEntry>();
 		try {
-
+			
+			if (searchDn.equals("agents")) {
+				searchDn = configurationService.getAgentLdapBaseDn();
+			}
 			returnLdapEntry=new LdapEntry();
-			retList=ldapService.findSubEntries(searchDn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
+			retList = ldapService.findSubEntries(searchDn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
 
 			for (LdapEntry ldapEntry : retList) {
 				if(ldapEntry.isOnline()) {
@@ -297,7 +300,7 @@ public class ComputerController {
 				}
 			}
 
-			returnLdapEntry.setOnlineAgentList(onlineRetList);
+			returnLdapEntry.setOnlineAgentListSize(onlineRetList.size());
 			returnLdapEntry.setAgentListSize(retList.size());
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -566,10 +569,9 @@ public class ComputerController {
 			@RequestParam(value="agentVersion", required=true) String agentVersion,
 			@RequestParam(value="macAddresses", required=true) String macAddresses,
 			@RequestParam(value="phase", required=true) String phase,
-			@RequestParam(value="processor", required=true) String processor,
-			@RequestParam(value="agentUid", required=true) String agentUid){
+			@RequestParam(value="agentUid", required=true) String agentUid,
+			@RequestParam(value="osVersion", required=true) String osVersion){
 
-		System.out.println(ipAddresses);
 		List<AgentImpl> agents =  agentService.findAgentByJid(agentUid);
 
 		if (agents != null && agents.size() > 0) {
@@ -578,7 +580,6 @@ public class ComputerController {
 				if (prop.getPropertyName().equals("hardware.network.ipAddresses")
 						&& prop.getPropertyValue() != ipAddresses
 						&& !agent.getIpAddresses().equals(ipAddresses)) {
-					logger.info("IP Addresses of Agent with ID {} has been changed. Updating in DB", agent.getId());
 					prop.setPropertyValue(ipAddresses);
 					agent.setIpAddresses(ipAddresses);
 				} else if (hostname != null && !agent.getHostname().equals(hostname)) {
@@ -594,9 +595,11 @@ public class ComputerController {
 				} else if (phase != null && phase != "" && prop.getPropertyName().equals("phase")
 						&& prop.getPropertyValue() != phase) {
 					prop.setPropertyValue(phase);
-				} else if (processor != null && processor != "" && prop.getPropertyName().equals("processor")
-						&& prop.getPropertyValue() != processor) {
-					prop.setPropertyValue(processor);
+				}
+				else if (osVersion != null 
+						&& prop.getPropertyName().equals("os.version") 
+						&& !prop.getPropertyValue().equals(osVersion)) {
+					prop.setPropertyValue(osVersion);
 				}
 			}
 
@@ -627,5 +630,27 @@ public class ComputerController {
 			}
 		}
 		return isExist;
+	}
+	
+	@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
+	public LdapEntry addOu(LdapEntry selectedEntry) {
+		try {
+			Map<String, String[]> attributes = new HashMap<String,String[]>();
+			attributes.put("objectClass", new String[] {"organizationalUnit", "top", "pardusLider"} );
+			attributes.put("ou", new String[] { selectedEntry.getOu() });
+
+			String dn="ou="+selectedEntry.getOu()+","+selectedEntry.getParentName();
+			
+			ldapService.addEntry(dn, attributes);
+			logger.info("OU created successfully RDN ="+dn);
+			
+			//get full of ou details after creation
+			selectedEntry = ldapService.getEntryDetail(dn);
+			
+			return selectedEntry;
+		} catch (LdapException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

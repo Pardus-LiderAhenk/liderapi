@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.InvalidNameException;
+import javax.naming.ldap.LdapName;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
@@ -22,6 +24,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -71,7 +77,7 @@ public class SudoGroupsController {
 	}
 	
 	@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
-	public LdapEntry addOu(LdapEntry selectedEntry) {
+	public LdapEntry addOu(@RequestBody LdapEntry selectedEntry) {
 		try {
 			Map<String, String[]> attributes = new HashMap<String,String[]>();
 			attributes.put("objectClass", new String[] {"organizationalUnit", "top", "pardusLider"} );
@@ -124,10 +130,21 @@ public class SudoGroupsController {
 	
 	
 	@RequestMapping(method=RequestMethod.POST ,value = "/rename/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Boolean renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
+	public LdapEntry renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
 			@RequestParam(value="newName", required=true) String newName) {
 		try {
-			return ldapService.renameEntry(oldDN, newName);
+			ldapService.renameEntry(oldDN, newName);
+			String newEntryDN = newName + ",";
+			LdapName dn = new LdapName(oldDN);
+			for (int i = dn.size()-2; 0 <= i; i--) {
+				newEntryDN += dn.get(i);
+				if(i>0) {
+					newEntryDN += ",";
+				}
+			}
+			LdapEntry selectedEntry = ldapService.getEntryDetail(newEntryDN);
+			
+			return selectedEntry;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -177,49 +194,70 @@ public class SudoGroupsController {
 	//add new group and add selected attributes
 	@RequestMapping(method=RequestMethod.POST ,value = "/createSudoGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public LdapEntry createSudoGroup(@RequestParam(value = "groupName", required=true) String groupName,
-			@RequestParam(value = "selectedOUDN", required=true) String selectedOUDN,
-			@RequestParam(value = "sudoHostList[]", required=false)  String[] sudoHostList,
-			@RequestParam(value = "sudoCommandList[]", required=false)  String[] sudoCommandList,
-			@RequestParam(value = "sudoUserList[]", required=false)  String[] sudoUserList) {
+	public LdapEntry createSudoGroup(@RequestBody(required=false) String body) {
 		
-		String newGroupDN = "";
-		//to return newly added entry with its details
-		LdapEntry entry;
-		Map<String, String[]> attributes = new HashMap<String,String[]>();
-		attributes.put("objectClass", new String[] {"top", "sudoRole"} );
 		try {
-			//add sudoUser attributes 
-			if(sudoUserList != null) {
-				attributes.put("sudoUser", sudoUserList );
+			Map<String, Object> readValue = new ObjectMapper().readValue(body, Map.class);
+			
+			String groupName = (String) readValue.get("groupName");
+			String selectedOUDN = (String) readValue.get("selectedOUDN");
+			List<String> sudoCommandList = (ArrayList<String>) readValue.get("sudoCommandList");
+			List<String> sudoUserList = (ArrayList<String>) readValue.get("sudoUserList");
+			List<String> sudoHostList = (ArrayList<String>) readValue.get("sudoHostList");
+			
+			String newGroupDN = "";
+			//to return newly added entry with its details
+			LdapEntry entry=null;
+			Map<String, String[]> attributes = new HashMap<String,String[]>();
+			attributes.put("objectClass", new String[] {"top", "sudoRole"} );
+			try {
+				//add sudoUser attributes 
+				if(sudoUserList != null) {
+					attributes.put("sudoUser", sudoUserList.toArray(new String[sudoUserList.size()]));
+				}
+				//add sudoHost attributes 
+				if(sudoHostList != null) {
+					attributes.put("sudoHost", sudoHostList.toArray(new String[sudoHostList.size()]));
+				}
+				//add sudoCommand attributes 
+				if(sudoCommandList != null) {
+					attributes.put("sudoCommand", sudoCommandList.toArray(new String[sudoCommandList.size()]));
+				}
+				newGroupDN = "cn=" +  groupName +","+ selectedOUDN;
+				System.out.println(attributes);
+				ldapService.addEntry(newGroupDN , attributes);
+				entry = ldapService.getEntryDetail(newGroupDN);
+				return entry;
+			} catch (LdapException e) {
+				logger.error("Error occured while adding new group.");
+				return null;
 			}
-			//add sudoHost attributes 
-			if(sudoHostList != null) {
-				attributes.put("sudoHost", sudoHostList );
-			}
-			//add sudoCommand attributes 
-			if(sudoCommandList != null) {
-				attributes.put("sudoCommand", sudoCommandList );
-			}
-			newGroupDN = "cn=" +  groupName +","+ selectedOUDN;
-			ldapService.addEntry(newGroupDN , attributes);
-			entry = ldapService.getEntryDetail(newGroupDN);
-		} catch (LdapException e) {
-			logger.error("Error occured while adding new group.");
-			return null;
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
 		}
-		return entry;
+		
+		
+
+		return null;
+		
 	}
 	
 	//edit sudo group
 	@RequestMapping(method=RequestMethod.POST ,value = "/editSudoGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public Boolean editSudoGroup(@RequestParam(value = "newName", required=true) String newName,
-			@RequestParam(value = "selectedDN", required=true) String selectedDN,
-			@RequestParam(value = "sudoHostList[]", required=false)  String[] sudoHostList,
-			@RequestParam(value = "sudoCommandList[]", required=false)  String[] sudoCommandList,
-			@RequestParam(value = "sudoUserList[]", required=false)  String[] sudoUserList) {
+	public LdapEntry editSudoGroup(@RequestBody(required=false) String body) {
 		try {
+			Map<String, Object> readValue = new ObjectMapper().readValue(body, Map.class);
+			
+			String newName = (String) readValue.get("newName");
+			String selectedDN = (String) readValue.get("selectedDN");
+			List<String> sudoCommandList = (ArrayList<String>) readValue.get("sudoCommandList");
+			List<String> sudoUserList = (ArrayList<String>) readValue.get("sudoUserList");
+			List<String> sudoHostList = (ArrayList<String>) readValue.get("sudoHostList");
+			
+			LdapEntry entry=null;
 			ldapService.updateEntryRemoveAttribute(selectedDN, "sudoCommand");
 			ldapService.updateEntryRemoveAttribute(selectedDN, "sudoHost");
 			ldapService.updateEntryRemoveAttribute(selectedDN, "sudoUser");
@@ -239,10 +277,32 @@ public class SudoGroupsController {
 				}
 			}
 			//if name has been edited edit name
-			return ldapService.renameEntry(selectedDN, newName);
+			ldapService.renameEntry(selectedDN, newName);
+			String newEntryDN = newName + ",";
+			LdapName dn = new LdapName(selectedDN);
+			for (int i = dn.size()-2; 0 <= i; i--) {
+				newEntryDN += dn.get(i);
+				if(i>0) {
+					newEntryDN += ",";
+				}
+			}
+			entry = ldapService.getEntryDetail(newEntryDN);
+			return entry;
 		} catch (LdapException e) {
 			e.printStackTrace();
-			return false;
+			return null;
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (InvalidNameException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
 		}
 	}
 	

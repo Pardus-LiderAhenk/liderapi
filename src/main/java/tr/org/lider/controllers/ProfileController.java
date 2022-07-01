@@ -60,10 +60,10 @@ public class ProfileController {
 	}
 
 	//	delete profile by id (deleted value is changed to true) Never truly delete, just mark as deleted!
-	@RequestMapping(method=RequestMethod.POST ,value = "/del", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ProfileImpl profileDel(@RequestBody ProfileImpl profile){
+	@RequestMapping(method=RequestMethod.POST ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ProfileImpl profileDelete(@RequestBody ProfileImpl profile){
 		try {
-			return profileService.del(profile);
+			return profileService.delete(profile);
 		} catch (DataAccessException e) {
 			logger.error("Error delete profile: " + e.getCause().getMessage());
 			return null;
@@ -80,4 +80,10 @@ public class ProfileController {
 			return null;
 		}
 	}
+	
+	//return profile detail by plugin name and by deleted is false
+	@RequestMapping(method=RequestMethod.POST ,value = "/allList", produces = MediaType.APPLICATION_JSON_VALUE)
+		public List<ProfileImpl> getAllProfiles() {
+			return profileService.list();
+		}
 }

@@ -7,5 +7,6 @@ import tr.org.lider.entities.ProfileImpl;
 public interface ProfileRepository extends BaseJpaRepository<ProfileImpl, Long>{
 	List<ProfileImpl> findByPluginId(Long plugin);
 	List<ProfileImpl> findByPluginIdAndDeleted(Long plugin_id, Boolean deleted);
+	List<ProfileImpl> findAllByDeleted(Boolean deleted);
 	
 }

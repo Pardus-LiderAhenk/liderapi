@@ -34,19 +34,19 @@ public class ScriptController {
 
 	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION" })
 	@RequestMapping(method=RequestMethod.POST ,value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ScriptTemplate scriptAdd(@RequestBody ScriptTemplate file){
-		return scriptService.add(file);
+	public ScriptTemplate scriptAdd(@RequestBody ScriptTemplate script){
+		return scriptService.add(script);
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION" })
-	@RequestMapping(method=RequestMethod.POST ,value = "/del", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ScriptTemplate scriptDel(@RequestBody ScriptTemplate file){
-		return scriptService.del(file);
+	@RequestMapping(method=RequestMethod.POST ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ScriptTemplate scriptDel(@RequestBody ScriptTemplate script){
+		return scriptService.delete(script);
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION" })
 	@RequestMapping(method=RequestMethod.POST ,value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ScriptTemplate scriptUpdate(@RequestBody ScriptTemplate file){
-		return scriptService.update(file);
+	public ScriptTemplate scriptUpdate(@RequestBody ScriptTemplate script){
+		return scriptService.update(script);
 	}
 }

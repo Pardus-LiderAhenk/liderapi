@@ -23,6 +23,8 @@ import tr.org.lider.ldap.LdapEntry;
 @Table(name = "c_plugin_task")
 public class PluginTask implements Serializable {
 
+	private static final long serialVersionUID = -8885880361026360284L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id", unique = true, nullable = false)

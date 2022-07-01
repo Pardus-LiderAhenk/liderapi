@@ -20,8 +20,6 @@
 package tr.org.lider.messaging.subscribers;
 
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -40,7 +38,6 @@ import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.repositories.CommandExecutionRepository;
 import tr.org.lider.repositories.CommandExecutionResultRepository;
-import tr.org.lider.services.ConfigurationService;
 
 /**
  * Default implementation for {@link IPolicyStatusSubscriber}. This class is
@@ -59,9 +56,6 @@ public class PolicyManagerImpl implements IPolicyStatusSubscriber {
 
 	@Autowired
 	private CommandExecutionResultRepository commandExecutionResultRepository;
-
-	@Autowired
-	private ConfigurationService configurationService;
 
 	@Autowired
 	private XMPPClientImpl messagingService;

@@ -42,7 +42,7 @@ public class NotifyController {
 	@Secured({"ROLE_ADMIN", "ROLE_ETA_MESSAGE_DEFINITION" })
 	@RequestMapping(method=RequestMethod.POST ,value = "/del", produces = MediaType.APPLICATION_JSON_VALUE)
 	public NotifyTemplate notifyDel(@RequestBody NotifyTemplate file){
-		return notifyService.del(file);
+		return notifyService.delete(file);
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_ETA_MESSAGE_DEFINITION" })

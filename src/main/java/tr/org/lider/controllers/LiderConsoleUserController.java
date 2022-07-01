@@ -1,21 +1,24 @@
 package tr.org.lider.controllers;
 
 import java.util.List;
+
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
+import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 
@@ -41,14 +44,20 @@ public class LiderConsoleUserController {
 	@Autowired
 	private OperationLogService operationLogService; 
 	
+	@Autowired
+	private CustomPasswordEncoder customPasswordEncoder;
+	
+	@Autowired
+	private CustomPasswordEncoder encoder;
 	
 //	LIDER_CONSOLE USER
 //	return lider console profile from ldap
 	@RequestMapping(method=RequestMethod.POST, value = "/profile")
 	@ResponseBody
-	public LdapEntry getLiderConsoleUser(@RequestParam(value="uid", required=true) String uid) {
+	public LdapEntry getLiderConsoleUser(Authentication authentication) {
 		String globalUserOu = configurationService.getUserLdapBaseDn();
 		LdapEntry liderConsoleUser = null;
+		String uid = authentication.getName();
 		try {
 			String filter="(&(uid="+ uid +"))";
 			List<LdapEntry> usersEntrylist = ldapService.findSubEntries(globalUserOu, filter,new String[] { "*" }, SearchScope.SUBTREE);
@@ -67,11 +76,11 @@ public class LiderConsoleUserController {
 	 */
 	@RequestMapping(method=RequestMethod.POST, value = "/updatePassword",produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public boolean updateLiderConsoleUserPassword(LdapEntry selectedEntry) {
+	public boolean updateLiderConsoleUserPassword(@RequestBody LdapEntry selectedEntry) {
 		try {
 		
 			if(!"".equals(selectedEntry.getUserPassword())){
-				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", selectedEntry.getUserPassword());
+				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", "{ARGON2}" + customPasswordEncoder.encode(selectedEntry.getUserPassword()));
 			}
 			operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD,"Lider Arayüz kullanıcı parolası güncellendi.",null);
 			return true;
@@ -84,7 +93,7 @@ public class LiderConsoleUserController {
 //	updated profile of lider console
 	@RequestMapping(method=RequestMethod.POST, value = "/updateProfile",produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public LdapEntry updateLiderConsoleUser(LdapEntry selectedEntry) {
+	public LdapEntry updateLiderConsoleUser(@RequestBody LdapEntry selectedEntry) {
 		try {
 			if(!"".equals(selectedEntry.getCn())){
 				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "cn", selectedEntry.getCn());
@@ -109,5 +118,31 @@ public class LiderConsoleUserController {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	@RequestMapping(method=RequestMethod.POST, value = "/matchesPassword",produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public boolean matchesLiderConsoleUserPassword(LdapEntry selectedEntry) {
+		LdapEntry ldapUserEntry= getUserFromLdap(selectedEntry.getUid());
+		if(!"".equals(selectedEntry.getUserPassword())){
+			return encoder.matches(selectedEntry.getUserPassword(), ldapUserEntry.getUserPassword());
+		} else {
+			return false;
+		}
+	}
+	
+	private LdapEntry getUserFromLdap(String userName) {
+		LdapEntry ldapEntry = null;
+		try {
+			String filter= "(&(objectClass=pardusAccount)(objectClass=pardusLider)(uid=$1))".replace("$1", userName);
+			List<LdapEntry> ldapEntries  = ldapService.findSubEntries(filter,
+					new String[] { "*" }, SearchScope.SUBTREE);
+			if(ldapEntries.size()>0) {
+				ldapEntry=ldapEntries.get(0);
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return ldapEntry;
 	}
 }

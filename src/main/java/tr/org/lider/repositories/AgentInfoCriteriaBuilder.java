@@ -35,84 +35,154 @@ import tr.org.lider.entities.AgentPropertyImpl;
 public class AgentInfoCriteriaBuilder {
 
 	@PersistenceContext
-	EntityManager entityManager;
-	
-	public Page<AgentImpl> filterAgents(int pageNumber, int pageSize, String status,
-			Optional<String> field, Optional<String> text,
-			Optional<Date> registrationStartDate, Optional<Date> registrationEndDate, List<String> listOfOnlineUsers) {
+	private EntityManager entityManager;
+
+
+	public Page<AgentImpl> filterAgents(
+			int pageNumber,
+			int pageSize,
+			Optional<Date> registrationStartDate,
+			Optional<Date> registrationEndDate,
+			Optional<String> status,
+			Optional<String> dn,
+			Optional<String> hostname,
+			Optional<String> macAddress,
+			Optional<String> ipAddress,
+			Optional<String> brand,
+			Optional<String> model,
+			Optional<String> processor,
+			Optional<String> osVersion,
+			Optional<String> agentVersion,
+			List<String> listOfOnlineUsers) {
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
 
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		//for filtered result count
-		CriteriaBuilder criteriaBuilderCount = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> criteriaCount = criteriaBuilderCount.createQuery(Long.class);
+		CriteriaBuilder cbCount = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaCount = cbCount.createQuery(Long.class);
 		Root<AgentImpl> fromCount = criteriaCount.from(AgentImpl.class);
-		criteriaCount.select(criteriaBuilderCount.count(fromCount));
+		criteriaCount.select(cbCount.count(fromCount));
 
-		CriteriaQuery<AgentImpl> criteriaQuery = criteriaBuilder.createQuery(AgentImpl.class);
+		CriteriaQuery<AgentImpl> criteriaQuery = cb.createQuery(AgentImpl.class);
 		Root<AgentImpl> from = criteriaQuery.from(AgentImpl.class);
 		CriteriaQuery<AgentImpl> select = criteriaQuery.select(from);
 
 		List<Predicate> predicates = new ArrayList<>();
 		//for filtered result count
 		List<Predicate> predicatesCount = new ArrayList<>();
-		if(field.isPresent() && text.isPresent()) {
-			if(field.get().equals("jid")) {
-				predicates.add(criteriaBuilder.like(from.get("jid").as(String.class), "%" + text.get() + "%"));
-				predicatesCount.add(criteriaBuilderCount.like(fromCount.get("jid").as(String.class), "%" + text.get() + "%"));
-			} else if(field.get().equals("hostname")) {
-				predicates.add(criteriaBuilder.like(from.get("hostname").as(String.class), "%" + text.get() + "%"));
-				predicatesCount.add(criteriaBuilderCount.like(fromCount.get("hostname").as(String.class), "%" + text.get() + "%"));
-			} else if(field.get().equals("ipAddresses")) {
-				predicates.add(criteriaBuilder.like(from.get("ipAddresses").as(String.class), "%" + text.get() + "%"));
-				predicatesCount.add(criteriaBuilderCount.like(fromCount.get("ipAddresses").as(String.class), "%" + text.get() + "%"));
-			} else if(field.get().equals("macAddresses")) {
-				predicates.add(criteriaBuilder.like(from.get("macAddresses").as(String.class), "%" + text.get() + "%"));
-				predicatesCount.add(criteriaBuilderCount.like(fromCount.get("macAddresses").as(String.class), "%" + text.get() + "%"));
-			} else if(field.get().equals("dn")) {
-				predicates.add(criteriaBuilder.like(from.get("dn").as(String.class), "%" + text.get() + "%"));
-				predicatesCount.add(criteriaBuilderCount.like(fromCount.get("dn").as(String.class), "%" + text.get() + "%"));
-			} else {
-				Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
 
-				Predicate namePredicate = criteriaBuilder.like(properties.get("propertyName").as(String.class), "%" + field.get() + "%");
-				Predicate valuePredicate = criteriaBuilder.like(properties.get("propertyValue").as(String.class), "%" + text.get() + "%");
-				predicates.add(criteriaBuilder.and(namePredicate, valuePredicate));
 
-				//for count 
-				Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
-				Predicate namePredicateCount = criteriaBuilderCount.like(propertiesCount.get("propertyName").as(String.class), "%" + field.get() + "%");
-				Predicate valuePredicateCount = criteriaBuilderCount.like(propertiesCount.get("propertyValue").as(String.class), "%" + text.get() + "%");
-				predicatesCount.add(criteriaBuilderCount.and(namePredicateCount, valuePredicateCount));
-			}
-		}
-
-		if(status.equals("online") ) {
-			predicates.add(criteriaBuilder.in(from.get("jid"))
-					.value(!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList(""))));
-			predicatesCount.add(criteriaBuilderCount.in(fromCount.get("jid"))
-					.value(!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList(""))));
-		} else if(status.equals("offline")) {
-			predicates.add(
-					criteriaBuilder.not(from.get("jid").in(
-							!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
-			predicatesCount.add(
-					criteriaBuilderCount.not(fromCount.get("jid").in(
-							!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
+		if(dn.isPresent() && !dn.get().equals("")) {
+			predicates.add(cb.like(from.get("dn").as(String.class), "%" + dn.get() + "%"));
+			predicatesCount.add(cbCount.like(fromCount.get("dn").as(String.class), "%" + dn.get() + "%"));
 		}
 
 		if (registrationStartDate.isPresent()) {
-			predicates.add(criteriaBuilder.greaterThanOrEqualTo(from.get("createDate"), registrationStartDate.get()));
-			predicatesCount.add(criteriaBuilderCount.greaterThanOrEqualTo(fromCount.get("createDate"), registrationStartDate.get()));
+			predicates.add(cb.greaterThanOrEqualTo(from.get("createDate"), registrationStartDate.get()));
+			predicatesCount.add(cbCount.greaterThanOrEqualTo(fromCount.get("createDate"), registrationStartDate.get()));
 		}
 		if (registrationEndDate.isPresent()) {
-			predicates.add(criteriaBuilder.lessThanOrEqualTo(from.get("createDate"), registrationEndDate.get()));
-			predicatesCount.add(criteriaBuilderCount.lessThanOrEqualTo(fromCount.get("createDate"), registrationEndDate.get()));
+			predicates.add(cb.lessThanOrEqualTo(from.get("createDate"), registrationEndDate.get()));
+			predicatesCount.add(cbCount.lessThanOrEqualTo(fromCount.get("createDate"), registrationEndDate.get()));
+		}
+
+		if(status.get().equals("ONLINE") ) {
+			predicates.add(cb.in(from.get("jid"))
+					.value(!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList(""))));
+			predicatesCount.add(cbCount.in(fromCount.get("jid"))
+					.value(!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList(""))));
+		} else if(status.get().equals("OFFLINE")) {
+			predicates.add(
+					cb.not(from.get("jid").in(
+							!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
+			predicatesCount.add(
+					cbCount.not(fromCount.get("jid").in(
+							!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
+		}
+
+		if(hostname.isPresent() && !hostname.get().equals("")) {
+			predicates.add(cb.like(from.get("hostname").as(String.class), "%" + hostname.get() + "%"));
+			predicatesCount.add(cbCount.like(fromCount.get("hostname").as(String.class), "%" + hostname.get() + "%") );
+		}
+		
+		if(macAddress.isPresent() && !macAddress.get().equals("")) {
+			predicates.add(cb.like(from.get("macAddresses").as(String.class), "%" + macAddress.get() + "%"));
+			predicatesCount.add(cbCount.like(fromCount.get("macAddresses").as(String.class), "%" + macAddress.get() + "%") );
+		}
+		
+		if(ipAddress.isPresent() && !ipAddress.get().equals("")) {
+			predicates.add(cb.like(from.get("ipAddresses").as(String.class), "%" + ipAddress.get() + "%"));
+			predicatesCount.add(cbCount.like(fromCount.get("ipAddresses").as(String.class), "%" + ipAddress.get() + "%") );
+		}
+		
+		if(brand.isPresent() && !brand.get().equals("")) {
+			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
+			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "hardware.baseboard.manufacturer");
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), brand.get());
+			predicates.add(cb.and(namePredicate, valuePredicate));
+
+			//for count 
+			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
+			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "hardware.baseboard.manufacturer");
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), brand.get());
+			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
+		}
+
+		if(model.isPresent() && !model.get().equals("")) {
+			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
+			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "hardware.baseboard.productName");
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), model.get());
+			predicates.add(cb.and(namePredicate, valuePredicate));
+
+			//for count 
+			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
+			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "hardware.baseboard.productName");
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), model.get());
+			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
+		}
+
+		if(processor.isPresent() && !processor.get().equals("")) {
+			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
+			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "processor");
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), processor.get());
+			predicates.add(cb.and(namePredicate, valuePredicate));
+
+			//for count 
+			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
+			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "processor");
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), processor.get());
+			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
+		}
+		
+		if(osVersion.isPresent() && !osVersion.get().equals("")) {
+			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
+			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "os.version");
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), osVersion.get());
+			predicates.add(cb.and(namePredicate, valuePredicate));
+
+			//for count 
+			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
+			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "os.version");
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), osVersion.get());
+			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
+		}
+		
+		if(agentVersion.isPresent() && !agentVersion.get().equals("")) {
+			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
+			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "agentVersion");
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), agentVersion.get());
+			predicates.add(cb.and(namePredicate, valuePredicate));
+
+			//for count 
+			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
+			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "agentVersion");
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), agentVersion.get());
+			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
 		}
 
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-		criteriaQuery.orderBy(criteriaBuilder.desc(from.get("createDate")));
-		Long count = count(criteriaBuilderCount, predicatesCount, criteriaCount);
+		criteriaQuery.orderBy(cb.desc(from.get("createDate")));
+		Long count = count(cbCount, predicatesCount, criteriaCount);
 
 		TypedQuery<AgentImpl> typedQuery = entityManager.createQuery(select);
 		typedQuery.setFirstResult((pageNumber - 1)*pageSize);
@@ -121,7 +191,7 @@ public class AgentInfoCriteriaBuilder {
 		} else {
 			typedQuery.setMaxResults(pageSize);
 		}
-		
+
 		Page<AgentImpl> agents = new PageImpl<AgentImpl>(typedQuery.getResultList(), pageable, count);
 
 		return agents;

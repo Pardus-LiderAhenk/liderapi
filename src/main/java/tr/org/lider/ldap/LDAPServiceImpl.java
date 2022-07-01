@@ -62,14 +62,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.security.User;
 import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.CommandService;
 import tr.org.lider.services.ConfigurationService;
@@ -194,12 +191,11 @@ public class LDAPServiceImpl implements ILDAPService {
 		LdapConnectionConfig lconfig = new LdapConnectionConfig();
 		lconfig.setLdapHost(configurationService.getLdapServer());
 		lconfig.setLdapPort(Integer.parseInt(configurationService.getLdapPort()));
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication != null && !(authentication instanceof AnonymousAuthenticationToken)) {
-			Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			if ( principal instanceof UserDetails) {
-				lconfig.setName(AuthenticationService.getDn());
-				lconfig.setCredentials(AuthenticationService.getPassword());
+		if (AuthenticationService.isLogged()) {
+			User user = AuthenticationService.getUser();
+			if ( user != null) {
+				lconfig.setName(user.getDn());
+				lconfig.setCredentials(user.getPassword());
 			} else {
 				lconfig.setName(configurationService.getLdapUsername());
 				lconfig.setCredentials(configurationService.getLdapPassword());
@@ -445,7 +441,7 @@ public class LDAPServiceImpl implements ILDAPService {
 	}
 
 	public void updateConsoleUserPassword(String entryDn, String attribute, String value) throws LdapException {
-		logger.info("Replacing attribute " + attribute + " value " + value);
+		logger.info("Replacing attribute " + attribute + " value ***");
 		LdapConnection connection = null;
 
 		connection = getConnectionForAdmin();
@@ -898,16 +894,24 @@ public class LDAPServiceImpl implements ILDAPService {
 
 					LdapEntry ldapEntry= new LdapEntry(entry.getDn().toString(), attrs,attributesMultiValues, priviliges,convertObjectClass2DNType(entry.get("objectClass")));
 
-					String dateStr= ldapEntry.get("createTimestamp");
-					String year=dateStr.substring(0,4);
-					String month=dateStr.substring(4,6);
-					String day=dateStr.substring(6,8);
-					String hour=dateStr.substring(8,10);
-					String min=dateStr.substring(10,12);
-					String sec=dateStr.substring(12,14);
-					String crtDate=day+"/"+ month+"/"+ year+" "+ hour +":"+min;
-
+					String dateStr = ldapEntry.get("createTimestamp");
+					String year = dateStr.substring(0,4);
+					String month = dateStr.substring(4,6);
+					String day = dateStr.substring(6,8);
+					String hour = dateStr.substring(8,10);
+					String min = dateStr.substring(10,12);
+					String crtDate = day + "/" + month + "/" + year + " " + hour + ":" + min;
 					ldapEntry.setCreateDateStr(crtDate);
+					
+					String dateModifyStr = ldapEntry.get("modifyTimestamp");
+					String yearModify = dateModifyStr.substring(0,4);
+					String monthModify = dateModifyStr.substring(4,6);
+					String dayModify = dateModifyStr.substring(6,8);
+					String hourModify = dateModifyStr.substring(8,10);
+					String minModify = dateModifyStr.substring(10,12);
+					String crtDateModify = dayModify + "/" + monthModify + "/" + yearModify + " " + hourModify + ":" + minModify;
+					ldapEntry.setModifyDateStr(crtDateModify);
+					
 					if(ldapEntry.getType()==DNType.AHENK) {
 						ldapEntry.setOnline(xmppClientImpl.isRecipientOnline(ldapEntry.getUid()));
 					}
@@ -1561,6 +1565,7 @@ public class LDAPServiceImpl implements ILDAPService {
 			org.apache.directory.api.ldap.model.name.Rdn rdn= new org.apache.directory.api.ldap.model.name.Rdn(newName);
 			connection.rename(entry.getDn(), rdn, true);
 			updateOLCAccessRulesAfterEntryRename(newName, oldDN);
+			
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			throw new LdapException(e);

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.messaging.enums.Protocol;
+import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.messaging.messages.FileServerConf;
 
 /**
@@ -129,10 +130,12 @@ public class ConfigParams {
 	private Boolean adUseSSL;
 	private Boolean adUseTLS;
 	private Boolean adAllowSelfSignedCert;
+	private Boolean allowDynamicDNSUpdate;
 	
 	//other settings
 	private Boolean disableLocalUser;
 	private DomainType domainType;
+	private SudoRoleType sudoRoleType;
 	private String ahenkRepoAddress;
 	private String ahenkRepoKeyAddress;
 
@@ -142,6 +145,8 @@ public class ConfigParams {
 	//repo address for package and repository plugin
 	private String pardusRepoAddress;
 	private String pardusRepoComponent;
+	
+	private RegistrationTemplateType selectedRegistrationType;
 	
 	public ConfigParams() {
 		super();
@@ -195,6 +200,10 @@ public class ConfigParams {
 		this.domainType = DomainType.LDAP;
 		this.ahenkRepoAddress = "";
 		this.ahenkRepoKeyAddress = "";
+		this.sudoRoleType = SudoRoleType.LDAP;
+		this.allowDynamicDNSUpdate = false;
+		
+		this.selectedRegistrationType = RegistrationTemplateType.DEFAULT;
 	}
 
 	public String getLiderLocale() {
@@ -827,6 +836,16 @@ public class ConfigParams {
 		this.adAllowSelfSignedCert = adAllowSelfSignedCert;
 	}
 
+	public Boolean getAllowDynamicDNSUpdate() {
+		if(this.allowDynamicDNSUpdate == null)
+			return true;
+		return allowDynamicDNSUpdate;
+	}
+
+	public void setAllowDynamicDNSUpdate(Boolean allowDynamicDNSUpdate) {
+		this.allowDynamicDNSUpdate = allowDynamicDNSUpdate;
+	}
+	
 	public Boolean getDisableLocalUser() {
 		return disableLocalUser;
 	}
@@ -849,6 +868,14 @@ public class ConfigParams {
 
 	public void setDomainType(DomainType domainType) {
 		this.domainType = domainType;
+	}
+	
+	public SudoRoleType getSudoRoleType() {
+		return sudoRoleType;
+	}
+
+	public void setsudoRoleType(SudoRoleType sudoRoleType) {
+		this.sudoRoleType = sudoRoleType;
 	}
 
 	public String getAhenkRepoAddress() {
@@ -891,6 +918,14 @@ public class ConfigParams {
 		this.pardusRepoComponent = pardusRepoComponent;
 	}
 
+	public RegistrationTemplateType getSelectedRegistrationType() {
+		return selectedRegistrationType;
+	}
+
+	public void setSelectedRegistrationType(RegistrationTemplateType selectedRegistrationType) {
+		this.selectedRegistrationType = selectedRegistrationType;
+	}
+
 	public FileServerConf getFileServerConf(String jid) {
 		Map<String, Object> params = new HashMap<String, Object>();
 		switch (fileServerProtocol) {
@@ -917,4 +952,5 @@ public class ConfigParams {
 	public void setXmppBoshAddress(String xmppBoshAddress) {
 		this.xmppBoshAddress = xmppBoshAddress;
 	}
+
 }

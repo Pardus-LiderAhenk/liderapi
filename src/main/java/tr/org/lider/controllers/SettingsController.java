@@ -32,10 +32,13 @@ import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.messaging.enums.Protocol;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.models.ConfigParams;
+import tr.org.lider.models.RegistrationTemplateType;
+import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.RoleService;
+import tr.org.lider.messaging.enums.SudoRoleType;
 
 /**
  * This controller is used for showing and updating all settings for lider
@@ -66,6 +69,9 @@ public class SettingsController {
 	@Autowired
 	private RoleService roleService;
 
+	@Autowired
+	private CustomPasswordEncoder customPasswordEncoder;
+	
 	@RequestMapping(method=RequestMethod.GET, value = "/configurations", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ConfigParams getConfigParams() {
 		return configurationService.getConfigParams();
@@ -191,19 +197,15 @@ public class SettingsController {
 			@RequestParam (value = "domainType", required = true) DomainType domainType,
 			@RequestParam (value = "ahenkRepoAddress", required = true) String ahenkRepoAddress,
 			@RequestParam (value = "ahenkRepoKeyAddress", required = true) String ahenkRepoKeyAddress,
-			
-			@RequestParam (value = "emailHost", required = false) String emailHost,
-			@RequestParam (value = "emailPort", required = false) String emailPort,
-			@RequestParam (value = "emailUsername", required = false) String emailUsername,
-			@RequestParam (value = "emailPassword", required = false) String emailPassword,
-			@RequestParam (value = "smtpAuth", required = false) Boolean smtpAuth,
-			@RequestParam (value = "tlsEnabled", required = false) Boolean tlsEnabled) {
+			@RequestParam (value = "sudoRoleType", required = true) SudoRoleType sudoRoleType,
+			@RequestParam (value = "selectedRegistrationType", required = true) RegistrationTemplateType selectedRegistrationType) {
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setDisableLocalUser(disableLocalUser);
 		configParams.setDomainType(domainType);
+		configParams.setsudoRoleType(sudoRoleType);
 		configParams.setAhenkRepoAddress(ahenkRepoAddress);
 		configParams.setAhenkRepoKeyAddress(ahenkRepoKeyAddress);
-		
+		configParams.setSelectedRegistrationType(selectedRegistrationType);
 		
 		return configurationService.updateConfigParams(configParams);
 	}
@@ -364,7 +366,7 @@ public class SettingsController {
 			attributes.put("uid", new String[] { user.getUid() });
 			attributes.put("uidNumber", new String[] { uidNumber });
 			attributes.put("loginShell", new String[] { "/bin/bash" });
-			attributes.put("userPassword", new String[] { user.getUserPassword() });
+			attributes.put("userPassword", new String[] { "{ARGON2}" + customPasswordEncoder.encode(user.getUserPassword()) });
 			attributes.put("homePostalAddress", new String[] { user.getHomePostalAddress() });
 			if(user.getTelephoneNumber()!=null && user.getTelephoneNumber()!="")
 				attributes.put("telephoneNumber", new String[] { user.getTelephoneNumber() });

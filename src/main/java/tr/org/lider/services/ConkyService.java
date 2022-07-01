@@ -24,77 +24,117 @@ public class ConkyService {
 	private void init() {
 		if (conkyRepository.count() == 0) {
 			String label = "Bilgisayar Bilgisi";
-			String contents = "Bilgisayar Adi: ${nodename}\n" + 
+			String contents = "conky.text = [[\n" + 
+					"${font sans-serif:bold:size=10}Sistem ${hr 2}\n" + 
+					"${font sans-serif:normal:size=8}$sysname $kernel $alignr $machine\n" + 
+					"Bilgisayar Adı:$alignr$nodename\n" + 
+					"Dosya Sistemi: $alignr${fs_type}\n" + 
 					"\n" + 
-					"IP Adresi: ${addrs enp0s3} - ${addrs enp0s8}\n" + 
-					"MAC Addresi: $color${execi 99999 cat /sys/class/net/enp0s3/address }";
+					"${font sans-serif:bold:size=10}İşlemci ${hr 2}\n" + 
+					"${font sans-serif:normal:size=8}${execi 1000 grep model /proc/cpuinfo | cut -d : -f2 | tail -1 | sed 's/\\s//'}\n" + 
+					"${font sans-serif:normal:size=8}${cpugraph cpu1}\n" + 
+					"İşlemci: ${cpu cpu1}% ${cpubar cpu1}\n" + 
+					"\n" + 
+					"${font sans-serif:bold:size=10}RAM ${hr 2}\n" + 
+					"${font sans-serif:normal:size=8}RAM $alignc $mem / $memmax $alignr $memperc%\n" + 
+					"$membar\n" + 
+					"SWAP $alignc ${swap} / ${swapmax} $alignr ${swapperc}%\n" + 
+					"${swapbar}\n" + 
+					"\n" + 
+					"${font sans-serif:bold:size=10}Disk Kullanımı ${hr 2}\n" + 
+					"${font sans-serif:normal:size=8}/ $alignc ${fs_used /} / ${fs_size /} $alignr ${fs_used_perc /}%\n" + 
+					"${fs_bar /}\n" + 
+					"\n" + 
+					"${font Ubuntu:bold:size=10}Ağ ${hr 2}\n" + 
+					"${font sans-serif:normal:size=8}Yerel IP:${alignr}External IP:\n" + 
+					"${execi 1000 ip a | grep inet | grep -vw lo | grep -v inet6 | cut -d \\/ -f1 | sed 's/[^0-9\\.]*//g'}  ${alignr}${execi 1000  wget -q -O- http://ipecho.net/plain; echo}\n" + 
+					"]];";
 			
-			String settings = "# VARSAYILAN\n" + 
-					"background yes\n" + 
-					"own_window yes\n" + 
-					"own_window_type normal\n" + 
-					"own_window_class conky\n" + 
-					"own_window_hints undecorated,skip_taskbar,skip_pager,sticky,below\n" + 
-					"own_window_argb_visual yes\n" + 
-					"own_window_transparent yes\n" + 
-					"draw_shades no\n" + 
-					"use_xft yes\n" + 
-					"xftfont Monospace:size=10\n" + 
-					"xftalpha 0.1\n" + 
-					"alignment top_right\n" + 
-					"TEXT\n" + 
-					"${voffset 0}\n" + 
-					"${font Ubuntu:style=Medium:pixelsize=35}${time %H:%M}${font}\n" + 
-					"${voffset 0}\n" + 
-					"${font Ubuntu:style=Medium:pixelsize=13}${time %A %d %B %Y}${font}\n" + 
-					"${hr}${font Ubuntu:style=Medium:pixelsize=18}\n" + 
-					"";
-			conkyRepository.save(new ConkyTemplate(label, contents, settings, new Date(), null));
+			String settings = "conky.config = {\n" + 
+					"	update_interval = 1,\n" + 
+					"	cpu_avg_samples = 2,\n" + 
+					"	net_avg_samples = 2,\n" + 
+					"	out_to_console = false,\n" + 
+					"	override_utf8_locale = true,\n" + 
+					"	double_buffer = true,\n" + 
+					"	no_buffers = true,\n" + 
+					"	text_buffer_size = 32768,\n" + 
+					"	imlib_cache_size = 0,\n" + 
+					"	own_window = true,\n" + 
+					"	own_window_type = 'normal',\n" + 
+					"	own_window_argb_visual = true,\n" + 
+					"	own_window_argb_value = 50,\n" + 
+					"	own_window_hints = 'undecorated,below,sticky,skip_taskbar,skip_pager',\n" + 
+					"	border_inner_margin = 5,\n" + 
+					"	border_outer_margin = 0,\n" + 
+					"	xinerama_head = 1,\n" + 
+					"	alignment = 'bottom_right',\n" + 
+					"	gap_x = 0,\n" + 
+					"	gap_y = 33,\n" + 
+					"	draw_shades = false,\n" + 
+					"	draw_outline = false,\n" + 
+					"	draw_borders = false,\n" + 
+					"	draw_graph_borders = false,\n" + 
+					"	use_xft = true,\n" + 
+					"	font = 'Ubuntu Mono:size=12',\n" + 
+					"	xftalpha = 0.8,\n" + 
+					"	uppercase = false,\n" + 
+					"	default_color = 'white',\n" + 
+					"	own_window_colour = '#000000',\n" + 
+					"	minimum_width = 300, minimum_height = 0,\n" + 
+					"	alignment = 'top_right',\n" + 
+					"};\n"; 
+					
+			conkyRepository.save(new ConkyTemplate(label, contents, settings, new Date(), null, false));
 		}
 	}
 
 	public List<ConkyTemplate> list(){
-		return conkyRepository.findAll();
+//		return conkyRepository.findAll();
+		return conkyRepository.findByDeletedOrderByCreateDateDesc(false);
 	}
 
-	public ConkyTemplate add(ConkyTemplate file) {
+	public ConkyTemplate add(ConkyTemplate template) {
+		template.setDeleted(false);
 		ArrayList<String> conky = new ArrayList<String>();
-		conky.add(file.getSettings());
-		conky.add(file.getContents());
-		ConkyTemplate conkyFile = conkyRepository.save(file);
+		conky.add(template.getSettings());
+		conky.add(template.getContents());
+		ConkyTemplate savedTemplate = conkyRepository.save(template);
 		try {
 			operationLogService.saveOperationLog(OperationType.CREATE, "Sistem Gözlemcisi Tanımı oluşturuldu.", conky.toString().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return conkyFile;
+		return savedTemplate;
 	}
 
-	public ConkyTemplate del(ConkyTemplate file) {
-		ConkyTemplate existFile = conkyRepository.findOne(file.getId());
+	public ConkyTemplate delete(ConkyTemplate template) {
+		ConkyTemplate existTemplate = conkyRepository.findOne(template.getId());
+		existTemplate.setDeleted(true);
 		ArrayList<String> conky = new ArrayList<String>();
-		conky.add(existFile.getSettings());
-		conky.add(existFile.getContents());
-		conkyRepository.deleteById(file.getId());
+		conky.add(existTemplate.getSettings());
+		conky.add(existTemplate.getContents());
+		ConkyTemplate savedTemplate = conkyRepository.save(existTemplate);
 		try {
 			operationLogService.saveOperationLog(OperationType.DELETE, "Sistem Gözlemcisi Tanımı silindi.", conky.toString().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return file;
+		return savedTemplate;
 	}
 	
-	public ConkyTemplate update(ConkyTemplate file) {
-		file.setModifyDate(new Date());
+	public ConkyTemplate update(ConkyTemplate template) {
+		template.setModifyDate(new Date());
+		template.setDeleted(false);
 		ArrayList<String> conky = new ArrayList<String>();
-		conky.add(file.getSettings());
-		conky.add(file.getContents());
-		ConkyTemplate conkyFile = conkyRepository.save(file);
+		conky.add(template.getSettings());
+		conky.add(template.getContents());
+		ConkyTemplate savedTemplate = conkyRepository.save(template);
 		try {
 			operationLogService.saveOperationLog(OperationType.UPDATE, "Sistem Gözlemcisi Tanımı güncellendi.", conky.toString().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return conkyFile;
+		return savedTemplate;
 	}
 }

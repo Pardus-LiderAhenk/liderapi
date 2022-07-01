@@ -22,7 +22,7 @@ import tr.org.lider.repositories.AgentRepository;
 public class AgentService {
 
 	@Autowired
-	AgentRepository agentRepository;
+	private AgentRepository agentRepository;
 	
 	@Autowired
 	private XMPPClientImpl messagingService;
@@ -70,12 +70,34 @@ public class AgentService {
 		}
 	}
 	
-	public Page<AgentImpl> findAllAgentsFiltered(int pageNumber, int pageSize, String status,
-			Optional<String> field, Optional<String> text,
-			Optional<Date> registrationStartDate, Optional<Date> registrationEndDate) {
+	public AgentImpl updateUserDirectoryAgentByDn(String dn, String userDirectoryDomain) {
+		List<AgentImpl> existAgent = agentRepository.findByDn(dn);
+		if(existAgent != null && existAgent.size() > 0) {
+			existAgent.get(0).setUserDirectoryDomain(userDirectoryDomain);
+			return agentRepository.save(existAgent.get(0));
+		} else {
+			return null;
+		}
+	}
+	
+	public Page<AgentImpl> findAllAgents(
+			int pageNumber,
+			int pageSize,
+			Optional<Date> registrationStartDate,
+			Optional<Date> registrationEndDate,
+			Optional<String> status,
+			Optional<String> dn,
+			Optional<String> hostname,
+			Optional<String> macAddress,
+			Optional<String> ipAddress,
+			Optional<String> brand,
+			Optional<String> model,
+			Optional<String> processor,
+			Optional<String> osVersion,
+			Optional<String> agentVersion) {
 		
 		List<String> listOfOnlineUsers = new ArrayList<String>();
-		if(!status.equals("all")) {
+		if(!status.get().equals("ALL")) {
 			
 			List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
 			try {
@@ -93,7 +115,21 @@ public class AgentService {
 			}
 		}
 		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents(
-				pageNumber, pageSize, status, field, text, registrationStartDate, registrationEndDate, listOfOnlineUsers);
+				pageNumber, 
+				pageSize, 
+				registrationStartDate, 
+				registrationEndDate, 
+				status,
+				dn,
+				hostname, 
+				macAddress, 
+				ipAddress, 
+				brand, 
+				model, 
+				processor, 
+				osVersion, 
+				agentVersion, 
+				listOfOnlineUsers);
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {
 			if(messagingService.isRecipientOnline(listOfAgentsCB.getContent().get(i).getJid())) {
 				listOfAgentsCB.getContent().get(i).setIsOnline(true);
@@ -117,4 +153,38 @@ public class AgentService {
 		List<AgentImpl> agentList = agentRepository.findByDn(dn);
 		agentRepository.deleteById(agentList.get(0).getId());
 	}
+	
+	public List<String> getBrands() {
+		return agentRepository.getPropertyValueByName("hardware.baseboard.manufacturer");
+	}
+	
+	public List<String> getmodels() {
+		return agentRepository.getPropertyValueByName("hardware.baseboard.productName");
+	}
+	
+	public List<String> getProcessors() {
+		return agentRepository.getPropertyValueByName("processor");
+	}
+	
+	public List<String> getOSVersions() {
+		return agentRepository.getPropertyValueByName("os.version");
+	}
+	
+	public List<String> getAgentVersions() {
+		return agentRepository.getPropertyValueByName("agentVersion");
+	}
+	
+	public int getCountByCreateDate(Date startDate, Date endDate) {
+		return agentRepository.getCountByCreateDate(startDate, endDate);
+	}
+	
+	public int getCountByTodayCreateDate(Date startDate) {
+		return agentRepository.getCountByTodayCreateDate(startDate);
+	}
+	
+	public int getCountByTodayLastLogin(Date startDate) {
+		return agentRepository.getCountByLastLoginToday(startDate);
+	}
+	
+	
 }

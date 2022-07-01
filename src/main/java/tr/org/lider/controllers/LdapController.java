@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -352,9 +353,10 @@ public class LdapController {
 	 * @param value
 	 * @return
 	 */
-	@RequestMapping(method=RequestMethod.POST ,value = "/searchEntry", produces={"application/json","application/xml"})
+	@RequestMapping(method=RequestMethod.POST ,value = "/searchEntry")
+	@ResponseBody
 	public List<LdapEntry> searchEntry(
-			@RequestParam(value="searchDn", required=true) String searchDn,
+			@RequestParam(value="searchDn", required=false) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
 			@RequestParam(value="value", required=true) String value) {
 		

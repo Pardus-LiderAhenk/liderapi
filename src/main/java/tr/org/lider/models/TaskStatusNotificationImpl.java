@@ -19,6 +19,7 @@
 */
 package tr.org.lider.models;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -32,7 +33,7 @@ import tr.org.lider.entities.CommandExecutionResultImpl;
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true, value = { "recipient" })
-public class TaskStatusNotificationImpl  {
+public class TaskStatusNotificationImpl implements Serializable {
 
 	private static final long serialVersionUID = 6226506876404468113L;
 
