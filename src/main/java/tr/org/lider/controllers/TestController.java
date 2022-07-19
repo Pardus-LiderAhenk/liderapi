@@ -11,10 +11,11 @@ import tr.org.lider.services.AuthenticationService;
 @RequestMapping("/test")
 public class TestController {
 
-	@RequestMapping(value = "/hello", method=RequestMethod.POST)
+	@RequestMapping(value = "/hello", method=RequestMethod.GET)
 	public String testRequest() {
 		return "Hello World!!!";
 	}
+	
 	
 	@RequestMapping(value = "/secured", method=RequestMethod.POST)
 	public String restRequestSecured(Authentication authentication) {

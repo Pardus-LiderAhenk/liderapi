@@ -8,7 +8,8 @@ package tr.org.lider.security;
  */
 import java.io.IOException;
 
-import javax.annotation.Resource;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,8 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
@@ -41,7 +40,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 	@Autowired
 	private UserService userService;
 	
-	@Resource
+	@Autowired
 	private CacheManager cacheManager;
 	
 	@Value("${jwt.secret}")
@@ -62,9 +61,9 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 			if (jwt != null && tokenProvider.validateJwtToken(jwt)) {
 				String username = tokenProvider.getUserNameFromJwtToken(jwt);
 				User userDetails = userService.loadUserByUsername(username);
-				Cache cache = cacheManager.getCache("userCache");
+				Cache<String, String> cache = cacheManager.getCache("userCache");
 				try {
-				    String tokenData = cache.get(jwt, String.class);
+					String tokenData = (String) cache.get(jwt);
 				    userDetails.setPasswordHashed(userDetails.getPassword());
 				    userDetails.setPassword(AESHash.decrypt(tokenData, jwtSecret + jwt));
 				} catch (Exception e) {
@@ -76,7 +75,8 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 				} else if (!userDetails.isEnabled()) {
 					throw new DisabledException("User is disabled");
 				} else if (!userDetails.isAccountNonExpired()) {
-					cache.evictIfPresent(jwt);
+					//cache.evictIfPresent(jwt);
+					cache.getAndRemove(jwt);
 					throw new AccountExpiredException("User account has expired");
 				} else if (!userDetails.isCredentialsNonExpired()) {
 					throw new CredentialsExpiredException("User credentials have expired");
