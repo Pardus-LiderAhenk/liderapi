@@ -29,6 +29,15 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                          HttpServletResponse response,
                          AuthenticationException e) 
                         		 throws IOException, ServletException {
+    	//TODO delete in prod
+	    StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+	    String queryString = request.getQueryString();
+	    if (queryString == null && requestURL.toString().equals("http://localhost:8080/")) {
+	        System.err.println("URL 1 : " + requestURL.toString());
+	        response.sendRedirect(requestURL.toString() + "index.html");
+	        return;
+	    }
+	    
         logger.error("Unauthorized error. Message - {}", e.getMessage());
         if(response.getHeader("reason") != null && !response.getHeader("reason").equals("")) {
         	String reason = response.getHeader("reason");

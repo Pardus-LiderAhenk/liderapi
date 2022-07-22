@@ -75,7 +75,6 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 				} else if (!userDetails.isEnabled()) {
 					throw new DisabledException("User is disabled");
 				} else if (!userDetails.isAccountNonExpired()) {
-					//cache.evictIfPresent(jwt);
 					cache.getAndRemove(jwt);
 					throw new AccountExpiredException("User account has expired");
 				} else if (!userDetails.isCredentialsNonExpired()) {
@@ -85,7 +84,6 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 					= new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 					authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authentication);
-					System.err.println("");
 				}
 			}
 		} catch (Exception e) {
