@@ -80,6 +80,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers("/fonts/**").permitAll()
 		.antMatchers("/favicon.ico").permitAll()
 		.antMatchers("/favicon.png").permitAll()
+		.antMatchers("/lider-info/**").permitAll()
 		.antMatchers("/test2/**").hasAuthority("ROLE_ADMIN")
 		.anyRequest().authenticated()
 		.and()
