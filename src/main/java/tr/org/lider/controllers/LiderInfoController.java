@@ -36,7 +36,7 @@ public class LiderInfoController {
 			@ApiResponse(responseCode = "200", description = "Returns lider version", 
 				content = { @Content(schema = @Schema(implementation = String.class)) })})
 	@GetMapping(value = "/version", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> findLiderVersion() {
+	public ResponseEntity<String> getLiderVersion() {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(buildProperties.getVersion());
