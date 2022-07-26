@@ -30,11 +30,21 @@ public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
                          AuthenticationException e) 
                         		 throws IOException, ServletException {
     	//TODO delete in prod
+//	    StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+//	    String queryString = request.getQueryString();
+//	    if (queryString == null && requestURL.toString().equals("http://localhost:8080/")) {
+//	        System.err.println("URL 1 : " + requestURL.toString());
+//	        response.sendRedirect(requestURL.toString() + "index.html");
+//	        return;
+//	    }
+	    
+    	//TODO delete in prod
 	    StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
 	    String queryString = request.getQueryString();
-	    if (queryString == null && requestURL.toString().equals("http://localhost:8080/")) {
+	    if (queryString == null) {
 	        System.err.println("URL 1 : " + requestURL.toString());
-	        response.sendRedirect(requestURL.toString() + "index.html");
+	        String redirectURL = request.getScheme() + "://" + request.getHeader("host") + "/index.html";
+	        response.sendRedirect(redirectURL);
 	        return;
 	    }
 	    

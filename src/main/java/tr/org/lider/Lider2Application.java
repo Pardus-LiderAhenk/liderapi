@@ -11,6 +11,7 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -44,6 +45,9 @@ public class Lider2Application extends SpringBootServletInitializer {
 	@Autowired
 	private CustomPasswordEncoder encoder;
 	
+	@Value("${lider.url}")
+	private String liderURL;
+	
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(Lider2Application.class)
@@ -72,7 +76,7 @@ public class Lider2Application extends SpringBootServletInitializer {
         CorsConfiguration config = new CorsConfiguration();  
         config.setAllowCredentials(true); 
         // * URL below needs to match the Vue client URL and port *
-        config.setAllowedOrigins(Collections.singletonList("http://localhost:8081"));
+        config.setAllowedOrigins(Collections.singletonList(liderURL));
         config.setAllowedMethods(Collections.singletonList("*"));  
         config.setAllowedHeaders(Collections.singletonList("*"));  
         source.registerCorsConfiguration("/**", config);  
