@@ -7,12 +7,12 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.4.2</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath />
 
 	</parent>
 	<groupId>tr.com.lider</groupId>
 	<artifactId>Lider3</artifactId>
-	<version>3.0</version>
+	<version>3.0.0-beta</version>
 	<name>Lider V3 Beta</name>
 	<packaging>war</packaging>
 	<description>Lider(V3) Merkezi Yonetim Sistemi</description>
@@ -27,17 +27,14 @@
 	</properties>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -48,44 +45,28 @@
 			<artifactId>springdoc-openapi-ui</artifactId>
 			<version>1.6.4</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/io.swagger/swagger-annotations -->
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-annotations</artifactId>
 			<version>1.5.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>nz.net.ultraq.thymeleaf</groupId>
-			<artifactId>thymeleaf-layout-dialect</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-
 		<!-- Apache DS Dependencies -->
 		<dependency>
 			<groupId>org.apache.directory.api</groupId>
@@ -97,13 +78,11 @@
 			<artifactId>api-ldap-schema-data</artifactId>
 			<version>1.0.0-M20</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.directory.api</groupId>
 			<artifactId>api-ldap-codec-standalone</artifactId>
 			<version>1.0.0-M20</version>
 		</dependency>
-
 		<!-- XMPP Dependencies -->
 		<dependency>
 			<groupId>org.igniterealtime.smack</groupId>
@@ -140,16 +119,11 @@
 			<artifactId>smack-resolver-javax</artifactId>
 			<version>${smack.version}</version>
 		</dependency>
-		<!-- End of XMPP Dependencies -->
-
-
 		<!-- security dependencies -->
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-ldap</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.ldap</groupId>
 			<artifactId>spring-ldap-core</artifactId>
@@ -162,36 +136,25 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
 			<version>1.19</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
-
-
-		<!-- Main Guacamole library -->
 		<dependency>
 			<groupId>org.apache.guacamole</groupId>
 			<artifactId>guacamole-common</artifactId>
 			<version>1.1.0</version>
 			<scope>compile</scope>
 		</dependency>
-
-		<!-- Guacamole JavaScript library -->
 		<dependency>
 			<groupId>org.apache.guacamole</groupId>
 			<artifactId>guacamole-common-js</artifactId>
@@ -199,31 +162,25 @@
 			<type>zip</type>
 			<scope>runtime</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>com.jcraft</groupId>
 			<artifactId>jsch</artifactId>
 			<version>0.1.53</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
-			<version>2.2.5.RELEASE</version>
 		</dependency>
-
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt</artifactId>
 			<version>0.9.1</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
 			<version>3.17</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
@@ -268,72 +225,36 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
-					<charset>utf-8</charset>
 				</configuration>
 			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.6</version>
-				<configuration>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
-
-					<overlays>
-						<overlay>
-							<groupId>org.apache.guacamole</groupId>
-							<artifactId>guacamole-common-js</artifactId>
-							<type>zip</type>
-						</overlay>
-					</overlays>
-				</configuration>
+				<!-- <configuration> -->
+				<!-- <failOnMissingWebXml>false</failOnMissingWebXml> -->
+				<!-- <overlays> -->
+				<!-- <overlay> -->
+				<!-- <groupId>org.apache.guacamole</groupId> -->
+				<!-- <artifactId>guacamole-common-js</artifactId> -->
+				<!-- <type>zip</type> -->
+				<!-- </overlay> -->
+				<!-- </overlays> -->
+				<!-- </configuration> -->
 			</plugin>
-			
-			
-
 		</plugins>
 	</build>
-	
-	
-	<!-- 
-		For packaging lider app with ui run mvn clean package -P build-with-vue
-	 -->
-	
-	
+
+	<!-- For packaging lider app with ui run mvn clean package -P build-with-vue -->
 	<profiles>
 		<profile>
 			<id>build-with-vue</id>
 			<build>
 				<finalName>ROOT</finalName>
 				<plugins>
-				<!--  
-					This will enable when lider ui node version problem fixed.
-					<plugin>
-						<artifactId>exec-maven-plugin</artifactId>
-						<groupId>org.codehaus.mojo</groupId>
-						<executions>
-		                    <execution>
-		                        <id>npm build the lider vue app</id>
-		                        <phase>generate-resources</phase>
-		                        <goals>
-		                            <goal>exec</goal>
-		                        </goals>
-		                        <configuration>
-		                            <workingDirectory>${basedir}/../liderui</workingDirectory>
-		                            <executable>npm</executable>
-		                            <arguments>
-		                                <argument>run</argument>
-		                                <argument>build</argument>
-		                            </arguments>
-		                        </configuration>
-		                    </execution>
-	                	</executions>
-					</plugin>
-					-->
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
 						<executions>
@@ -358,6 +279,4 @@
 			</build>
 		</profile>
 	</profiles>
-	
-	
 </project>

@@ -508,7 +508,7 @@ public class ExcelExportService {
 
 	private String getFileWriteLocation() {
 		if(System.getProperty("user.dir").equals("/")) {
-			return "/opt/tomcat/webapps/files/";
+			return "/opt/tomcat/webapps/";
 		}
 		return "/tmp/";
 	}
