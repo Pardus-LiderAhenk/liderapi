@@ -1,25 +1,24 @@
 /*
-*
-*    Copyright © 2015-2016 Tübitak ULAKBIM
-*
-*    This file is part of Lider Ahenk.
-*
-*    Lider Ahenk is free software: you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation, either version 3 of the License, or
-*    (at your option) any later version.
-*
-*    Lider Ahenk is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with Lider Ahenk.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ *
+ *    Copyright © 2015-2016 Tübitak ULAKBIM
+ *
+ *    This file is part of Lider Ahenk.
+ *
+ *    Lider Ahenk is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Lider Ahenk is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Lider Ahenk.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package tr.org.lider.messaging.subscribers;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +38,6 @@ import tr.org.lider.entities.AgentPropertyImpl;
 import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
-import tr.org.lider.ldap.LdapSearchFilterAttribute;
-import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.messaging.enums.AgentMessageType;
 import tr.org.lider.messaging.enums.StatusCode;
 import tr.org.lider.messaging.messages.ILiderMessage;
@@ -48,6 +46,7 @@ import tr.org.lider.messaging.messages.RegistrationMessageImpl;
 import tr.org.lider.messaging.messages.RegistrationResponseMessageImpl;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
+import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.ConfigurationService;
 
 
@@ -80,22 +79,24 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 
 	private static Logger logger = LoggerFactory.getLogger(DefaultRegistrationSubscriberImpl.class);
 
-	
+
 	@Autowired
 	private XMPPClientImpl xmppClient;
-	
+
 	@Autowired
 	private LDAPServiceImpl ldapService;
-	
-	
+
 	@Autowired
 	private ConfigurationService configurationService;
-	
+
 	@Autowired
 	private AgentRepository agentDao;
-	
+
+	@Autowired
+	private CustomPasswordEncoder passwordEncoder;
+
 	private String LDAP_VERSION = "3";
-	
+
 	private static String DIRECTORY_SERVER_LDAP="LDAP";
 	private static String DIRECTORY_SERVER_AD="ACTIVE_DIRECTORY";
 
@@ -111,23 +112,23 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 
 		// Register agent
 		if (AgentMessageType.REGISTER == message.getType()) {
-			
+
 			boolean alreadyExists = false;
 			String dn = null;
-			
+
 			String userName = message.getUserName();
 			String userPassword = message.getUserPassword();
-//			String directoryServer = message.getDirectoryServer();
+			//			String directoryServer = message.getDirectoryServer();
 			String directoryServer =DIRECTORY_SERVER_LDAP;
-			
+
 			if( configurationService.getDomainType()!=null) {
 				directoryServer= configurationService.getDomainType().name();
 			}
-			
+
 			LdapEntry ldapUserEntry= getUserFromLdap(userName, userPassword);
-			
+
 			if(ldapUserEntry==null) {
-				
+
 				RegistrationResponseMessageImpl	respMessage = new RegistrationResponseMessageImpl(StatusCode.NOT_AUTHORIZED,
 						"User Not Found", dn, null, new Date());
 				return respMessage;
@@ -142,12 +143,12 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 				alreadyExists = true;
 				dn = entry.getDistinguishedName();
 				logger.info("{} Already exist in LDAP ",new Object[] {dn});
-//				logger.info("Updating LDAP entry: {} with password: {}",new Object[] { message.getFrom(), message.getPassword() });
+				//				logger.info("Updating LDAP entry: {} with password: {}",new Object[] { message.getFrom(), message.getPassword() });
 				// Update agent LDAP entry.
-//				ldapService.updateEntry(dn, "userPassword", message.getPassword());
-				
-//				logger.info("Agent LDAP entry {} updated successfully!", dn);
-				
+				//				ldapService.updateEntry(dn, "userPassword", message.getPassword());
+
+				//				logger.info("Agent LDAP entry {} updated successfully!", dn);
+
 			} else {
 				dn = createEntryDN(message);
 				logger.info("Creating LDAP entry: {} with password: {}",new Object[] { message.getFrom(), message.getPassword() });
@@ -166,18 +167,18 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 
 			// Try to find related agent database record
 			List<? extends AgentImpl> agents = agentDao.findByJid(jid);
-			
+
 			AgentImpl agent = agents != null && !agents.isEmpty() ? agents.get(0) : null;
 
-//			String userDirectoryDomain = null;
-//			// get directory server
-//			if(directoryServer.equals(DIRECTORY_SERVER_LDAP)) {
-//				userDirectoryDomain=configurationService.getLdapRootDn();
-//			}
-//			else if(directoryServer.equals(DIRECTORY_SERVER_AD)) {
-//				userDirectoryDomain =configurationService.getAdDomainName();
-//			}
-			
+			//			String userDirectoryDomain = null;
+			//			// get directory server
+			//			if(directoryServer.equals(DIRECTORY_SERVER_LDAP)) {
+			//				userDirectoryDomain=configurationService.getLdapRootDn();
+			//			}
+			//			else if(directoryServer.equals(DIRECTORY_SERVER_AD)) {
+			//				userDirectoryDomain =configurationService.getAdDomainName();
+			//			}
+
 			// Update the record
 			if (agent != null) {
 				alreadyExists = true;
@@ -185,7 +186,7 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 				if(!message.getMacAddresses().equals("")) {
 					String[] messageMacIDList = message.getMacAddresses().replace(" ", "").replaceAll("'", "").split(",");
 					String[] agentMacIDList = agent.getMacAddresses().replace(" ", "").replaceAll("'", "").split(",");
-					
+
 					for(String messageMacID:messageMacIDList) {
 						for (String agentMacID:agentMacIDList) {
 							if (messageMacID.equals(agentMacID)) {
@@ -212,8 +213,8 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 							false,
 							(Set<AgentPropertyImpl>) agent.getProperties(),
 							(Set<UserSessionImpl>) agent.getSessions(),directoryServer);
-					
-					
+
+
 					if (message.getData() != null) {
 						for (Entry<String, Object>  entryy : message.getData().entrySet()) {
 							if (entryy.getKey() != null && entryy.getValue() != null) {
@@ -222,7 +223,7 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 							}
 						}
 					}
-					
+
 					// Update agent Database.
 					logger.info("Updating agentJid: {} with password: {} in database",new Object[] {agent.getJid(), message.getPassword()});
 					agentDao.save(agent);
@@ -251,49 +252,49 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 						}
 					}
 				}
-				
+
 				agentDao.save(agentImpl);
 			}
-			
-			
+
+
 			IRegistrationResponseMessage respMessage=null;
-			
+
 
 			if (alreadyExists) {
 				logger.warn(
 						"Agent {} already exists! Hostname already in use",
 						dn);
-				
-				
+
+
 				respMessage =new RegistrationResponseMessageImpl(StatusCode.ALREADY_EXISTS,
 						dn + " already exists! Updated its password and database properties with the values submitted.",
 						dn, null, new Date());
 
-				
+
 			} else {
 				logger.info("Agent {} and its related database record created successfully!", dn);
-				
+
 				respMessage = new RegistrationResponseMessageImpl(StatusCode.REGISTERED,
 						dn + " and its related database record created successfully!", dn, null, new Date());
-				
+
 			}
-			
+
 			respMessage.setDisableLocalUser(configurationService.getDisableLocalUser());
 			respMessage.setDirectoryServer(directoryServer);
-			
+
 			if(directoryServer.equals(DIRECTORY_SERVER_LDAP)) {
 				respMessage.setLdapServer(configurationService.getLdapServer());
 				respMessage.setLdapBaseDn(configurationService.getLdapRootDn());
 				respMessage.setLdapVersion(LDAP_VERSION);
 				respMessage.setLdapUserDn(dn);
-				
+
 				logger.info("Registration message created..  "
 						+ "Message details ldap base dn : " +respMessage.getLdapBaseDn() 
 						+ "  ldap server =" + respMessage.getLdapBaseDn()
 						+ "  ldap userdn =" + respMessage.getLdapUserDn()
 						+ "  ldap version =" + respMessage.getLdapVersion()
 						);
-				
+
 			}
 			else if(directoryServer.equals(DIRECTORY_SERVER_AD)) {
 				respMessage.setAdDomainName(configurationService.getAdDomainName());
@@ -301,7 +302,7 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 				respMessage.setAdIpAddress(configurationService.getAdIpAddress());
 				respMessage.setAdAdminPassword(configurationService.getAdAdminPassword());
 				respMessage.setAdAdminUserName(configurationService.getAdAdminUserName());
-				
+
 				logger.info("Registration message created..  "
 						+ "Message details ldap base dn : " +respMessage.getLdapBaseDn() 
 						+ "  ldap server =" + respMessage.getLdapBaseDn()
@@ -309,33 +310,33 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 						+ "  ldap version =" + respMessage.getLdapVersion()
 						);
 			}
-			
-			
+
+
 			xmppClient.addClientToRoster(jid + "@"+configurationService.getXmppServiceName());
 			return respMessage;
-			
+
 		} else if (AgentMessageType.UNREGISTER == message.getType()) {
-			
+
 			logger.info("Unregister message from jid : "+jid);
 			logger.info("Unregister message UserName: "+message.getUserName());
 			String userName = message.getUserName();
 			String userPassword = message.getUserPassword();
-			
+
 			String directoryServer ="LDAP";
-			
+
 			if( configurationService.getDomainType()!=null) {
 				directoryServer= configurationService.getDomainType().name();
 			}
-			
+
 			LdapEntry ldapUserEntry= getUserFromLdap(userName, userPassword);
-			
+
 			if(ldapUserEntry==null) {
-				
+
 				RegistrationResponseMessageImpl	respMessage = new RegistrationResponseMessageImpl(StatusCode.NOT_AUTHORIZED,
 						"User Not Found", null, null, new Date());
 				return respMessage;
 			}
-			
+
 			// Check if agent LDAP entry already exists
 			final List<LdapEntry> entry = ldapService.search(configurationService.getAgentLdapJidAttribute(), jid,
 					new String[] { configurationService.getAgentLdapJidAttribute() });
@@ -355,14 +356,14 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 			if (agent != null) {
 				agentDao.delete(agent);
 			}
-			
-			
-			
+
+
+
 			IRegistrationResponseMessage respMessage= new RegistrationResponseMessageImpl(StatusCode.UNREGISTERED,dn + " and its related database record unregistered successfully!", dn, null, new Date());
 
 			respMessage.setDirectoryServer(directoryServer);
 			return respMessage;
-			
+
 		} else if (AgentMessageType.REGISTER_LDAP == message.getType()) {
 			logger.info("REGISTER_LDAP");
 			return null;
@@ -414,18 +415,18 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 	}
 
 	private LdapEntry getUserFromLdap(String userName, String userPassword) throws LdapException {
-
 		LdapEntry user = null;
+		String filter= "(&(uid=$1))".replace("$1", userName);
+		List<LdapEntry> ldapEntries  = ldapService.findSubEntries(filter,
+				new String[] { "*" }, SearchScope.SUBTREE);
 
-		List<LdapSearchFilterAttribute> filterAtt = new ArrayList<LdapSearchFilterAttribute>();
-		filterAtt.add(new LdapSearchFilterAttribute("uid", userName, SearchFilterEnum.EQ));
-		filterAtt.add(new LdapSearchFilterAttribute("userPassword", userPassword, SearchFilterEnum.EQ));
-
-		List<LdapEntry> userList = ldapService.search(filterAtt, new String[] { "cn", "dn","uid" });
-		if (userList != null && userList.size() > 0) {
-
-			user = userList.get(0);
+		if(ldapEntries.size()>0) {
+			user = ldapEntries.get(0);
 		}
-		return user;
+		if(user != null && passwordEncoder.matches(userPassword, user.getUserPassword())) {
+			return user;
+		} else {
+			return null;
+		}
 	}
 }
