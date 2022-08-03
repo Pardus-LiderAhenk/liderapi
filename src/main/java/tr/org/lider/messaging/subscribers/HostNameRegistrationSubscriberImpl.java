@@ -21,6 +21,7 @@ import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,6 @@ import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
-import tr.org.lider.ldap.LdapSearchFilterAttribute;
-import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.messaging.enums.AgentMessageType;
 import tr.org.lider.messaging.enums.StatusCode;
 import tr.org.lider.messaging.messages.ILiderMessage;
@@ -43,6 +42,7 @@ import tr.org.lider.messaging.messages.RegistrationMessageImpl;
 import tr.org.lider.messaging.messages.RegistrationResponseMessageImpl;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
+import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.RegistrationTemplateService;
 
@@ -67,6 +67,10 @@ public class HostNameRegistrationSubscriberImpl implements IRegistrationSubscrib
 	@Autowired
 	private RegistrationTemplateService registrationTemplateService;
 
+
+	@Autowired
+	private CustomPasswordEncoder passwordEncoder;
+	
 	private String LDAP_VERSION = "3";
 	private static String DIRECTORY_SERVER_LDAP="LDAP";
 	private static String DIRECTORY_SERVER_AD="ACTIVE_DIRECTORY";
@@ -427,14 +431,18 @@ public class HostNameRegistrationSubscriberImpl implements IRegistrationSubscrib
 
 	private LdapEntry getUserFromLdap(String userName, String userPassword) throws LdapException {
 		LdapEntry user = null;
-		List<LdapSearchFilterAttribute> filterAtt = new ArrayList<LdapSearchFilterAttribute>();
-		filterAtt.add(new LdapSearchFilterAttribute("uid", userName, SearchFilterEnum.EQ));
-		filterAtt.add(new LdapSearchFilterAttribute("userPassword", userPassword, SearchFilterEnum.EQ));
-		List<LdapEntry> userList = ldapService.search(filterAtt, new String[] { "cn", "dn","uid" });
-		if (userList != null && userList.size() > 0) {
-			user = userList.get(0);
+		String filter= "(&(uid=$1))".replace("$1", userName);
+		List<LdapEntry> ldapEntries  = ldapService.findSubEntries(filter,
+				new String[] { "*" }, SearchScope.SUBTREE);
+
+		if(ldapEntries.size()>0) {
+			user = ldapEntries.get(0);
 		}
-		return user;
+		if(user != null && passwordEncoder.matches(userPassword, user.getUserPassword())) {
+			return user;
+		} else {
+			return null;
+		}
 	}
 
 }
