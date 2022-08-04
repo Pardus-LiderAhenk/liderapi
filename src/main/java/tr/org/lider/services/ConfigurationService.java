@@ -486,6 +486,10 @@ public class ConfigurationService {
 		return getConfigParams().getAhenkRepoKeyAddress();
 	}
 
+	public Boolean getEnableDelete4Directory() {
+		return getConfigParams().getEnableDelete4Directory();
+	}
+	
 	public Boolean getAllowVNCConnectionWithoutPermission() {
 		String allowVNCWithoutPermissionStr = env.getProperty("allow.connection.without.permission");
 		if( allowVNCWithoutPermissionStr != null && !allowVNCWithoutPermissionStr.isEmpty()) {
