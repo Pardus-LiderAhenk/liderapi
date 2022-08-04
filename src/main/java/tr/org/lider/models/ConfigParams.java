@@ -145,6 +145,7 @@ public class ConfigParams {
 	//repo address for package and repository plugin
 	private String pardusRepoAddress;
 	private String pardusRepoComponent;
+	private Boolean enableDelete4Directory;
 	
 	private RegistrationTemplateType selectedRegistrationType;
 	
@@ -204,6 +205,7 @@ public class ConfigParams {
 		this.allowDynamicDNSUpdate = false;
 		
 		this.selectedRegistrationType = RegistrationTemplateType.DEFAULT;
+		this.enableDelete4Directory = false;
 	}
 
 	public String getLiderLocale() {
@@ -924,6 +926,14 @@ public class ConfigParams {
 
 	public void setSelectedRegistrationType(RegistrationTemplateType selectedRegistrationType) {
 		this.selectedRegistrationType = selectedRegistrationType;
+	}
+	
+	public Boolean getEnableDelete4Directory() {
+		return enableDelete4Directory;
+	}
+
+	public void setEnableDelete4Directory(Boolean enableDelete4Directory) {
+		this.enableDelete4Directory = enableDelete4Directory;
 	}
 
 	public FileServerConf getFileServerConf(String jid) {

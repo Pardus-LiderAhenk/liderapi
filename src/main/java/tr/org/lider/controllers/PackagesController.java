@@ -65,10 +65,9 @@ public class PackagesController {
 //	get directory server(Active Directory and OpenLDAP) configurations method for ldap-login task
 	@RequestMapping(method=RequestMethod.GET, value = "/repoAddress", produces = MediaType.APPLICATION_JSON_VALUE)
 	public HashMap<String, Object> getConfigParams() {
-		ConfigParams configParams = configurationService.getConfigParams();
 		HashMap<String, Object> repoMap = new HashMap<String, Object>();
-		repoMap.put("pardusRepoAddress", configParams.getPardusRepoAddress());
-		repoMap.put("pardusRepoComponent", configParams.getPardusRepoComponent());
+		repoMap.put("pardusRepoAddress", configurationService.getPardusRepoAddress());
+		repoMap.put("pardusRepoComponent", configurationService.getPardusRepoComponent());
 		return repoMap;
 	}
 }
