@@ -60,16 +60,15 @@ public class LdapLoginController {
 //	get directory server(Active Directory and OpenLDAP) configurations method for ldap-login task
 	@RequestMapping(method=RequestMethod.GET, value = "/configurations", produces = MediaType.APPLICATION_JSON_VALUE)
 	public HashMap<String, Object> getConfigParams() {
-		ConfigParams configParams = configurationService.getConfigParams();
 		HashMap<String, Object> configMap = new HashMap<String, Object>();
-		configMap.put("ldapRootDn", configParams.getLdapRootDn());
-		configMap.put("ldapServer", configParams.getLdapServer());
-		configMap.put("adDomainName", configParams.getAdDomainName());
-		configMap.put("adIpAddress", configParams.getAdIpAddress());
-		configMap.put("adHostName", configParams.getAdHostName());
-		configMap.put("adAdminUserName", configParams.getAdAdminUserName());
-		configMap.put("disableLocalUser", configParams.getDisableLocalUser());
-		configMap.put("allowDynamicDNSUpdate", configParams.getAllowDynamicDNSUpdate());
+		configMap.put("ldapRootDn", configurationService.getLdapRootDn());
+		configMap.put("ldapServer", configurationService.getLdapServer());
+		configMap.put("adDomainName", configurationService.getAdDomainName());
+		configMap.put("adIpAddress", configurationService.getAdIpAddress());
+		configMap.put("adHostName", configurationService.getAdHostName());
+		configMap.put("adAdminUserName", configurationService.getAdAdminUserName());
+		configMap.put("disableLocalUser", configurationService.getDisableLocalUser());
+		configMap.put("allowDynamicDNSUpdate", configurationService.getAllowDynamicDNSUpdate());
 		return configMap;
 	}
 	
@@ -105,11 +104,10 @@ public class LdapLoginController {
 			throws UnsupportedEncodingException {
 		if (requestBody.getPlugin().getName().equals("ldap-login")) {
 			if (requestBody.getCommandId().equals("EXECUTE_AD_LOGIN")) {
-				ConfigParams configParams = configurationService.getConfigParams();
 				Map<String, Object> parameterMap = requestBody.getParameterMap();
-				parameterMap.put("ad_username", configParams.getAdAdminUserName());
-				parameterMap.put("admin_password", configParams.getAdAdminPassword());
-				parameterMap.put("ad_port", configParams.getAdPort());
+				parameterMap.put("ad_username", configurationService.getAdAdminUserName());
+				parameterMap.put("admin_password", configurationService.getAdAdminPassword());
+				parameterMap.put("ad_port", configurationService.getAdPort());
 				requestBody.setParameterMap(parameterMap);
 			}
 			IRestResponse restResponse = taskService.execute(requestBody);

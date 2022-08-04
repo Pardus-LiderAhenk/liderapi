@@ -28,6 +28,7 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
+import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.PolicyResponse;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.AdService;
@@ -687,6 +688,14 @@ public class AdController {
 		}
 		return results;
 	}
-
+	
+//	get domainType and enableDelete4Directory parameters for AD management
+	@RequestMapping(method=RequestMethod.GET, value = "/configurations", produces = MediaType.APPLICATION_JSON_VALUE)
+	public HashMap<String, Object> getConfigParams() {
+		HashMap<String, Object> configMap = new HashMap<String, Object>();
+		configMap.put("domainType", configurationService.getDomainType());
+		configMap.put("enableDelete4Directory", configurationService.getEnableDelete4Directory());
+		return configMap;
+	}
 	
 }
