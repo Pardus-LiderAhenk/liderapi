@@ -1,6 +1,7 @@
 package tr.org.lider.controllers;
 
-import javax.annotation.Resource;
+import javax.cache.Cache;
+import javax.cache.CacheManager;
 
 /**
  * Service auth controller
@@ -16,8 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -48,12 +47,15 @@ public class AuthController {
 
 	Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-	@Resource
+	//@Value("classpath:ehcache.xml")
+	//	private CacheManager cacheManager;
+
+	@Autowired
 	private CacheManager cacheManager;
-	
+
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	
+
 	@Autowired
 	private OperationLogService operationLogService; 
 
@@ -65,7 +67,7 @@ public class AuthController {
 
 	@Value("${jwt.expiration}")
 	private int jwtExpiration;
-	
+
 	@RequestMapping(value="/signin", method=RequestMethod.POST)
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginParams loginParams, HttpServletRequest request) {
 		Authentication authentication = null;
@@ -75,10 +77,10 @@ public class AuthController {
 							loginParams.getUsername().trim(), loginParams.getPassword().trim()));
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			User userPrincipal = (User)authentication.getDetails();
-			
+
 			String jwt = jwtProvider.generateJwtToken(authentication);
 			String tokenData = AESHash.encrypt(loginParams.getPassword(), jwtSecret + jwt);
-			Cache cache = cacheManager.getCache("userCache");
+			Cache<String, String> cache = cacheManager.getCache("userCache");
 			cache.put(jwt, tokenData);
 			operationLogService.saveOperationLog(OperationType.LOGIN,"Lider Arayüze Giriş Yapıldı.",null);
 			return ResponseEntity.ok(new JwtResponse(jwt, userPrincipal.getName(), userPrincipal.getSurname()));
