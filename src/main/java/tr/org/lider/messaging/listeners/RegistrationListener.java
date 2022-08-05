@@ -29,13 +29,20 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Stanza;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tr.org.lider.messaging.messages.ILiderMessage;
 import tr.org.lider.messaging.messages.RegistrationMessageImpl;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.messaging.subscribers.DefaultRegistrationSubscriberImpl;
+import tr.org.lider.messaging.subscribers.HostNameRegistrationSubscriberImpl;
+import tr.org.lider.messaging.subscribers.IPAddressRegistrationSubscriberImpl;
 import tr.org.lider.messaging.subscribers.IRegistrationSubscriber;
+import tr.org.lider.models.RegistrationTemplateType;
+import tr.org.lider.services.ConfigurationService;
 
 
 /**
@@ -45,6 +52,7 @@ import tr.org.lider.messaging.subscribers.IRegistrationSubscriber;
  * to handle registration.
  *
  */
+@Component
 public class RegistrationListener implements StanzaListener, StanzaFilter {
 
 	
@@ -62,15 +70,30 @@ public class RegistrationListener implements StanzaListener, StanzaFilter {
 	 */
 	private IRegistrationSubscriber subscriber;
 
+	private ConfigurationService configurationService;
     
+	private DefaultRegistrationSubscriberImpl defaultRegistrationSubscriberImpl;
+	
+	private HostNameRegistrationSubscriberImpl hostnameRegistrationSubscriberImpl;
+	
+	private IPAddressRegistrationSubscriberImpl ipAddressRegistrationSubscriberImpl;
+	
 	// TODO IMPROVEMENT: separate xmpp client into two classes. one for
 	// configuration/setup, other for functional methods
 	private XMPPClientImpl client;
 
-	public RegistrationListener(XMPPClientImpl client) {
+	public RegistrationListener(XMPPClientImpl client, 
+			ConfigurationService configurationService,
+			HostNameRegistrationSubscriberImpl hostnameRegistrationSubscriberImpl,
+			IPAddressRegistrationSubscriberImpl ipAddressRegistrationSubscriberImpl,
+			DefaultRegistrationSubscriberImpl defaultRegistrationSubscriberImpl) {
 		this.client = client;
+		this.configurationService = configurationService;
+		this.hostnameRegistrationSubscriberImpl = hostnameRegistrationSubscriberImpl;
+		this.ipAddressRegistrationSubscriberImpl = ipAddressRegistrationSubscriberImpl;
+		this.defaultRegistrationSubscriberImpl = defaultRegistrationSubscriberImpl;
 	}
-
+	
 	@Override
 	public boolean accept(Stanza stanza) {
 		if (stanza instanceof Message) {
@@ -106,6 +129,13 @@ public class RegistrationListener implements StanzaListener, StanzaFilter {
 				// non-anonymous JID to be registered.
 
 				try {
+					if(configurationService.getRegistrationTemplateType().equals(RegistrationTemplateType.HOSTNAME)) {
+						setSubscriber(hostnameRegistrationSubscriberImpl);
+					} else if(configurationService.getRegistrationTemplateType().equals(RegistrationTemplateType.IP_ADDRESS)) {
+						setSubscriber(ipAddressRegistrationSubscriberImpl);
+					} else {
+						setSubscriber(defaultRegistrationSubscriberImpl);
+					}
 					responseMessage = subscriber.messageReceived(message);
 					logger.debug("Notified subscriber => {}", subscriber);
 					// Send registration (successful/error) message

@@ -360,7 +360,10 @@ public class XMPPClientImpl {
 		policyStatusListener.setSubscribers(policyStatusSubscribers);
 		connection.addAsyncStanzaListener(policyStatusListener, policyStatusListener);
 		// Hook listener for registration messages
-		registrationListener = new RegistrationListener(this);
+		registrationListener = new RegistrationListener(this, configurationService, 
+				hostnameRegistrationSubscriberImpl, 
+				ipAddressRegistrationSubscriberImpl,
+				defaultRegistrationSubscriberImpl);
 		
 		if(configurationService.getRegistrationTemplateType().equals(RegistrationTemplateType.HOSTNAME)) {
 			registrationListener.setSubscriber(hostnameRegistrationSubscriberImpl);
