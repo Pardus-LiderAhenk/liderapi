@@ -17,8 +17,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties({ "password"})
+@JsonInclude(Include.NON_NULL)
 public class User implements Serializable, UserDetails {
 
 	private static final long serialVersionUID = -2977272476847712618L;

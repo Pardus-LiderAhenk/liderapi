@@ -8,7 +8,6 @@ import java.util.Locale;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
-import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.PluginTask;
 import tr.org.lider.entities.TaskImpl;
+import tr.org.lider.kafka.MessageProducer;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -63,6 +63,9 @@ public class TaskService {
 	@Autowired
 	private PluginTaskService pluginTaskService;
 
+	@Autowired
+	private MessageProducer messageProducer;
+	
 	public IRestResponse execute(PluginTask request) {
 
 		// Getting target entries 
@@ -163,16 +166,21 @@ public class TaskService {
 					message= new ExecuteTaskMessageImpl(taskJsonString, uid, new Date(), fileServerConf);
 
 					// TaskStatusUpdateListener in XMPPClientImpl class
+//					try {
+//						messagingService.sendMessage(message);
+//					} catch (JsonGenerationException e) {
+//						e.printStackTrace();
+//					} catch (JsonMappingException e) {
+//						e.printStackTrace();
+//					} catch (NotConnectedException e) {
+//						e.printStackTrace();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
 					try {
-						messagingService.sendMessage(message);
-					} catch (JsonGenerationException e) {
-						e.printStackTrace();
-					} catch (JsonMappingException e) {
-						e.printStackTrace();
-					} catch (NotConnectedException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
+						messageProducer.sendTask(message);
+					} catch (Exception e) {
+						logger.error("Error occured while sending message to kafka. Message: " + e.getMessage());
 					}
 
 				}

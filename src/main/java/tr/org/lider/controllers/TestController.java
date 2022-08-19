@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tr.org.lider.services.AuthenticationService;
 
-@RestController()
+@RestController
 @RequestMapping("/test")
 public class TestController {
-
+	
 	@RequestMapping(value = "/hello", method=RequestMethod.GET)
 	public String testRequest() {
 		return "Hello World!!!";
