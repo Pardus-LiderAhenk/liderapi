@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.sql.rowset.serial.SerialBlob;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jackson.JsonObjectSerializer;
 import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,7 +24,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysql.cj.exceptions.ExceptionInterceptor;
+import com.mysql.cj.jdbc.Blob;
+
 import tr.org.lider.entities.CommandImpl;
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -34,7 +42,9 @@ import tr.org.lider.models.UserSessionsModel;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.CommandService;
 import tr.org.lider.services.ConfigurationService;
-import tr.org.lider.services.UserService;
+import tr.org.lider.services.OperationLogService;
+import tr.org.lider.services.UserService;    
+
 
 @RestController()
 @RequestMapping("/lider/user")
@@ -56,6 +66,9 @@ public class UserController {
 	
 	@Autowired
 	private CustomPasswordEncoder customPasswordEncoder;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	@RequestMapping(value = "/getOuDetails")
 	public List<LdapEntry> task(LdapEntry selectedEntry) {
@@ -106,6 +119,14 @@ public class UserController {
 			//get full of ou details after creation
 			selectedEntry = ldapService.getEntryDetail(dn);
 			
+			String log = selectedEntry.getOu() + " has been created in " + selectedEntry.getDistinguishedName();
+			try {
+//				operationLogService.saveOperationLog(OperationType.CREATE, log, null, null, null, null);
+				operationLogService.saveOperationLog(OperationType.CREATE, log, null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -143,14 +164,19 @@ public class UserController {
 			}
 			
 			String rdn="uid="+selectedEntry.getUid()+","+selectedEntry.getParentName();
-
 			ldapService.addEntry(rdn, attributes);
-			
 			selectedEntry.setAttributesMultiValues(attributes);
 			selectedEntry.setDistinguishedName(selectedEntry.getUid());
-
 			logger.info("User created successfully RDN ="+rdn);
 			selectedEntry = ldapService.findSubEntries(rdn, "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
+			
+			String log = selectedEntry.getUid() + " has been created in " + selectedEntry.getDistinguishedName();
+			try {
+//				operationLogService.saveOperationLog(OperationType.CREATE, log, null, null, null, null);
+				operationLogService.saveOperationLog(OperationType.CREATE, log, null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 			
 			return selectedEntry;
@@ -159,6 +185,7 @@ public class UserController {
 			return null;
 		}
 	}
+	
 	/**
 	 * delete selected user
 	 * @param selectedEntryArr
@@ -168,7 +195,9 @@ public class UserController {
 	@ResponseBody
 	public Boolean deleteUser(@RequestBody LdapEntry[] selectedEntryArr) {
 		try {
+			LdapEntry userLdapEntry = null;
 			for (LdapEntry ldapEntry : selectedEntryArr) {
+				userLdapEntry = ldapEntry;
 				if(ldapEntry.getType().equals(DNType.USER)) {
 					List<LdapEntry> subEntries = ldapService.search("member", ldapEntry.getDistinguishedName(), new String[] {"*"});
 					for (LdapEntry groupEntry : subEntries) {
@@ -188,6 +217,16 @@ public class UserController {
 					logger.info("User deleted successfully RDN ="+ldapEntry.getDistinguishedName());
 				}
 			}
+			
+			String log =  userLdapEntry.getDistinguishedName() + " has been deleted";
+			try {
+	//				operationLogService.saveOperationLog(OperationType.CREATE, log, null, null, null, null);
+				operationLogService.saveOperationLog(OperationType.DELETE, log, null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+				
+			
 			return true;
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -204,6 +243,7 @@ public class UserController {
 	@RequestMapping(method=RequestMethod.POST, value = "/editUser",produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public LdapEntry editUser(LdapEntry selectedEntry) {
+		LdapEntry oldSelectedEntry = selectedEntry;
 		try {
 			if(!"".equals(selectedEntry.getCn())){
 				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "cn", selectedEntry.getCn());
@@ -220,10 +260,33 @@ public class UserController {
 			if(!"".equals(selectedEntry.getHomePostalAddress())){
 				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "homePostalAddress", selectedEntry.getHomePostalAddress());
 			}
-			
-			
+						
 			selectedEntry = ldapService.findSubEntries(selectedEntry.getDistinguishedName(), "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
 
+			String log = selectedEntry.getUid() + " has been updated ";	
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("cn",oldSelectedEntry.getCn());
+			requestData.put("sn",oldSelectedEntry.getSn());
+			requestData.put("telephoneNumber",oldSelectedEntry.getTelephoneNumber());
+			requestData.put("mail",oldSelectedEntry.getMail());
+			requestData.put("homePostalAddress",oldSelectedEntry.getHomePostalAddress());
+
+			ObjectMapper mapper = new ObjectMapper();
+			String jsonString = "";
+			try {
+				jsonString = mapper.writeValueAsString(requestData);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}
+	
+			try {	
+				operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(),null, null, null);
+//				operationLogService.saveOperationLog(OperationType.UPDATE, log, null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -246,12 +309,21 @@ public class UserController {
 			}
 			selectedEntry = ldapService.findSubEntries(selectedEntry.getDistinguishedName(), "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
 			
+			String log = selectedEntry.getUid() + " password has been changed";
+			try {
+//				operationLogService.saveOperationLog(OperationType.CREATE, log, null, null, null, null);
+				operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD, log, null);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
+	
 	/**
 	 * getting password policy  
 	 * @param selectedEntry
@@ -270,6 +342,7 @@ public class UserController {
 		}
 		return passwordPolicies;
 	}
+	
 	/**
 	 * set password policy to user  
 	 * @param passwordPolicy
@@ -284,11 +357,20 @@ public class UserController {
 			
 		selectedEntry = ldapService.findSubEntries(dn, "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
 
+
+		String log = selectedEntry.getDistinguishedName() + " has been changed ";
+		try {
+//			operationLogService.saveOperationLog(OperationType.CREATE, log, null, null, null, null);
+			operationLogService.saveOperationLog(OperationType.UPDATE, log, null);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 			
 		} catch (LdapException e) {
 			e.printStackTrace();
 			return null;
 		}
+		
 		return selectedEntry;
 	}
 	
@@ -361,15 +443,20 @@ public class UserController {
 			}
 			ldapService.addEntry(newGroupDN , attributes);
 			entry = ldapService.getEntryDetail(newGroupDN);
+			
+			String log = newGroupDN + " has been created in";
+			operationLogService.saveOperationLog(OperationType.CREATE, log, null, null, null, null);
+			
 		} catch (LdapException e) {
 			System.out.println("Error occured while adding new group.");
 			return null;
 		}
+		
 		return entry;
 	}
 	
 	/**
-	 * delete user ous
+	 * delete user ou's
 	 * @param selectedEntryArr
 	 * @return
 	 */
@@ -377,13 +464,19 @@ public class UserController {
 	@RequestMapping(method=RequestMethod.POST, value = "/deleteUserOu")
 	@ResponseBody
 	public Boolean deleteUserOu(@RequestBody LdapEntry[] selectedEntryArr) {
+		LdapEntry deletedLdapEntry = null;
 		try {
 			for (LdapEntry ldapEntry : selectedEntryArr) {
+				deletedLdapEntry = ldapEntry;
 				if(ldapEntry.getType().equals(DNType.ORGANIZATIONAL_UNIT)) {
 					ldapService.updateOLCAccessRulesAfterEntryDelete(ldapEntry.getDistinguishedName());
 					ldapService.deleteNodes(ldapService.getOuAndOuSubTreeDetail(ldapEntry.getDistinguishedName()));
 				}
 			}
+
+			String log = deletedLdapEntry.getDistinguishedName() + " has been deleted";
+			operationLogService.saveOperationLog(OperationType.DELETE, log, null, null, null, null);
+			
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -392,7 +485,7 @@ public class UserController {
 	}
 	
 	/**
-	 * delete user ous
+	 * get last user
 	 * @param selectedEntryArr
 	 * @return
 	 */
@@ -445,6 +538,10 @@ public class UserController {
 			@RequestParam(value="destinationDN", required=true) String destinationDN) {
 		try {
 			ldapService.moveEntry(sourceDN, destinationDN);
+			
+			String log = sourceDN + " has been moved to " + destinationDN;
+			operationLogService.saveOperationLog(OperationType.MOVE, log, null, null, null, null);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -469,6 +566,19 @@ public class UserController {
 		try {
 			ldapService.updateEntryRemoveAttributeWithValue(dn, attribute, value);
 			entry = ldapService.findSubEntries(dn, "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
+			
+			String log = entry.getUid() + " " + attribute + " has been deleted" ;
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put(attribute, value);
+			ObjectMapper mapper = new ObjectMapper();
+			String jsonString = "";
+			try {
+				jsonString = mapper.writeValueAsString(requestData);
+				operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}			
 		} catch (LdapException e) {
 			e.printStackTrace();
 			return null;
