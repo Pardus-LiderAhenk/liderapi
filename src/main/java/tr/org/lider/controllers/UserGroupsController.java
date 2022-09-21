@@ -31,12 +31,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.OperationLogService;
+
 
 /**
  * Controller for user groups operations
@@ -50,6 +53,9 @@ import tr.org.lider.services.ConfigurationService;
 public class UserGroupsController {
 	Logger logger = LoggerFactory.getLogger(UserGroupsController.class);
 
+	@Autowired
+	private OperationLogService operationLogService;
+	
 	@Autowired
 	private LDAPServiceImpl ldapService;
 	
@@ -200,6 +206,25 @@ public class UserGroupsController {
 			logger.error("Error occured while adding new group.");
 			return null;
 		}
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		List<String> userAdded = new ArrayList<>();
+		
+		for (LdapEntry user : entries) {
+			if (user.getUid() != null) {
+				userAdded.add(user.getUid());
+			}
+		}
+		requestData.put("uid",userAdded);
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = "";
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "Users has been added to " + entry.getDistinguishedName();
+		operationLogService.saveOperationLog(OperationType.MOVE, log, jsonString.getBytes(), null, null, null);
+		
 		return new ResponseEntity<LdapEntry>(entry, HttpStatus.OK);
 	}
 	
@@ -248,6 +273,19 @@ public class UserGroupsController {
 				}
 			}
 		}
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("dn",dn);
+		requestData.put("uid",dnList.get(0));
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = dnList.get(0) + " has been deleted from " + dn;
+		operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
 		return ldapService.getEntryDetail(dn);
 	}
 	
@@ -260,14 +298,27 @@ public class UserGroupsController {
 			e.printStackTrace();
 			return false;
 		}
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("SourceDN",sourceDN);
+		requestData.put("DestinationDN",destinationDN);
+
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "Entry has been moved from " + sourceDN + " to " + destinationDN ;
+		operationLogService.saveOperationLog(OperationType.MOVE, log, jsonString.getBytes(), null, null, null);
 		return true;
 	}
 	
 	@RequestMapping(method=RequestMethod.POST ,value = "/rename/entry", produces = MediaType.APPLICATION_JSON_VALUE)
 	public LdapEntry renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
 			@RequestParam(value="newName", required=true) String newName) {
-		try {
-			
+		try {	
 			ldapService.renameEntry(oldDN, newName);
 			String newEntryDN = newName + ",";
 			LdapName dn = new LdapName(oldDN);
@@ -278,9 +329,17 @@ public class UserGroupsController {
 				}
 			}
 			LdapEntry selectedEntry = ldapService.getEntryDetail(newEntryDN);
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("oldDN", oldDN);
+			requestData.put("newDN", newName);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = dataMapper.writeValueAsString(requestData);
+			String log = "Entry name has been changed from " + oldDN + " to " + newName;
+			operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
 			return selectedEntry;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
 			return null;
 		}
 	}
@@ -295,14 +354,21 @@ public class UserGroupsController {
 			String dn="ou="+selectedEntry.getOu()+","+selectedEntry.getParentName();
 			
 			ldapService.addEntry(dn, attributes);
-			logger.info("OU created successfully RDN ="+dn);
+			logger.info("OU created successfully RDN =" + dn);
 			
 			//get full of ou details after creation
 			selectedEntry = ldapService.getEntryDetail(dn);
 			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("dn", selectedEntry.getDistinguishedName());
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = dataMapper.writeValueAsString(requestData);
+			String log = "Entry has been added to " + selectedEntry.getDistinguishedName();
+			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+			
 			return selectedEntry;
-		} catch (LdapException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
 			return null;
 		}
 	}
@@ -311,18 +377,28 @@ public class UserGroupsController {
 	public ResponseEntity<?> deleteEntry(@RequestParam(value = "dn") String dn) {
 		try {
 			if(dn.equals("cn=adminGroups," + configurationService.getUserGroupLdapBaseDn())) {
-				return new ResponseEntity<String[]>(new String[] {"Admin grubu silinemez!"}, HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<String[]>(new String[] {"Admin grubu silinemez!"}, HttpStatus.CONFLICT);
 			}
 			if(dn.contains(configurationService.getUserGroupLdapBaseDn()) && dn.length() > configurationService.getUserGroupLdapBaseDn().length() ) {
 				ldapService.updateOLCAccessRulesAfterEntryDelete(dn);
 				ldapService.deleteNodes(ldapService.getOuAndOuSubTreeDetail(dn));
+				
+
+				Map<String, Object> requestData = new HashMap<String, Object>();
+				requestData.put("dn", dn);
+				ObjectMapper dataMapper = new ObjectMapper();
+				String jsonString = dataMapper.writeValueAsString(requestData);
+				String log = "Entry name has been deleted " + dn;
+				operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+				
 				return new ResponseEntity<String[]>(new String[] {"Grup başarıyla silindi"}, HttpStatus.OK);
 			} else {
-				return new ResponseEntity<String[]>(new String[] {"Hata oluştu"}, HttpStatus.BAD_REQUEST);
+				return new ResponseEntity<String[]>(new String[] {"Hata oluştu"}, HttpStatus.EXPECTATION_FAILED);
 			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<String[]>(new String[] {"Hata oluştu"}, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String[]>(new String[] {"Hata oluştu"}, HttpStatus.EXPECTATION_FAILED);
 		}
 	}
 	
@@ -390,6 +466,25 @@ public class UserGroupsController {
 			logger.error("Error occured while adding new group.");
 			return null;
 		}
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		List<String> userAdded = new ArrayList<>();
+		
+		for (LdapEntry user : entries) {
+			if (user.getUid() != null) {
+				userAdded.add(user.getUid());
+			}
+		}
+		requestData.put("uid",userAdded);
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "New group has been created " + entry.getDistinguishedName();
+		operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
 		
 //		try {
 //			//when single dn comes spring boot takes it as multiple arrays

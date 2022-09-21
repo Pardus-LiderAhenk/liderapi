@@ -29,11 +29,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.OperationLogService;
+
 
 /**
  * Controller for sudo groups operations
@@ -54,8 +57,11 @@ public class SudoGroupsController {
 	@Autowired
 	private ConfigurationService configurationService;
 	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	@RequestMapping(value = "/getGroups")
+
 	public List<LdapEntry> getSudoGroups() {
 		List<LdapEntry> retList = new ArrayList<LdapEntry>();
 		retList.add(ldapService.getLdapSudoGroupsTree());
@@ -91,9 +97,17 @@ public class SudoGroupsController {
 			//get full of ou details after creation
 			selectedEntry = ldapService.getEntryDetail(dn);
 			
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("dn", selectedEntry.getDistinguishedName());
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = dataMapper.writeValueAsString(requestData);
+			String log = "Entry has been added to " + selectedEntry.getDistinguishedName();
+			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+			
 			return selectedEntry;
-		} catch (LdapException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
 			return null;
 		}
 	}
@@ -104,13 +118,21 @@ public class SudoGroupsController {
 			if(dn != configurationService.getAgentLdapBaseDn()) {
 				ldapService.updateOLCAccessRulesAfterEntryDelete(dn);
 				ldapService.deleteNodes(ldapService.getOuAndOuSubTreeDetail(dn));
+				
+				Map<String, Object> requestData = new HashMap<String, Object>();
+				requestData.put("dn", dn);
+				ObjectMapper dataMapper = new ObjectMapper();
+				String jsonString = dataMapper.writeValueAsString(requestData);
+				String log = "Entry name has been deleted " + dn;
+				operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+				
 				return true;
 			} else {
 				return false;
 			}
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
 			return false;
 		}
 	}
@@ -125,6 +147,20 @@ public class SudoGroupsController {
 			e.printStackTrace();
 			return false;
 		}
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("SourceDN",sourceDN);
+		requestData.put("DestinationDN",destinationDN);
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "Entry has been moved from " + sourceDN + " to " + destinationDN ;
+		operationLogService.saveOperationLog(OperationType.MOVE, log, jsonString.getBytes(), null, null, null);
+		
 		return true;
 	}
 	
@@ -144,9 +180,17 @@ public class SudoGroupsController {
 			}
 			LdapEntry selectedEntry = ldapService.getEntryDetail(newEntryDN);
 			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("oldDN", oldDN);
+			requestData.put("newDN", newName);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = dataMapper.writeValueAsString(requestData);
+			String log = "Entry name has been changed from " + oldDN + " to " + newName;
+			operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+			
 			return selectedEntry;
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
 			return null;
 		}
 	}
@@ -227,6 +271,17 @@ public class SudoGroupsController {
 				System.out.println(attributes);
 				ldapService.addEntry(newGroupDN , attributes);
 				entry = ldapService.getEntryDetail(newGroupDN);
+
+				Map<String, Object> requestData = new HashMap<String, Object>();
+				requestData.put("dn", entry.getDistinguishedName());
+				requestData.put("sudoUser", sudoUserList);
+				requestData.put("sudoHost", sudoHostList);
+				requestData.put("sudoCommand", sudoCommandList);
+				ObjectMapper dataMapper = new ObjectMapper();
+				String jsonString = dataMapper.writeValueAsString(requestData);
+				String log = entry.getDistinguishedName()+ " sudoGroup has been created";
+				operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+				
 				return entry;
 			} catch (LdapException e) {
 				logger.error("Error occured while adding new group.");
@@ -238,10 +293,7 @@ public class SudoGroupsController {
 			e.printStackTrace();
 		}
 		
-		
-
 		return null;
-		
 	}
 	
 	//edit sudo group
@@ -287,6 +339,19 @@ public class SudoGroupsController {
 				}
 			}
 			entry = ldapService.getEntryDetail(newEntryDN);
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("dn", entry.getDistinguishedName());
+			requestData.put("sudoUser", sudoUserList);
+			requestData.put("sudoHost", sudoHostList);
+			requestData.put("sudoCommand", sudoCommandList);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = dataMapper.writeValueAsString(requestData);
+			String log = entry.getDistinguishedName()+ " sudoGroup has been changed";
+			operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+			
+			
+			
 			return entry;
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -313,8 +378,17 @@ public class SudoGroupsController {
 			@RequestParam(value="uid", required=true) String uid) {
 		try {
 			ldapService.updateEntryRemoveAttributeWithValue(dn, "sudoUser", uid);
-		} catch (LdapException e) {
-			e.printStackTrace();
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("dn", dn);
+			requestData.put("uid", uid);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = dataMapper.writeValueAsString(requestData);
+			String log = "sudoUser " + uid + " has been deleted " + dn;
+			operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+			
+		} catch (Exception e) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
 			return null;
 		}
 		return ldapService.getEntryDetail(dn);

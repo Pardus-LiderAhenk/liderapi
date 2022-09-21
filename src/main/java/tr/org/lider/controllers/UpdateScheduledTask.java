@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import tr.org.lider.services.ScheduledTaskService;
 
-
 /**
  *  Scheduled task as cancel or updated
  */
@@ -35,7 +34,6 @@ public class UpdateScheduledTask {
 		return response;
 	}
 	
-	
 	@RequestMapping(value = "/cancel", method = { RequestMethod.POST })
 	public ResponseEntity<?> cancelScheduledTask(@RequestParam (value = "id", required=false) Long id) {
 		
@@ -43,7 +41,4 @@ public class UpdateScheduledTask {
 		ResponseEntity<?> response = scheduledTaskService.cancelScheduledTask(id);
 		return response;
 	}
-	
-	
-	
 }
