@@ -2,7 +2,6 @@ package tr.org.lider;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Properties;
 
 import javax.annotation.PostConstruct;
 
@@ -30,13 +29,14 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.security.CustomPasswordEncoder;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "tr.org.lider")
 @EnableJpaRepositories(basePackages = {"tr.org.lider"})
 @EntityScan(basePackages = {"tr.org.lider"})
 @ComponentScan(basePackages = {"tr.org.lider"})
 @EnableCaching
-public class Lider2Application extends SpringBootServletInitializer {
-
+public class LiderApplication extends SpringBootServletInitializer {
+	
+	
 	Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
@@ -50,23 +50,7 @@ public class Lider2Application extends SpringBootServletInitializer {
 	
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(Lider2Application.class)
-				.sources(Lider2Application.class)
-				.properties(getProperties());
-	}
-
-	public static void main(String[] args) {
-		new SpringApplicationBuilder(Lider2Application.class)
-		.sources(Lider2Application.class)
-		.properties(getProperties())
-		.run(args);
-	}
-
-
-	static Properties getProperties() {
-		Properties props = new Properties();
-		props.put("spring.config.location","file:/etc/lider/lider.properties");
-		return props;
+		return application.sources(LiderApplication.class);
 	}
 	
 	@SuppressWarnings("rawtypes")
