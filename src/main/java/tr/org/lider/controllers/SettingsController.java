@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.RoleImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -121,6 +124,31 @@ public class SettingsController {
 		configParams.setAdUseSSL(adUseSSL);
 		configParams.setAdUseTLS(adUseTLS);
 		configParams.setAdAllowSelfSignedCert(adAllowSelfSignedCert);
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("ldapServer",configParams.getLdapServer());
+		requestData.put("ldapPort",configParams.getLdapPort());
+		requestData.put("ldapUsername",configParams.getLdapUsername());
+		requestData.put("adIpAddress",configParams.getAdIpAddress());
+		requestData.put("adPort",configParams.getAdPort());
+		requestData.put("adDomainName",configParams.getAdDomainName());
+		requestData.put("adAdminUserName",configParams.getAdAdminUserName());
+		requestData.put("adAdminUserFullDN",configParams.getAdAdminUserFullDN());
+		requestData.put("adHostName",configParams.getAdHostName());
+		requestData.put("adUseSSL",configParams.getAdUseSSL());
+		requestData.put("adUseTLS",configParams.getAdUseTLS());
+		requestData.put("adAllowSelfSignedCert",configParams.getAdAllowSelfSignedCert());
+
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "LDAP server setting has been updated";
+		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		
 		return configurationService.updateConfigParams(configParams);
 	}
 
@@ -153,6 +181,25 @@ public class SettingsController {
 				logger.error("XMPP settings are updated but error occured while connecting with new settings. Message: " + e.getMessage());
 			}
 		}
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("xmppHost",configParams.getXmppHost());
+		requestData.put("xmppPort",configParams.getXmppPort());
+		requestData.put("xmppUsername",configParams.getXmppUsername());
+		requestData.put("xmppMaxRetryConnectionCount",configParams.getXmppMaxRetryConnectionCount());
+		requestData.put("xmppPacketReplayTimeout",configParams.getXmppPacketReplayTimeout());
+		requestData.put("xmppPingTimeout",configParams.getXmppPingTimeout());
+
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "XMPP server setting has been updated";
+		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		
 		return updatedParams;
 	}
 
@@ -171,6 +218,24 @@ public class SettingsController {
 		configParams.setFileServerUsername(fileServerUsername);
 		configParams.setFileServerPassword(fileServerPassword);
 		configParams.setFileServerAgentFilePath(fileServerAgentFilePath);
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("fileServerAddress",configParams.getFileServerHost());
+		requestData.put("fileServerUsername",configParams.getFileServerUsername());
+		requestData.put("fileServerPort",configParams.getFileServerPort());
+		requestData.put("fileServerAgentFilePath",configParams.getFileServerAgentFilePath());
+		requestData.put("fileTransferType",configParams.getFileServerProtocol());
+
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "File server setting has been updated";
+		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		
 		return configurationService.updateConfigParams(configParams);
 	}
 
@@ -182,6 +247,7 @@ public class SettingsController {
 			@RequestParam (value = "emailPassword", required = false) String emailPassword,
 			@RequestParam (value = "smtpAuth", required = false) Boolean smtpAuth,
 			@RequestParam (value = "tlsEnabled", required = false) Boolean tlsEnabled) {
+		
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setMailHost(emailHost);
 		configParams.setMailPassword(emailPassword);
@@ -189,6 +255,24 @@ public class SettingsController {
 		configParams.setMailSmtpAuth(smtpAuth);
 		configParams.setMailSmtpStartTlsEnable(tlsEnabled);
 		configParams.setMailAddress(emailUsername);
+
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("emailHost",configParams.getMailHost());
+		requestData.put("emailPort",configParams.getMailPassword());
+		requestData.put("emailUsername",configParams.getMailSmtpPort());
+		requestData.put("smtpAuth",configParams.getMailSmtpStartTlsEnable());
+		requestData.put("tlsEnabled",configParams.getMailAddress());
+
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "Mail server setting has been updated";
+		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		
 		return configurationService.updateConfigParams(configParams);
 	}
 	
@@ -199,6 +283,7 @@ public class SettingsController {
 			@RequestParam (value = "ahenkRepoKeyAddress", required = true) String ahenkRepoKeyAddress,
 			@RequestParam (value = "sudoRoleType", required = true) SudoRoleType sudoRoleType,
 			@RequestParam (value = "selectedRegistrationType", required = true) RegistrationTemplateType selectedRegistrationType) {
+		
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setDisableLocalUser(disableLocalUser);
 		configParams.setDomainType(domainType);
@@ -207,10 +292,27 @@ public class SettingsController {
 		configParams.setAhenkRepoKeyAddress(ahenkRepoKeyAddress);
 		configParams.setSelectedRegistrationType(selectedRegistrationType);
 		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("domainType",configParams.getDomainType());
+		requestData.put("ahenkRepoAddress",configParams.getAhenkRepoAddress());
+		requestData.put("ahenkRepoKeyAddress",configParams.getAhenkRepoKeyAddress());
+		requestData.put("sudoRoleType",configParams.getSudoRoleType());
+		requestData.put("selectedRegistrationType",configParams.getSelectedRegistrationType());
+		requestData.put("disableLocalUser",configParams.getDisableLocalUser());
+
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "Other server setting has been updated";
+		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		
 		return configurationService.updateConfigParams(configParams);
 	}
 
-	
 	//add roles to user. 
 	@RequestMapping(method=RequestMethod.POST, value = "/editUserRoles", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<LdapEntry>> editUserRoles(@RequestParam (value = "dn", required = true) String dn,
@@ -244,6 +346,17 @@ public class SettingsController {
 				String filter= "(&(objectClass=pardusAccount)(objectClass=pardusLider)(liderPrivilege=ROLE_USER))";
 				ldapEntries  = ldapService.findSubEntries(filter,
 						new String[] { "*" }, SearchScope.SUBTREE);
+				try {
+					Map<String, Object> requestData = new HashMap<String, Object>();
+					requestData.put("dn", entry.getDistinguishedName());
+					requestData.put("liderPrivilege", roles);
+					ObjectMapper dataMapper = new ObjectMapper();
+					String jsonString = dataMapper.writeValueAsString(requestData);
+					String log = entry.getDistinguishedName()+ " Lider Privileges has been changed";
+					operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+				}catch (Exception e) {
+					logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
+				}
 				return new ResponseEntity<>(ldapEntries, HttpStatus.OK);
 			}
 		} catch (LdapException e) {
@@ -276,6 +389,21 @@ public class SettingsController {
 				String filter= "(&(objectClass=pardusAccount)(objectClass=pardusLider)(liderPrivilege=ROLE_USER))";
 				ldapEntries  = ldapService.findSubEntries(filter,
 						new String[] { "*" }, SearchScope.SUBTREE);
+				
+
+				Map<String, Object> requestData = new HashMap<String, Object>();	
+				requestData.put("dn",entry.getDistinguishedName());
+				requestData.put("menuRole",entry.getAttributesMultiValues().get("liderPrivilege"));
+				ObjectMapper dataMapper = new ObjectMapper();
+				String jsonString = null ;
+				try {
+					jsonString = dataMapper.writeValueAsString(requestData);
+				} catch (JsonProcessingException e1) {
+					logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+				}
+				String log = entry.getName() + " Lider privileges access has been deleted" ;
+				operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+				
 				return new ResponseEntity<>(ldapEntries, HttpStatus.OK);
 			}
 
@@ -294,6 +422,19 @@ public class SettingsController {
 	public List<RoleImpl> saveMenusForRole(@RequestBody RoleImpl role) {
 		if(!role.getName().equals("ROLE_ADMIN")) {
 			roleService.saveRole(role);
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("menuRole",role);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = null ;
+			try {
+				jsonString = dataMapper.writeValueAsString(requestData);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}
+			String log = role.getName() + " Menu settings has been chancged" ;
+			operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+			
 			return roleService.getRoles();
 		} else {
 			return null;
@@ -326,6 +467,19 @@ public class SettingsController {
 			rule.setAssignedDNType("group.exact");
 			rule.setAssignedDN(groupDN);
 			rule.setAccessType(accessType);
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("olcAccess",rule);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = null ;
+			try {
+				jsonString = dataMapper.writeValueAsString(requestData);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}
+			String log = rule.getAssignedDN() + " OLC Access has been added" ;
+			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+			
 			return ldapService.addOLCAccessRule(rule);
 		} else {
 			return false;
@@ -335,6 +489,18 @@ public class SettingsController {
 	@RequestMapping(method=RequestMethod.POST ,value = "/deleteOLCAccessRule", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Boolean deleteOLCAccessRule(@RequestBody OLCAccessRule rule) 
 	{
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("olcAccess",rule);
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = rule.getAssignedDN() + " OLC Access has been deleted" ;
+		operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+		
 		ldapService.removeOLCAccessRuleWithParents(rule);
 		return true;
 	}
@@ -384,6 +550,19 @@ public class SettingsController {
 
 			logger.info("User created successfully RDN ="+rdn);
 			user = ldapService.findSubEntries(rdn, "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("dn",user.getDistinguishedName());
+
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = null ;
+			try {
+				jsonString = dataMapper.writeValueAsString(requestData);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}
+			String log = user.getDistinguishedName() + " Console user has been added";
+			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
 			
 			return user;
 		} catch (LdapException e) {
