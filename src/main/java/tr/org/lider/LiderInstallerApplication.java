@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -21,6 +23,8 @@ import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @ComponentScan(basePackages =  "tr.org.lider.installer")
+@EntityScan(basePackages = {"tr.org.lider.installer"})
+@EnableJpaRepositories(basePackages = {"tr.org.lider.installer"})
 @SpringBootApplication(
 		scanBasePackages = "tr.org.lider.installer",
 		exclude = {
