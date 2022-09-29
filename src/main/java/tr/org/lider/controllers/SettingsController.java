@@ -553,7 +553,6 @@ public class SettingsController {
 			
 			Map<String, Object> requestData = new HashMap<String, Object>();
 			requestData.put("dn",user.getDistinguishedName());
-
 			ObjectMapper dataMapper = new ObjectMapper();
 			String jsonString = null ;
 			try {
