@@ -31,7 +31,7 @@ import tr.org.lider.services.ExcelExportService;
 
 @Secured({"ROLE_ADMIN", "ROLE_AGENT_INFO" })
 @RestController
-@RequestMapping("api/lider/agent-info")
+@RequestMapping("/api/lider/agent-info")
 @Tag(name = "Agent service", description = "Agent controller")
 public class AgentInfoController {
 
