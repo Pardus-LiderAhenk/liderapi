@@ -125,6 +125,7 @@ public class AdController {
 		}
 		return oneLevelSubList;
 	}
+	
 	@RequestMapping(value = "/addUser2AD")
 	public ResponseEntity<?> addUser2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		 logger.info("Adding user to AD. User info : "+ selectedEntry.getDistinguishedName());
@@ -171,7 +172,7 @@ public class AdController {
 			String rdn="CN="+selectedEntry.getCn()+","+selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
 			selectedEntry = service.getEntryDetail(rdn);
-			operationLogService.saveOperationLog(OperationType.CREATE,"Dizin yapısına kullanıcı eklendi.Kullanıcı: "+rdn,null);
+			operationLogService.saveOperationLog(OperationType.CREATE, selectedEntry.getCn() + ", USER has been added " + rdn + " [Active Directroy]", null);
 //			return responseFactoryService.createResponse(RestResponseStatus.OK,"Kullanıcı Başarı ile oluşturuldu.");
 			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
@@ -195,7 +196,7 @@ public class AdController {
 			String rdn = "OU="+selectedEntry.getOu()+","+selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
 			selectedEntry = service.getEntryDetail(rdn);
-			operationLogService.saveOperationLog(OperationType.CREATE,"Dizin yapısına organizasyon birimi eklendi. Ou: "+rdn,null);
+			operationLogService.saveOperationLog(OperationType.CREATE, selectedEntry.getOu() + ", FOLDER has been added " + rdn + " [Active Directroy]", null);
 			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -217,7 +218,7 @@ public class AdController {
 			String rdn="CN="+selectedEntry.getCn()+","+selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
 			selectedEntry = service.getEntryDetail(rdn);
-			operationLogService.saveOperationLog(OperationType.CREATE,"Dizin yapısına grup eklendi. Grup: "+rdn,null);
+			operationLogService.saveOperationLog(OperationType.CREATE, selectedEntry.getCn() + ", GROUP has been added " + rdn + " [Active Directroy]",null);
 			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -229,9 +230,12 @@ public class AdController {
 	public LdapEntry addMember2ADGroup(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding {} to group. Group info {} ", selectedEntry.getDistinguishedName(),selectedEntry.getParentName());
 		
+		LdapEntry memberEntry = null;
+		
 		try {
+			memberEntry = service.getEntryDetail(selectedEntry.getDistinguishedName());
 			service.updateEntryAddAtribute(selectedEntry.getParentName(), "member", selectedEntry.getDistinguishedName());
-			operationLogService.saveOperationLog(OperationType.CREATE,"Gruba üye eklendi. Üye: "+selectedEntry.getDistinguishedName(),null);
+			operationLogService.saveOperationLog(OperationType.UPDATE, memberEntry.getCn()+ " User has been added to Group " + selectedEntry.getParentName() + " [Active Directroy]", null);
 			selectedEntry = service.getEntryDetail(selectedEntry.getParentName());
 			return selectedEntry;
 		} catch (LdapException e) {
@@ -262,6 +266,7 @@ public class AdController {
 		}
 		return results;
 	}
+	
 	@RequestMapping(value = "/searchEntryGroup")
 	public List<LdapEntry>  searchEntryGroup(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
@@ -283,6 +288,7 @@ public class AdController {
 		}
 		return results;
 	}
+	
 	@RequestMapping(value = "/searchEntry")
 	public List<LdapEntry>  searchEntry(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
@@ -330,7 +336,7 @@ public class AdController {
 					
 					if(adUserListForCheck!=null && adUserListForCheck.size()==0) {
 						addUserToLDAP(selectedLdapEntryList.get(0).getDistinguishedName(), adUser, sAMAccountName,sAMAccountName);
-						operationLogService.saveOperationLog(OperationType.UPDATE,"Kullanıcı Lider LDAP yapısına taşındı. Kullanıcı : "+selectedLdapEntryList.get(0).getDistinguishedName(),null);
+						operationLogService.saveOperationLog(OperationType.UPDATE, sAMAccountName + " User has been moved to LDAP"+selectedLdapEntryList.get(0).getDistinguishedName(),null);
 					}
 					else {
 						logger.info("SYNC AD to LDAP.. User exist ="+adUser.getDistinguishedName() );
@@ -372,7 +378,7 @@ public class AdController {
 						ldapService.updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_USER");
 						ldapService.updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_ADMIN");
 						
-						operationLogService.saveOperationLog(OperationType.UPDATE,"Kullanıcı Lider sistemine taşındı. Kullanıcı : "+dn,null);
+						operationLogService.saveOperationLog(OperationType.MOVE, dn + " User authorization has been given for Lider", null);
 					}
 					else {
 						logger.info("SYNC AD to LDAP.. User exist ="+adUser.getDistinguishedName() );
@@ -451,6 +457,8 @@ public class AdController {
 						
 						String rdn="cn="+adGroup.get("cn")+","+destinationDnLdap;
 						ldapService.addEntry(rdn, attributes);
+						
+						operationLogService.saveOperationLog(OperationType.UPDATE, adGroup.get("cn") + " group has been moved to LDAP "+selectedLdapEntryList.get(0).getDistinguishedName(),null);
 					}
 					else {
 						logger.info("SYNC AD to LDAP.. Group already exist ="+adGroup.getDistinguishedName() );
@@ -527,10 +535,10 @@ public class AdController {
 			
 			if(!"".equals(selectedEntry.getUserPassword())){
 				service.updateEntryReplaceAttribute(selectedEntry.getDistinguishedName(),"unicodePwd",new String(newUnicodePassword));
-				
-				operationLogService.saveOperationLog(OperationType.UPDATE,"Kullanıcı Parolası Değiştirildi. Kullanıcı : "+selectedEntry.getDistinguishedName(),null);
 			}
 			selectedEntry = service.findSubEntries(selectedEntry.getDistinguishedName(), "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
+			operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD, selectedEntry.getDistinguishedName() + " password has been changed [Active Directory]", null);
+
 			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -550,7 +558,7 @@ public class AdController {
 			logger.info("AD Deleting entry. Dn: {}",selectedEntry.getDistinguishedName());
 			service.deleteEntry(selectedEntry.getDistinguishedName());
 			
-			operationLogService.saveOperationLog(OperationType.DELETE,"Dizin yapısından nesne silindi. Silinen nesne: "+selectedEntry.getDistinguishedName(),null);
+			operationLogService.saveOperationLog(OperationType.DELETE, selectedEntry.getDistinguishedName() + " entry has been deleted from " + "[Active Directroy]", null);
 			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -595,7 +603,7 @@ public class AdController {
 		if(checkedArraySizeIsOne) {
 			try {
 				service.updateEntryRemoveAttributeWithValue(dn, "member", String.join(",", dnList));
-				operationLogService.saveOperationLog(OperationType.DELETE,"Dizin grubundan üye silindi. Grup: "+dn +" Silinen üyeler: "+dnList,null);
+				operationLogService.saveOperationLog(OperationType.DELETE,  dnList + " User has been deleted from group [Active Directory]", null);
 				
 			} catch (LdapException e) {
 				e.printStackTrace();
@@ -605,7 +613,7 @@ public class AdController {
 			for (int i = 0; i < dnList.size(); i++) {
 				try {
 					service.updateEntryRemoveAttributeWithValue(dn, "member", dnList.get(i));
-					operationLogService.saveOperationLog(OperationType.DELETE,"Dizin grubundan üye silindi. Grup: "+dn +" Silinen üye: "+dnList.get(i),null);
+					operationLogService.saveOperationLog(OperationType.DELETE, dnList.get(i) + "Users has been deleted from group [Active Directory]",null);
 				} catch (LdapException e) {
 					e.printStackTrace();
 					return null;

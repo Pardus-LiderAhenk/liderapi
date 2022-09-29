@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.PluginImpl;
 import tr.org.lider.entities.PluginTask;
 import tr.org.lider.ldap.DNType;
@@ -42,6 +43,7 @@ import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.PluginService;
 import tr.org.lider.services.TaskService;
 import tr.org.lider.utils.IRestResponse;
+import tr.org.lider.services.OperationLogService;;
 
 
 /**
@@ -79,6 +81,9 @@ public class ComputerController {
 	
 	@Autowired
 	private XMPPClientImpl xmppClient;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 
 	@RequestMapping(value = "/getComputers")
 	public List<LdapEntry> getComputers() {
@@ -359,7 +364,7 @@ public class ComputerController {
 			requestBody.setEntryList(entryList);
 			IRestResponse restResponse = taskService.execute(requestBody);
 			logger.debug("Completed processing request, returning result: {}", restResponse.toJson());
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
@@ -416,6 +421,7 @@ public class ComputerController {
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
+		
 		commandService.deleteAgentCommands(agentDN, agentUID);
 		return true;
 	}
@@ -490,9 +496,9 @@ public class ComputerController {
 		}
 		//update C_AGENT table
 		agentService.updateHostname(agentDN, newAgentDN, newHostname);
-
 		//update C_COMMAND and C_COMMAND_EXECUTION table
 		commandService.updateAgentHostname(agentDN, newAgentDN, cn, newHostname);
+		
 		return new ResponseEntity<Boolean>(true, HttpStatus.OK);
 	}
 
@@ -514,6 +520,19 @@ public class ComputerController {
 						return false;
 					}
 					else {
+						
+						Map<String, Object> requestData = new HashMap<String, Object>();
+						requestData.put("dn",entry.getDistinguishedName());
+						ObjectMapper dataMapper = new ObjectMapper();
+						String jsonString = null ; 
+						try {
+							jsonString = dataMapper.writeValueAsString(requestData);
+						} catch (JsonProcessingException e1) {
+							logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+						}
+						String log = entry.getDistinguishedName()+ " folder has been deleted";
+						operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+						
 						ldapService.deleteNodes(entry);
 						return true;
 					}
@@ -612,6 +631,7 @@ public class ComputerController {
 						phase.toString(), new Date()));
 			} 
 			agentRepository.save(agent);
+			
 			return agent;
 		} else {
 			return null;
@@ -646,6 +666,18 @@ public class ComputerController {
 			
 			//get full of ou details after creation
 			selectedEntry = ldapService.getEntryDetail(dn);
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("dn",selectedEntry.getDistinguishedName());
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = null ; 
+			try {
+				jsonString = dataMapper.writeValueAsString(requestData);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}
+			String log = selectedEntry.getDistinguishedName() + " folder has been created";
+			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
 			
 			return selectedEntry;
 		} catch (LdapException e) {

@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
@@ -13,10 +15,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.PackageInfo;
 import tr.org.lider.plugins.RepoSourcesListParser;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.OperationLogService;
+
 
 /**
  * 
@@ -29,9 +37,14 @@ import tr.org.lider.services.ConfigurationService;
 @RestController
 @RequestMapping("/packages")
 public class PackagesController {
+	
+	private final Logger logger = org.slf4j.LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	ConfigurationService configurationService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 
 	@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<PackageInfo> getPackageList(@RequestParam(value="type") String type,
@@ -56,6 +69,20 @@ public class PackagesController {
 			HashMap<String, Object> repoMap = new HashMap<String, Object>();
 			repoMap.put("pardusRepoAddress", configParams.getPardusRepoAddress());
 			repoMap.put("pardusRepoComponent", configParams.getPardusRepoComponent());
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("pardusRepoAddress",configParams.getPardusRepoAddress());
+			requestData.put("pardusRepoComponent",configParams.getPardusRepoComponent());
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = null ; 
+			try {
+				jsonString = dataMapper.writeValueAsString(requestData);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}
+			String log = pardusRepoAddress + " has been updated";
+			operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+			
 			return repoMap;
 		} else {
 			return null;

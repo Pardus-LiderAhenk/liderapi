@@ -337,6 +337,7 @@ public class UserGroupsController {
 			String jsonString = dataMapper.writeValueAsString(requestData);
 			String log = "Entry name has been changed from " + oldDN + " to " + newName;
 			operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+			
 			return selectedEntry;
 		} catch (Exception e) {
 			logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
@@ -483,7 +484,7 @@ public class UserGroupsController {
 		} catch (JsonProcessingException e1) {
 			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
 		}
-		String log = "New group has been created " + entry.getDistinguishedName();
+		String log = "New user group has been created " + entry.getDistinguishedName();
 		operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
 		
 //		try {

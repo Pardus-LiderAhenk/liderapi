@@ -82,7 +82,7 @@ public class AuthController {
 			String tokenData = AESHash.encrypt(loginParams.getPassword(), jwtSecret + jwt);
 			Cache<String, String> cache = cacheManager.getCache("userCache");
 			cache.put(jwt, tokenData);
-			operationLogService.saveOperationLog(OperationType.LOGIN,"Lider Arayüze Giriş Yapıldı.",null);
+			operationLogService.saveOperationLog(OperationType.LOGIN,"User logged in",null);
 			return ResponseEntity.ok(new JwtResponse(jwt, userPrincipal.getName(), userPrincipal.getSurname()));
 		} catch (BadCredentialsException e) {
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but username or password is wrong. Returned: " + HttpStatus.NOT_FOUND);

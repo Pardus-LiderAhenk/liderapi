@@ -126,7 +126,7 @@ public class PluginService {
 		pluginTaskList.add(new PluginTask("Paket Deposu Ekle veya Sil", "package-sources", "İstemcide bulunan paket deposunu siler veya yeni depo ekler", "PACKAGE_SOURCES", false, findPluginIdByName("package-manager"), 0));
 		pluginTaskList.add(new PluginTask("Paket Kaldır", "package-management", "İstemcide bulunan paket veya paketleri kaldırır", "PACKAGE_MANAGEMENT", false, findPluginIdByName("package-manager"), 1));
 		pluginTaskList.add(new PluginTask("Paket Kur veya Kaldır", "packages", "İstenilen paket deposundan istemciye paket kurar veya seçilen paket veya paketleri kaldırır", "PACKAGES", true, findPluginIdByName("package-manager"), 1));
-		pluginTaskList.add(new PluginTask("İsmcideki Paketleri Listele", "installed-packages", "İstemcide bulunan paketleri listeler", "INSTALLED_PACKAGES", false, findPluginIdByName("package-manager"), 0));
+		pluginTaskList.add(new PluginTask("İstemcideki Paketleri Listele", "installed-packages", "İstemcide bulunan paketleri listeler", "INSTALLED_PACKAGES", false, findPluginIdByName("package-manager"), 0));
 		pluginTaskList.add(new PluginTask("Paket Kontrol Et", "check-package", "Paket kontrol eder", "CHECK_PACKAGE", true, findPluginIdByName("package-manager"), 1));
 //		remote-access plugin task 
 		pluginTaskList.add(new PluginTask("Uzak Masaüstü", "remote-access", "İstemciye uzak masaüstü erişimi sağlar", "SETUP-VNC-SERVER", false, findPluginIdByName("remote-access"), 1));

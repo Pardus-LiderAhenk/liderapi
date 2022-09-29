@@ -34,6 +34,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tr.org.lider.entities.AgentImpl;
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -41,6 +42,7 @@ import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.services.AgentService;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.OperationLogService;;
 
 /**
  * Controller for computer groups operations
@@ -59,6 +61,9 @@ public class ComputerGroupsController {
 	
 	@Autowired
 	private AgentService agentService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	@Autowired
 	private ConfigurationService configurationService;
@@ -100,6 +105,18 @@ public class ComputerGroupsController {
 			//get full of ou details after creation
 			selectedEntry = ldapService.getEntryDetail(dn);
 			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("dn",selectedEntry.getDistinguishedName());
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = null ; 
+			try {
+				jsonString = dataMapper.writeValueAsString(requestData);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}
+			String log = selectedEntry.getDistinguishedName() + " group has been created";
+			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+			
 			return selectedEntry;
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -113,6 +130,19 @@ public class ComputerGroupsController {
 			if(dn != configurationService.getAgentLdapBaseDn()) {
 				ldapService.updateOLCAccessRulesAfterEntryDelete(dn);
 				ldapService.deleteNodes(ldapService.getOuAndOuSubTreeDetail(dn));
+				
+				Map<String, Object> requestData = new HashMap<String, Object>();
+				requestData.put("dn",dn);
+				ObjectMapper dataMapper = new ObjectMapper();
+				String jsonString = null ; 
+				try {
+					jsonString = dataMapper.writeValueAsString(requestData);
+				} catch (JsonProcessingException e1) {
+					logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+				}
+				String log = dn + " group has been deleted";
+				operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+				
 				return true;
 			} else {
 				return false;
@@ -219,6 +249,26 @@ public class ComputerGroupsController {
 			logger.error("Error occured while adding new group.");
 			return null;
 		}
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		List<String> computerAdded = new ArrayList<>();
+		
+		for (LdapEntry computer : entries) {
+			if (computer.getUid() != null) {
+				computerAdded.add(computer.getUid());
+			}
+		}
+		requestData.put("uid",computerAdded);
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "New computer group has been created " + entry.getDistinguishedName();
+		operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+		
 		return new ResponseEntity<LdapEntry>(entry, HttpStatus.OK);
 	}
 	
@@ -272,6 +322,26 @@ public class ComputerGroupsController {
 				logger.error("Error occured while adding new group.");
 				return null;
 			}
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			List<String> computerAdded = new ArrayList<>();
+			
+			for (LdapEntry computer : entries) {
+				if (computer.getUid() != null) {
+					computerAdded.add(computer.getUid());
+				}
+			}
+			requestData.put("uid",computerAdded);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = null;
+			try {
+				jsonString = dataMapper.writeValueAsString(requestData);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}
+			String log = "Computers has been added to " + entry.getDistinguishedName();
+			operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+			
 			return new ResponseEntity<LdapEntry>(entry, HttpStatus.OK);
 		}
 	
@@ -320,6 +390,20 @@ public class ComputerGroupsController {
 				}
 			}
 		}
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("dn",dn);
+		requestData.put("uid",dnList.get(0));
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = dnList.get(0) + " has been deleted from " + dn;
+		operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+		
 		return ldapService.getEntryDetail(dn);
 	}
 	
@@ -333,6 +417,20 @@ public class ComputerGroupsController {
 			e.printStackTrace();
 			return false;
 		}
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("SourceDN",sourceDN);
+		requestData.put("DestinationDN",destinationDN);
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "Entry has been moved from " + sourceDN + " to " + destinationDN ;
+		operationLogService.saveOperationLog(OperationType.MOVE, log, jsonString.getBytes(), null, null, null);
+		
 		return true;
 	}
 	
@@ -351,6 +449,14 @@ public class ComputerGroupsController {
 				}
 			}
 			LdapEntry selectedEntry = ldapService.getEntryDetail(newEntryDN);
+			
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("oldDN", oldDN);
+			requestData.put("newDN", newName);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = dataMapper.writeValueAsString(requestData);
+			String log = "Entry name has been changed from " + oldDN + " to " + newName;
+			operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
 			
 			return selectedEntry;
 		} catch (Exception e) {
@@ -435,6 +541,23 @@ public class ComputerGroupsController {
 			logger.error("Error occured while adding new group.");
 			return null;
 		}
+		
+		String selectedAgentList[] = new String[listOfAgents.getContent().size()];
+		selectedAgentList = listOfAgents.getContent().stream().map(t -> t.getDn()).toArray(String[]::new);
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("newGroupDN", newGroupDN);
+		requestData.put("agents", selectedAgentList);
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "New group has been created " + newGroupDN + " and agents has been added";
+		operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+		
+		
 		return entry;
 	}
 	
@@ -483,6 +606,22 @@ public class ComputerGroupsController {
 			return null;
 		}
 		entry = ldapService.getEntryDetail(groupDN);
+		
+		String selectedAgentList[] = new String[listOfAgents.getContent().size()];
+		selectedAgentList = listOfAgents.getContent().stream().map(t -> t.getDn()).toArray(String[]::new);
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("newGroupDN", entry.getDistinguishedName());
+		requestData.put("agents", selectedAgentList);
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null;
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = "Existing group has been updated " + entry.getDistinguishedName() + " and agents has been added";
+		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		
 		return entry;
 	}
 }

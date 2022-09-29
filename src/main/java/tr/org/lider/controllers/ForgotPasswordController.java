@@ -2,6 +2,7 @@ package tr.org.lider.controllers;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,12 +22,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import tr.org.lider.entities.ForgotPasswordImpl;
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.EmailService;
 import tr.org.lider.services.ForgotPasswordService;
+import tr.org.lider.services.OperationLogService;;
 
 /**
  * 
@@ -49,6 +55,9 @@ public class ForgotPasswordController {
 
 	@Autowired
 	private ForgotPasswordService forgotPasswordService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 
 	@Value("${lider.url}")
 	private String liderURL;
@@ -194,6 +203,20 @@ public class ForgotPasswordController {
 				}
 				//delete forgot password key
 				forgotPasswordService.deleteByUsername(fp.get().getUsername());
+				
+				Map<String, Object> requestData = new HashMap<String, Object>();
+				requestData.put("username",ldapEntry.getDistinguishedName());
+				requestData.put("email",ldapEntry.getMail());
+				ObjectMapper dataMapper = new ObjectMapper();
+				String jsonString = null ; 
+				try {
+					jsonString = dataMapper.writeValueAsString(requestData);
+				} catch (JsonProcessingException e1) {
+					logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+				}
+				String log = ldapEntry.getDistinguishedName() + " password has been changed";
+				operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD, log, jsonString.getBytes(), null, null, null);
+//				
 				return new ResponseEntity<List<String>>(Arrays.asList("Parolanız başarılı bir şekilde yenilendi. Şimdi giriş yapabilirsiniz."), 
 						HttpStatus.OK);
 			}
