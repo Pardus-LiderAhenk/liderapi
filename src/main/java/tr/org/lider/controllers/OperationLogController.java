@@ -39,7 +39,7 @@ import tr.org.lider.services.OperationLogService;
  */
 
 @RestController
-@RequestMapping("api/operation")
+@RequestMapping("/api/operation")
 @Tag(name = "Operation Log ", description = "Operation Log Service")
 public class OperationLogController {
 

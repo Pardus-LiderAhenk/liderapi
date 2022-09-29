@@ -25,7 +25,7 @@ import tr.org.lider.services.ScheduledTaskService;
 
 @Secured({"ROLE_ADMIN", "ROLE_COMPUTERS" })
 @RestController
-@RequestMapping("api/lider/scheduled-task")
+@RequestMapping("/api/lider/scheduled-task")
 @Tag(name = "Update scheduled task", description = "Update Scheduled Task")
 public class UpdateScheduledTask {
 	

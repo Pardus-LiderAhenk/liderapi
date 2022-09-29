@@ -37,7 +37,7 @@ import tr.org.lider.services.ScheduledTaskReportService;
 
 @Secured({ "ROLE_ADMIN", "ROLE_EXECUTED_TASK" })
 @RestController
-@RequestMapping("api/lider/scheduled-task-report")
+@RequestMapping("/api/lider/scheduled-task-report")
 @Tag(name = "Scheduled Task Report", description = "Scheduled Task Report Service")
 public class ScheduledTaskReportController {
 
