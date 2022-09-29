@@ -34,13 +34,13 @@ import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.enums.AgentMessageType;
 import tr.org.lider.messaging.enums.StatusCode;
 import tr.org.lider.messaging.messages.ILiderMessage;
 import tr.org.lider.messaging.messages.IRegistrationResponseMessage;
 import tr.org.lider.messaging.messages.RegistrationMessageImpl;
 import tr.org.lider.messaging.messages.RegistrationResponseMessageImpl;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.ConfigurationService;
@@ -62,7 +62,7 @@ public class HostNameRegistrationSubscriberImpl implements IRegistrationSubscrib
 	private AgentRepository agentDao;
 
 	@Autowired
-	private XMPPClientImpl xmppClient;
+	private IMessagingService xmppClient;
 
 	@Autowired
 	private RegistrationTemplateService registrationTemplateService;

@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.messaging.messages.ILiderMessage;
 
 @Service
+@ConditionalOnProperty(prefix = "lider", name = "messaging", havingValue = "kafka")
 public class MessageProducer {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -22,7 +24,7 @@ public class MessageProducer {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
     
-    public void sendTask(ILiderMessage message){
+    public void sendMessage(ILiderMessage message){
 		try {
 			ObjectMapper mapper = new ObjectMapper();
 			mapper.setDateFormat(new SimpleDateFormat("dd-MM-yyyy HH:mm"));

@@ -21,14 +21,13 @@ import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.PluginTask;
 import tr.org.lider.entities.TaskImpl;
-import tr.org.lider.kafka.MessageProducer;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.messages.ExecuteTaskMessageImpl;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.messaging.messages.ILiderMessage;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.TaskRepository;
 import tr.org.lider.utils.IRestResponse;
 import tr.org.lider.utils.ResponseFactoryService;
@@ -46,7 +45,7 @@ public class TaskService {
 	private ConfigurationService configService;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private CommandService commandService;
@@ -62,9 +61,9 @@ public class TaskService {
 	
 	@Autowired
 	private PluginTaskService pluginTaskService;
-
+	
 	@Autowired
-	private MessageProducer messageProducer;
+	private IMessagingService mService;
 	
 	public IRestResponse execute(PluginTask request) {
 
@@ -178,7 +177,8 @@ public class TaskService {
 //						e.printStackTrace();
 //					}
 					try {
-						messageProducer.sendTask(message);
+						//messagingService.sendMessage(message);
+						mService.sendMessage(message);
 					} catch (Exception e) {
 						logger.error("Error occured while sending message to kafka. Message: " + e.getMessage());
 					}

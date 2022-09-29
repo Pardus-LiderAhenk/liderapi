@@ -7,8 +7,6 @@ import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +17,6 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.services.ConfigurationService;
 
 
@@ -40,9 +37,6 @@ public class LdapController {
 
 	@Autowired
 	private ConfigurationService configurationService;
-
-	@Autowired
-	private XMPPClientImpl messagingService;
 
 //	@RequestMapping(value = "/getOuDetails")
 //	public List<LdapEntry> task(LdapEntry selectedEntry) {

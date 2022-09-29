@@ -28,9 +28,10 @@ import tr.org.lider.entities.RoleImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.OLCAccessRule;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.messaging.enums.Protocol;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.security.CustomPasswordEncoder;
@@ -38,7 +39,6 @@ import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.RoleService;
-import tr.org.lider.messaging.enums.SudoRoleType;
 
 /**
  * This controller is used for showing and updating all settings for lider
@@ -58,7 +58,7 @@ public class SettingsController {
 	ConfigurationService configurationService;
 
 	@Autowired
-	XMPPClientImpl xmppClient;
+	private IMessagingService xmppClient;
 
 	@Autowired
 	private LDAPServiceImpl ldapService;
@@ -146,7 +146,7 @@ public class SettingsController {
 			logger.info("XMPP settings are updated. XMPP will disconnect and reconnect after resetting XMPP parameters.");
 			try {
 				xmppClient.disconnect();
-				xmppClient.initXMPPClient();
+				xmppClient.init();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

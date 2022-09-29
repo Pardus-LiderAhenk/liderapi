@@ -65,7 +65,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.CommandImpl;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.security.User;
 import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.CommandService;
@@ -87,7 +87,7 @@ public class LDAPServiceImpl implements ILDAPService {
 	//private ICacheService cacheService;
 
 	@Autowired
-	private XMPPClientImpl xmppClientImpl;
+	private IMessagingService xmppClientImpl;
 
 	@Autowired
 	private CommandService commandService;

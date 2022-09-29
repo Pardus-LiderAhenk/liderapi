@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.messages.ILiderMessage;
 import tr.org.lider.messaging.messages.UserSessionMessageImpl;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.messaging.subscribers.IUserSessionSubscriber;
 
 /**
@@ -37,11 +37,11 @@ public class UserSessionListener implements StanzaListener, StanzaFilter {
 	 */
 	private IUserSessionSubscriber subscriber;
 	
-	private XMPPClientImpl client;
+	private IMessagingService client;
 	
 	
 	
-	 public UserSessionListener(XMPPClientImpl client) {
+	 public UserSessionListener(IMessagingService client) {
 		 this.client = client;
 	}
 	

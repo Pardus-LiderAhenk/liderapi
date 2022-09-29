@@ -9,6 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,10 +19,10 @@ import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandExecutionResultImpl;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.PluginImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.enums.ContentType;
 import tr.org.lider.messaging.enums.StatusCode;
 import tr.org.lider.messaging.messages.ITaskStatusMessage;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.models.TaskStatusNotificationImpl;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.repositories.CommandExecutionRepository;
@@ -51,9 +52,11 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 	private ConfigurationService configurationService;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
-
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
+	
 	@Override
 	public void messageReceived(ITaskStatusMessage message) {
 
@@ -178,8 +181,9 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 
 								ObjectMapper mapper = new ObjectMapper();
 								mapper.setDateFormat(new SimpleDateFormat("dd-MM-yyyy HH:mm"));
-								messagingService.sendChatMessage(mapper.writeValueAsString(notification),
-										notification.getRecipient());
+//								messagingService.sendChatMessage(mapper.writeValueAsString(notification),
+//										notification.getRecipient());
+								messagingTemplate.convertAndSend("/topic/lider-response", mapper.writeValueAsString(notification)); 
 
 							} catch (Exception e) {
 								logger.error(e.getMessage(), e);

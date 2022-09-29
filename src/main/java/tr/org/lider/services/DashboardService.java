@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.message.service.IMessagingService;
 
 @Service
 public class DashboardService {
@@ -28,7 +28,7 @@ public class DashboardService {
 	private CommandService commandService;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private OperationLogService operationLogService;

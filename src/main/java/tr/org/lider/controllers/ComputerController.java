@@ -34,7 +34,7 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.services.AgentService;
 import tr.org.lider.services.CommandService;
@@ -60,7 +60,7 @@ public class ComputerController {
 	private ConfigurationService configurationService;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private AgentService agentService;
@@ -76,9 +76,6 @@ public class ComputerController {
 
 	@Autowired
 	private AgentRepository agentRepository;
-	
-	@Autowired
-	private XMPPClientImpl xmppClient;
 
 	@RequestMapping(value = "/getComputers")
 	public List<LdapEntry> getComputers() {
@@ -446,7 +443,7 @@ public class ComputerController {
 			//update uid attribute
 			ldapService.renameHostname("uid", newHostname, agentDN);
 			
-			xmppClient.addClientToRoster(newHostname + "@"+configurationService.getXmppServiceName());
+			messagingService.addClientToRoster(newHostname + "@"+configurationService.getXmppServiceName());
 
 			//check memberships and if membership exists in any group update DN info
 			ldapService.renameEntry(agentDN, "cn=" + newHostname);

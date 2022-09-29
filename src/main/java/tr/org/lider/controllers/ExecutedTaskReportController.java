@@ -50,7 +50,7 @@ public class ExecutedTaskReportController {
 	}
 
 	@RequestMapping(method=RequestMethod.POST, value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Page<CommandImpl> findAllCommandsRest(@RequestParam (value = "pageNumber") int pageNumber,
+	public ResponseEntity<?> findAllCommandsRest(@RequestParam (value = "pageNumber") int pageNumber,
 			@RequestParam (value = "pageSize") int pageSize,
 			@RequestParam (value = "taskCommand") Optional<String> taskCommand,
 			@RequestParam (value="startDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> startDate,
@@ -65,7 +65,10 @@ public class ExecutedTaskReportController {
 				}
 			}
 		}
-		return commands;
+		//return commands;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(commands);
 	}
 
 	@RequestMapping(method=RequestMethod.POST, value = "/plugins", produces = MediaType.APPLICATION_JSON_VALUE)

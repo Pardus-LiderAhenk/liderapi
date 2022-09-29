@@ -82,6 +82,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers("/favicon.png").permitAll()
 		.antMatchers("/lider-info/**").permitAll()
 		.antMatchers("/tunnel/**").permitAll()
+		.antMatchers("/lider-ws/**").permitAll()
+		.antMatchers("/app/**").permitAll()
+		.antMatchers("/topic/**").permitAll()
+		.antMatchers("/gs-guide-websocket/**").permitAll()
+		
 		.antMatchers("/test2/**").hasAuthority("ROLE_ADMIN")
 		.anyRequest().authenticated()
 		.and()

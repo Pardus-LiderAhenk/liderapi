@@ -59,6 +59,7 @@ public class JwtAuthTokenFilter extends OncePerRequestFilter {
 		try {
 			String jwt = getJwt(request);
 			if (jwt != null && tokenProvider.validateJwtToken(jwt)) {
+				System.err.println(jwt);
 				String username = tokenProvider.getUserNameFromJwtToken(jwt);
 				User userDetails = userService.loadUserByUsername(username);
 				Cache<String, String> cache = cacheManager.getCache("userCache");

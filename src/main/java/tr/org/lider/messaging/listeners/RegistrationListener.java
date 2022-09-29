@@ -29,14 +29,13 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Stanza;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.messages.ILiderMessage;
 import tr.org.lider.messaging.messages.RegistrationMessageImpl;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.messaging.subscribers.DefaultRegistrationSubscriberImpl;
 import tr.org.lider.messaging.subscribers.HostNameRegistrationSubscriberImpl;
 import tr.org.lider.messaging.subscribers.IPAddressRegistrationSubscriberImpl;
@@ -80,9 +79,9 @@ public class RegistrationListener implements StanzaListener, StanzaFilter {
 	
 	// TODO IMPROVEMENT: separate xmpp client into two classes. one for
 	// configuration/setup, other for functional methods
-	private XMPPClientImpl client;
+	private IMessagingService client;
 
-	public RegistrationListener(XMPPClientImpl client, 
+	public RegistrationListener(IMessagingService client, 
 			ConfigurationService configurationService,
 			HostNameRegistrationSubscriberImpl hostnameRegistrationSubscriberImpl,
 			IPAddressRegistrationSubscriberImpl ipAddressRegistrationSubscriberImpl,

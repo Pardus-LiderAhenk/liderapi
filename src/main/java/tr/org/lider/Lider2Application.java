@@ -23,6 +23,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.Ordered;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -37,6 +38,7 @@ import tr.org.lider.security.CustomPasswordEncoder;
 @ComponentScan(basePackages = {"tr.org.lider"})
 @EnableCaching
 @EnableKafka
+@EnableScheduling
 public class Lider2Application extends SpringBootServletInitializer {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
