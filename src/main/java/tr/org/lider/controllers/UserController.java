@@ -15,8 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jackson.JsonObjectSerializer;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,6 +33,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mysql.cj.exceptions.ExceptionInterceptor;
 import com.mysql.cj.jdbc.Blob;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.UserSessionImpl;
@@ -46,8 +55,8 @@ import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.UserService;    
 
 
-@RestController()
-@RequestMapping("/lider/user")
+@RestController
+@RequestMapping("/api/lider/user")
 public class UserController {
 	
 	Logger logger = LoggerFactory.getLogger(UserController.class);
@@ -134,9 +143,15 @@ public class UserController {
 		}
 	}
 	
-	@RequestMapping(method=RequestMethod.POST, value = "/addUser",produces = MediaType.APPLICATION_JSON_VALUE)
+	
+	@Operation(summary = "", description = "", tags = { "settings" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/add-user",produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public LdapEntry addUser(LdapEntry selectedEntry) {
+	public ResponseEntity<LdapEntry>  addUser(LdapEntry selectedEntry) {
 		try {
 			String gidNumber="6000";
 			int randomInt = (int)(1000000.0 * Math.random());
@@ -176,13 +191,19 @@ public class UserController {
 				operationLogService.saveOperationLog(OperationType.CREATE, log, null);
 			} catch (Exception e) {
 				e.printStackTrace();
+				HttpHeaders headers = new HttpHeaders();
+				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).headers(headers).build();
 			}
-
 			
-			return selectedEntry;
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(selectedEntry);
+			
+			
 		} catch (LdapException e) {
 			e.printStackTrace();
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).headers(headers).build();
 		}
 	}
 	
