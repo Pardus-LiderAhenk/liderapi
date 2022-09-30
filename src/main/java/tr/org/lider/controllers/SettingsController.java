@@ -619,8 +619,13 @@ public class SettingsController {
 		}
 	}
 
+	@Operation(summary = "Add new access rule ", description = "", tags = { "settings" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Created new access rule"),
+			  @ApiResponse(responseCode = "417", description = "Could not add access rule. Unexpected errror occured", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-OLC-access-rule", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Boolean addOLCAccessRule(
+	public ResponseEntity<Boolean>  addOLCAccessRule(
 			@RequestParam (value = "groupDN", required = true) String groupDN,
 			@RequestParam (value = "olcAccessDN", required = true) String olcAccessDN,
 			@RequestParam (value = "accessType", required = true) String accessType) {
@@ -644,15 +649,26 @@ public class SettingsController {
 			String log = rule.getAssignedDN() + " OLC Access has been added" ;
 			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
 			
-			return ldapService.addOLCAccessRule(rule);
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(ldapService.addOLCAccessRule(rule));
+	
 		} else {
-			return false;
+			return ResponseEntity
+					.status(HttpStatus.EXPECTATION_FAILED)
+					.body(false);
+					
 		}
 	}
 	
 
+	@Operation(summary = "Delete new access rule", description = "", tags = { "settings" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Access rule deleted"),
+			  @ApiResponse(responseCode = "417", description = "Could not delete access rule. Unexpected errror occured", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/delete-OLC-access-rule", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Boolean deleteOLCAccessRule(@RequestBody OLCAccessRule rule) 
+	public ResponseEntity<Boolean>  deleteOLCAccessRule(@RequestBody OLCAccessRule rule) 
 	{
 		Map<String, Object> requestData = new HashMap<String, Object>();
 		requestData.put("olcAccess",rule);
@@ -662,12 +678,16 @@ public class SettingsController {
 			jsonString = dataMapper.writeValueAsString(requestData);
 		} catch (JsonProcessingException e1) {
 			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).headers(headers).build();
 		}
 		String log = rule.getAssignedDN() + " OLC Access has been deleted" ;
 		operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
 		
 		ldapService.removeOLCAccessRuleWithParents(rule);
-		return true;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(true);
 	}
 
 	/**
@@ -747,16 +767,26 @@ public class SettingsController {
 	}
 
 	
+	@Operation(summary = "Member added to the group ", description = "", tags = { "settings" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Member has been added to the group at the ldap entry"),
+			  @ApiResponse(responseCode = "417", description = "Could not  add members to the group in ldap entry. Unexpected error occured", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-member-to-group")
-	public Boolean addMemberToGroup(HttpServletRequest request, LdapEntry selectedEntry) {
+	public ResponseEntity<Boolean>  addMemberToGroup(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding {} to group. Group info {} ", selectedEntry.getDistinguishedName(),selectedEntry.getParentName());
 		try {
 			ldapService.updateEntryAddAtribute(selectedEntry.getParentName(), "member", selectedEntry.getDistinguishedName());
 			operationLogService.saveOperationLog(OperationType.CREATE,"Gruba üye eklendi. Üye: "+selectedEntry.getDistinguishedName(),null);
 		} catch (LdapException e) {
 			e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).headers(headers).build();
 		}
-		return true;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(true);
+		
 	}
 	
 	
