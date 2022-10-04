@@ -591,7 +591,7 @@ public class SettingsController {
 	@Operation(summary = "Get access ldap rules", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Get open ldap check rule list"),
-			  @ApiResponse(responseCode = "417", description = "Could not retrieved open ldap  check rule list", 
+			  @ApiResponse(responseCode = "417", description = "Could not retrieved open ldap  check rule list. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	//	@GetMapping(method=RequestMethod.POST ,value = "/getOLCAccessRules/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(value = "/OLC-access-rules/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -662,7 +662,7 @@ public class SettingsController {
 	}
 	
 
-	@Operation(summary = "Delete new access rule", description = "", tags = { "settings" })
+	@Operation(summary = "Delete access rule", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Access rule deleted"),
 			  @ApiResponse(responseCode = "417", description = "Could not delete access rule. Unexpected errror occured", 

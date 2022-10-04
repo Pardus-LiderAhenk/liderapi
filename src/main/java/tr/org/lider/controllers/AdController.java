@@ -13,9 +13,14 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +28,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -41,8 +52,9 @@ import tr.org.lider.services.PolicyService;
  * @author M. Edip YILDIZ
  *
  */
-@RestController()
-@RequestMapping(value = "/ad")
+@RestController
+@RequestMapping("/api/ad")
+@Tag(name="Ad", description = "Ad Rest Service")
 public class AdController {
 	Logger logger = LoggerFactory.getLogger(AdController.class);
 
@@ -59,13 +71,18 @@ public class AdController {
 	private OperationLogService operationLogService; 
 	
 	@Autowired
-	private PolicyService policyService; 
+	private PolicyService policyService;
 	
 	@Autowired
 	private CustomPasswordEncoder customPasswordEncoder;
 	
-	@RequestMapping(value = "/getDomainEntry")
-	public List<LdapEntry> getDomainEntry(HttpServletRequest request) {
+	@Operation(summary = "Get Ldap list domain entry", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Ldap list exists"),
+			  @ApiResponse(responseCode = "417", description = "Could not retrieve domain entry. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/domain-entry")
+	public ResponseEntity<List<LdapEntry>>  getDomainEntry(HttpServletRequest request) {
 		logger.info("Getting AD base DN ");
 		List<LdapEntry> retList =null;
 		try {
@@ -79,12 +96,26 @@ public class AdController {
 			retList.add(domainEntry);
 		} catch (LdapException e) {
 			e.printStackTrace();
+			logger.error("Could not retrieve domain entry. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Could not retrieve domain entry. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
-		return retList;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(retList);
 	}
 	
-	@RequestMapping(value = "/getChildEntriesOu")
-	public List<LdapEntry> getChildEntriesOu(HttpServletRequest request, LdapEntry selectedEntry) {
+	@Operation(summary = "Get Ldap list domain entry", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns entries under selected ou."),
+			  @ApiResponse(responseCode = "417", description = "Could not retrieve entries under selected ou. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/child-entries-ou")
+	public ResponseEntity<List<LdapEntry>>  getChildEntriesOu(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Getting AD child OU entries for dn = "+ selectedEntry.getUid());
 		List<LdapEntry> oneLevelSubList=null;
 		try {
@@ -101,12 +132,26 @@ public class AdController {
 			oneLevelSubList = service.findSubEntries(selectedEntry.getUid(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
 		} catch (LdapException e) {
 			e.printStackTrace();
+			logger.error("Could not retrieve entries under selected ou. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Could not retrieve entries under selected ou. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
-		return oneLevelSubList;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(oneLevelSubList);	
 	}
 	
-	@RequestMapping(value = "/getChildEntries")
-	public List<LdapEntry> getChildEntries(HttpServletRequest request, LdapEntry selectedEntry) {
+	@Operation(summary = "Returns ldap sub list", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns ldap sub list under selected entry."),
+			  @ApiResponse(responseCode = "417", description = "Could not retrieve ldap sub list. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/child-entries")
+	public ResponseEntity<List<LdapEntry>> getChildEntries(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Getting AD child entries for dn = "+ selectedEntry.getDistinguishedName());
 		List<LdapEntry> oneLevelSubList=null;
 		try {
@@ -122,11 +167,25 @@ public class AdController {
 			oneLevelSubList = service.findSubEntries(selectedEntry.getDistinguishedName(),filter,new String[] { "*" }, SearchScope.ONELEVEL);
 		} catch (LdapException e) {
 			e.printStackTrace();
+			logger.error("Could not retrieve ldap sub list. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Could not retrieve ldap sub list. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
-		return oneLevelSubList;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(oneLevelSubList);	
 	}
 	
-	@RequestMapping(value = "/addUser2AD")
+	@Operation(summary = "Add user to AD", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Add user to AD."),
+			  @ApiResponse(responseCode = "417", description = "Could not add user to AD. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/add-user-two-ad")
 	public ResponseEntity<?> addUser2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		 logger.info("Adding user to AD. User info : "+ selectedEntry.getDistinguishedName());
 		 
@@ -175,19 +234,24 @@ public class AdController {
 			operationLogService.saveOperationLog(OperationType.CREATE, selectedEntry.getCn() + ", USER has been added " + rdn + " [Active Directroy]", null);
 //			return responseFactoryService.createResponse(RestResponseStatus.OK,"Kullanıcı Başarı ile oluşturuldu.");
 			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
-		} catch (LdapException e) {
-			e.printStackTrace();
-			String message=e.getLocalizedMessage();
-			if(message!=null && message.contains("ENTRY_EXISTS")) {
-//			return 	responseFactoryService.createResponse(RestResponseStatus.WARNING,"Aynı kullanıcı giriş ismine sahip kullanıcı bulunmaktadır.");
-				return new ResponseEntity<>(null, HttpStatus.ALREADY_REPORTED);
+			} catch (LdapException e) {
+				e.printStackTrace();
+				String message=e.getLocalizedMessage();
+				if(message!=null && message.contains("ENTRY_EXISTS")) {
+					return new ResponseEntity<LdapEntry>(HttpStatus.ALREADY_REPORTED);
+				} else {
+					return new ResponseEntity<LdapEntry>(HttpStatus.EXPECTATION_FAILED);
+				}
 			}
-		}
-		return null;
 	}
 	
-	@RequestMapping(value = "/addOu2AD")
-	public LdapEntry addOu2AD(HttpServletRequest request, LdapEntry selectedEntry) {
+	@Operation(summary = "Add ou to AD.", description = "Add ou to AD.")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Add ou to AD."),
+			  @ApiResponse(responseCode = "417", description = "Could not add ou to AD. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/add-ou-two-ad")
+	public ResponseEntity<LdapEntry> addOu2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding OU to AD. Ou info {} {}", selectedEntry.getDistinguishedName(),selectedEntry.getOu());
 		Map<String, String[]> attributes = new HashMap<String, String[]>();
 		attributes.put("objectClass", new String[] {"top","organizationalUnit"});
@@ -197,15 +261,20 @@ public class AdController {
 			service.addEntry(rdn, attributes);
 			selectedEntry = service.getEntryDetail(rdn);
 			operationLogService.saveOperationLog(OperationType.CREATE, selectedEntry.getOu() + ", FOLDER has been added " + rdn + " [Active Directroy]", null);
-			return selectedEntry;
+			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
-			e.printStackTrace();
+			return new ResponseEntity<LdapEntry>(HttpStatus.EXPECTATION_FAILED);
 		}
-		return null;
+
 	}
 	
-	@RequestMapping(value = "/addGroup2AD")
-	public LdapEntry addGroup2AD(HttpServletRequest request, LdapEntry selectedEntry) {
+	@Operation(summary = "Add group to AD .", description = "Adding group to AD.")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Add group to AD."),
+			  @ApiResponse(responseCode = "417", description = "Could not add group to AD. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/add-group-two-ad")	
+	public ResponseEntity<LdapEntry>  addGroup2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding Group to AD. Group info {} {}", selectedEntry.getDistinguishedName(),selectedEntry.getCn());
 		
 		Map<String, String[]> attributes = new HashMap<String, String[]>();
@@ -219,15 +288,20 @@ public class AdController {
 			service.addEntry(rdn, attributes);
 			selectedEntry = service.getEntryDetail(rdn);
 			operationLogService.saveOperationLog(OperationType.CREATE, selectedEntry.getCn() + ", GROUP has been added " + rdn + " [Active Directroy]",null);
-			return selectedEntry;
+			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
-			e.printStackTrace();
+			return new ResponseEntity<LdapEntry>(HttpStatus.EXPECTATION_FAILED);
+
 		}
-		return null;
 	}
 	
-	@RequestMapping(value = "/addMember2ADGroup")
-	public LdapEntry addMember2ADGroup(HttpServletRequest request, LdapEntry selectedEntry) {
+	@Operation(summary = "Add member to group.", description = "Adding member in group")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Add member to group"),
+			  @ApiResponse(responseCode = "417", description = "Could not add member to group. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/add-member-two-ad-group")
+	public ResponseEntity<LdapEntry> addMember2ADGroup(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding {} to group. Group info {} ", selectedEntry.getDistinguishedName(),selectedEntry.getParentName());
 		
 		LdapEntry memberEntry = null;
@@ -237,15 +311,19 @@ public class AdController {
 			service.updateEntryAddAtribute(selectedEntry.getParentName(), "member", selectedEntry.getDistinguishedName());
 			operationLogService.saveOperationLog(OperationType.UPDATE, memberEntry.getCn()+ " User has been added to Group " + selectedEntry.getParentName() + " [Active Directroy]", null);
 			selectedEntry = service.getEntryDetail(selectedEntry.getParentName());
-			return selectedEntry;
+			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
-			e.printStackTrace();
+			return new ResponseEntity<LdapEntry>(HttpStatus.EXPECTATION_FAILED);
 		}
-		return null;
 	}
 	
-	@RequestMapping(value = "/searchEntryUser")
-	public List<LdapEntry>  searchEntryUser(HttpServletRequest request,
+	@Operation(summary = "Returns user list under selected entry.", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns user list under selected entry."),
+			  @ApiResponse(responseCode = "417", description = "Could not retrieve user list under selected entry. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/search-entry-user")
+	public ResponseEntity<List<LdapEntry>>  searchEntryUser(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
 			@RequestParam(value="value", required=true) String value) {
@@ -262,13 +340,26 @@ public class AdController {
 			filterAttributes.add(new LdapSearchFilterAttribute("objectclass", "computer", SearchFilterEnum.NOT_EQ)); 
 			results = service.search(searchDn,filterAttributes, new String[] {"*"});
 		} catch (LdapException e) {
-			e.printStackTrace();
+			logger.error("Could not retrieve user list. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Could not retrieve user list. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
-		return results;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(results);
 	}
 	
-	@RequestMapping(value = "/searchEntryGroup")
-	public List<LdapEntry>  searchEntryGroup(HttpServletRequest request,
+	@Operation(summary = "Returns entry group list.", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns entry group list."),
+			  @ApiResponse(responseCode = "417", description = "Could not retrieve entry group list. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/search-entry-group")
+	public ResponseEntity<List<LdapEntry>>   searchEntryGroup(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
 			@RequestParam(value="value", required=true) String value) {
@@ -284,13 +375,26 @@ public class AdController {
 			filterAttributes.add(new LdapSearchFilterAttribute("objectclass", "group", SearchFilterEnum.EQ)); 
 			results = service.search(searchDn,filterAttributes, new String[] {"*"});
 		} catch (LdapException e) {
-			e.printStackTrace();
+			logger.error("Could not retrieve entry group list. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Could not retrieve entry group list. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
-		return results;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(results);
 	}
 	
-	@RequestMapping(value = "/searchEntry")
-	public List<LdapEntry>  searchEntry(HttpServletRequest request,
+	@Operation(summary = "Returns entry list.", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns entry  list."),
+			  @ApiResponse(responseCode = "417", description = "Could not entry  list. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/search-entry")
+	public ResponseEntity<List<LdapEntry>> searchEntry(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
 			@RequestParam(value="value", required=true) String value) {
@@ -305,12 +409,26 @@ public class AdController {
 			results = service.search(searchDn,filterAttributes, new String[] {"*"});
 		} catch (LdapException e) {
 			e.printStackTrace();
+			logger.error("Could not entry  list. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Could not entry  list. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
-		return results;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(results);
 	}
 	
-	@RequestMapping(method=RequestMethod.POST ,value = "/syncUserFromAd2Ldap")
-	public List<LdapEntry> syncUserFromAd2Ldap(HttpServletRequest request,@RequestBody LdapEntry selectedLdapDn) {
+	@Operation(summary = "User created from ad to ldap.", description = "User created from ad to ldap.")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "User created from ad to ldap."),
+			  @ApiResponse(responseCode = "417", description = "A new user could not be created. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/sync-user-from-ad-two-ldap")	
+	public ResponseEntity<List<LdapEntry>> syncUserFromAd2Ldap(HttpServletRequest request,@RequestBody LdapEntry selectedLdapDn) {
 		logger.info("SYNC AD to LDAP starting.. Sync to LDAP OU ="+selectedLdapDn.getDistinguishedName() );
 		String filter="(objectClass=organizationalUnit)";
 		List<LdapEntry> existUserList= new ArrayList<>();
@@ -336,7 +454,7 @@ public class AdController {
 					
 					if(adUserListForCheck!=null && adUserListForCheck.size()==0) {
 						addUserToLDAP(selectedLdapEntryList.get(0).getDistinguishedName(), adUser, sAMAccountName,sAMAccountName);
-						operationLogService.saveOperationLog(OperationType.UPDATE, sAMAccountName + " User has been moved to LDAP"+selectedLdapEntryList.get(0).getDistinguishedName(),null);
+						operationLogService.saveOperationLog(OperationType.UPDATE, sAMAccountName + " User has been moved to LDAP" + selectedLdapEntryList.get(0).getDistinguishedName(),null);
 					}
 					else {
 						logger.info("SYNC AD to LDAP.. User exist ="+adUser.getDistinguishedName() );
@@ -344,15 +462,29 @@ public class AdController {
 					}
 				}
 			}
-		} catch (Exception e) {
+			
+		} catch (LdapException e) {
 			e.printStackTrace();
-			return null;
+			logger.error("A new user has not been created. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "A new user could not be created. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
-		return existUserList;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(existUserList);
 	}
 	
-	@RequestMapping(method=RequestMethod.POST ,value = "/moveAdUser2Ldap")
-	public List<LdapEntry> moveAdUser2Ldap(HttpServletRequest request,@RequestBody LdapEntry selectedLdapDn) {
+	@Operation(summary = "User has been moved to the lider system.", description = "User has been moved to the lider system.")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "User has been moved to the lider system."),
+			  			  @ApiResponse(responseCode = "417", description = "User could not be moved to the lider system.Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/move-ad-user-two-ldap")
+	public ResponseEntity<List<LdapEntry>> moveAdUser2Ldap(HttpServletRequest request,@RequestBody LdapEntry selectedLdapDn) {
 		
 		List<LdapEntry> existUserList= new ArrayList<>();
 		try {
@@ -386,15 +518,29 @@ public class AdController {
 					}
 				}
 			}
-		} catch (Exception e) {
+		} catch (LdapException e) {
 			e.printStackTrace();
-			return null;
+			logger.error("User has not been moved to the lider system. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "User has not been moved to the lider system. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
-		return existUserList;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(existUserList);
 	}
 	
-	@RequestMapping(method=RequestMethod.POST ,value = "/syncGroupFromAd2Ldap")
-	public List<LdapEntry> syncGroupFromAd2Ldap(HttpServletRequest request,@RequestBody LdapEntry selectedLdapDn) {
+	
+	@Operation(summary = "Add selected AD group to LDAP", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Add selected AD group to LDAP"),
+			  			  @ApiResponse(responseCode = "417", description = "Could not LDAP user group list. Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/sync-group-from-ad-two-ldap")
+	public ResponseEntity<List<LdapEntry>> syncGroupFromAd2Ldap(HttpServletRequest request,@RequestBody LdapEntry selectedLdapDn) {
 		logger.info("SYNC GROUP AD to LDAP starting.. Sync to LDAP OU ="+selectedLdapDn.getDistinguishedName() );
 		
 		List<LdapEntry> existGroupList= new ArrayList<>();
@@ -467,11 +613,18 @@ public class AdController {
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null;
+			logger.error("Could not LDAP user group list. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Could not LDAP user group list. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
-		return existGroupList;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(existGroupList);
 	}
 
 	private String addUserToLDAP(String destinationDistinguishedName, LdapEntry adUser, String sAMAccountName, String userPassword)
@@ -518,9 +671,14 @@ public class AdController {
 	 * @param selectedEntry
 	 * @return
 	 */
-	@RequestMapping(method=RequestMethod.POST, value = "/updateUserPassword",produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Update user password", description = "Update user password")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Update user password"),
+			  			  @ApiResponse(responseCode = "404", description = "User is not found.Not found.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PutMapping(value = "/update-user-password",produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public LdapEntry updateUserPassword(LdapEntry selectedEntry) {
+	public  ResponseEntity<LdapEntry> updateUserPassword(LdapEntry selectedEntry) {
 		logger.info("Resetting user password. Dn: {}",selectedEntry.getDistinguishedName());
 		try {
 			String newPassword =  selectedEntry.getUserPassword();
@@ -539,10 +697,9 @@ public class AdController {
 			selectedEntry = service.findSubEntries(selectedEntry.getDistinguishedName(), "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
 			operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD, selectedEntry.getDistinguishedName() + " password has been changed [Active Directory]", null);
 
-			return selectedEntry;
+			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
-			e.printStackTrace();
-			return null;
+			return new ResponseEntity<LdapEntry>(HttpStatus.EXPECTATION_FAILED);
 		}
 	}
 
@@ -551,18 +708,22 @@ public class AdController {
 	 * @param selectedEntry
 	 * @return
 	 */
-	@RequestMapping(method=RequestMethod.POST, value = "/deleteEntry",produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public LdapEntry deleteEntry(LdapEntry selectedEntry) {
+	@Operation(summary = "Delete AD entries.", description = "Delete AD entries.")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Delete AD entries."),
+			  			  @ApiResponse(responseCode = "404", description = "Could not delete AD entry. Not found", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@DeleteMapping(value = "/entry",produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody	
+	public ResponseEntity<LdapEntry> deleteEntry(LdapEntry selectedEntry) {
 		try {
 			logger.info("AD Deleting entry. Dn: {}",selectedEntry.getDistinguishedName());
 			service.deleteEntry(selectedEntry.getDistinguishedName());
 			
 			operationLogService.saveOperationLog(OperationType.DELETE, selectedEntry.getDistinguishedName() + " entry has been deleted from " + "[Active Directroy]", null);
-			return selectedEntry;
+			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
-			e.printStackTrace();
-			return null;
+			return new ResponseEntity<LdapEntry>(HttpStatus.EXPECTATION_FAILED);
 		}
 	}
 	
@@ -585,9 +746,14 @@ public class AdController {
 //	}
 	
 	
-	@RequestMapping(method=RequestMethod.POST ,value = "/deleteMemberFromGroup", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Delete member from Ldap group", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Delete member from Ldap group"),
+			  			  @ApiResponse(responseCode = "404", description = "Member is not found.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@DeleteMapping(value = "/member-from-group",produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public LdapEntry deleteMembersOfGroup(@RequestParam(value="dn", required=true) String dn, 
+	public  ResponseEntity<LdapEntry> deleteMembersOfGroup(@RequestParam(value="dn", required=true) String dn, 
 			@RequestParam(value="dnList[]", required=true) List<String> dnList) {
 		//when single dn comes spring boot takes it as multiple arrays
 		//so dn must be joined with comma
@@ -607,7 +773,12 @@ public class AdController {
 				
 			} catch (LdapException e) {
 				e.printStackTrace();
-				return null;
+	        	HttpHeaders headers = new HttpHeaders();
+				headers.add("message", "Could not deleted member: " + e.getMessage());
+	    		return ResponseEntity
+	    				.status(HttpStatus.EXPECTATION_FAILED)
+	    				.headers(headers)
+	    				.build();
 			}
 		} else {
 			for (int i = 0; i < dnList.size(); i++) {
@@ -616,11 +787,19 @@ public class AdController {
 					operationLogService.saveOperationLog(OperationType.DELETE, dnList.get(i) + "Users has been deleted from group [Active Directory]",null);
 				} catch (LdapException e) {
 					e.printStackTrace();
-					return null;
+					HttpHeaders headers = new HttpHeaders();
+					headers.add("message", "Could not deleted member: " + e.getMessage());
+		    		return ResponseEntity
+		    				.status(HttpStatus.EXPECTATION_FAILED)
+		    				.headers(headers)
+		    				.build();
 				}
 			}
 		}
-		return service.getEntryDetail(dn);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(service.getEntryDetail(dn));
+				
 	}
 	
 	
@@ -629,9 +808,13 @@ public class AdController {
 	 * @param selectedEntry
 	 * @return
 	 */
-	@RequestMapping(method=RequestMethod.POST, value = "/getUserPolicies",produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public List<PolicyResponse> getUserPolicies(LdapEntry selectedEntry) {
+	@Operation(summary = "Get user policies.", description = "")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Get user policies."),
+			  			  @ApiResponse(responseCode = "417", description = "Failed to get user policies.Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/user-policies",produces = MediaType.APPLICATION_JSON_VALUE)	@ResponseBody
+	public ResponseEntity<List<PolicyResponse>> getUserPolicies(LdapEntry selectedEntry) {
 		logger.info("Getting user policies user Dn: {}",selectedEntry.getDistinguishedName());
 		try {
 			//get user groups
@@ -647,15 +830,29 @@ public class AdController {
 				List<PolicyResponse> policies= policyService.getPoliciesForGroup(ldapEntry.getDistinguishedName());
 				userPolicies.addAll(policies);
 			}
-			return userPolicies;
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(userPolicies);
+			
 		} catch (LdapException e) {
 			e.printStackTrace();
-			return null;
+			logger.error("Failed to get user policies.Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Failed to get user policies. Error: " + e.getMessage());
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 	}
 	
-	@RequestMapping(value = "/getChildUser")
-	public List<LdapEntry>  getChildUSer(HttpServletRequest request,
+	@Operation(summary = "Get child user", description = "Created cild user")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Get child user"),
+			  			  @ApiResponse(responseCode = "417", description = "Could not get child user.Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/child-user")
+	public ResponseEntity<List<LdapEntry>>  getChildUSer(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
 			@RequestParam(value="value", required=true) String value) {
@@ -672,12 +869,22 @@ public class AdController {
 			results = service.search(searchDn,filterAttributes, new String[] {"*"});
 		} catch (LdapException e) {
 			e.printStackTrace();
+			logger.error("Could not create child user. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Could not create child user. Error: " + e.getMessage());
 		}
-		return results;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(results);
 	}
 	
-	@RequestMapping(value = "/getChildGroup")
-	public List<LdapEntry>  getChildGroup(HttpServletRequest request,
+	@Operation(summary = "Get child group", description = "Get child group")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Get child group"),
+			  			  @ApiResponse(responseCode = "417", description = "Could not get child group.Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/child-group")
+	public ResponseEntity<List<LdapEntry>>  getChildGroup(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
 			@RequestParam(value="value", required=true) String value) {
@@ -693,17 +900,29 @@ public class AdController {
 			results = service.search(searchDn,filterAttributes, new String[] {"*"});
 		} catch (LdapException e) {
 			e.printStackTrace();
+			logger.error("Could not create child group. Error: " + e.getMessage());
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Could not create child group. Error: " + e.getMessage());
 		}
-		return results;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(results);
 	}
 	
 //	get domainType and enableDelete4Directory parameters for AD management
-	@RequestMapping(method=RequestMethod.GET, value = "/configurations", produces = MediaType.APPLICATION_JSON_VALUE)
-	public HashMap<String, Object> getConfigParams() {
+	@Operation(summary = "Get AD configuration", description = "Creat AD configuration")
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Creat AD configuration"),
+			  			  @ApiResponse(responseCode = "417", description = "Could not get AD configuration.Unexpected error occured.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/configurations", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<HashMap<String, Object>> getConfigParams() {
 		HashMap<String, Object> configMap = new HashMap<String, Object>();
 		configMap.put("domainType", configurationService.getDomainType());
 		configMap.put("enableDelete4Directory", configurationService.getEnableDelete4Directory());
-		return configMap;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(configMap);
 	}
 	
 }
