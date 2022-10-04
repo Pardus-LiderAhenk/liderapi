@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.ConkyTemplate;
@@ -89,9 +91,9 @@ public class ConkyService {
 		}
 	}
 
-	public List<ConkyTemplate> list(){
-//		return conkyRepository.findAll();
-		return conkyRepository.findByDeletedOrderByCreateDateDesc(false);
+	public Page<ConkyTemplate> list(int pageNumber, int pageSize){
+		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
+		return conkyRepository.findByDeletedOrderByCreateDateDesc(pageable, false);
 	}
 
 	public ConkyTemplate add(ConkyTemplate template) {

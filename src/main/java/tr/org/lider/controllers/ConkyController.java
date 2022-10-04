@@ -1,13 +1,13 @@
 package tr.org.lider.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import tr.org.lider.entities.ConkyTemplate;
@@ -30,8 +30,11 @@ public class ConkyController {
 //	get conky list
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION", "ROLE_COMPUTERS" })
 	@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<ConkyTemplate> notifyList() {
-		return conkyService.list();
+	public Page<ConkyTemplate> conkyList(
+			@RequestParam (value = "pageSize") int pageSize,
+			@RequestParam (value = "pageNumber") int pageNumber
+			) {
+		return conkyService.list(pageNumber, pageSize);
 	}
 
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })

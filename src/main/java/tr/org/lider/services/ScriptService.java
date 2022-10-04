@@ -7,8 +7,13 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ScriptTemplate;
 import tr.org.lider.entities.ScriptType;
@@ -39,8 +44,9 @@ public class ScriptService {
 		return scriptRepository.findById(id);
 	}
 	
-	public List<ScriptTemplate> list(){
-		return scriptRepository.findByDeletedOrderByCreateDateDesc(false);
+	public Page<ScriptTemplate> list(int pageNumber, int pageSize){
+		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
+		return scriptRepository.findByDeletedOrderByCreateDateDesc(pageable, false);
 	}
 
 	public ScriptTemplate add(ScriptTemplate script) {

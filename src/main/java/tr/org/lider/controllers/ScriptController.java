@@ -1,13 +1,13 @@
 package tr.org.lider.controllers;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import tr.org.lider.entities.ScriptTemplate;
@@ -28,8 +28,11 @@ public class ScriptController {
 	
 	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION", "ROLE_COMPUTERS" })
 	@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<ScriptTemplate> scriptList() {
-		return scriptService.list();
+	public Page<ScriptTemplate> scriptList(
+			@RequestParam (value = "pageSize") int pageSize,
+			@RequestParam (value = "pageNumber") int pageNumber
+			) {
+		return scriptService.list(pageNumber, pageSize);
 	}
 
 	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION" })
