@@ -1,5 +1,6 @@
 package tr.org.lider.controllers;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
@@ -27,7 +28,7 @@ public class ConkyController {
 	@Autowired
 	private ConkyService conkyService;
 	
-//	get conky list
+//	get conky list with pagging
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION", "ROLE_COMPUTERS" })
 	@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
 	public Page<ConkyTemplate> conkyList(
@@ -35,6 +36,13 @@ public class ConkyController {
 			@RequestParam (value = "pageNumber") int pageNumber
 			) {
 		return conkyService.list(pageNumber, pageSize);
+	}
+	
+//	get conky list all as no pagging
+	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION", "ROLE_COMPUTERS" })
+	@RequestMapping(method=RequestMethod.POST ,value = "/list-all", produces = MediaType.APPLICATION_JSON_VALUE)
+	public List<ConkyTemplate> conkyListAll() {
+		return conkyService.listAll();
 	}
 
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })

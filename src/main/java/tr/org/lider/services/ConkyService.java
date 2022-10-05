@@ -95,6 +95,10 @@ public class ConkyService {
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
 		return conkyRepository.findByDeletedOrderByCreateDateDesc(pageable, false);
 	}
+	
+	public List<ConkyTemplate> listAll(){
+		return conkyRepository.findAll();
+	}
 
 	public ConkyTemplate add(ConkyTemplate template) {
 		template.setDeleted(false);
