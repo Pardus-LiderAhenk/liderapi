@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,7 +38,6 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
-import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.PolicyResponse;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.AdService;
@@ -81,7 +79,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Ldap list exists"),
 			  @ApiResponse(responseCode = "417", description = "Could not retrieve domain entry. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/domain-entry")
+	@PostMapping(value = "/domain-entry")
 	public ResponseEntity<List<LdapEntry>>  getDomainEntry(HttpServletRequest request) {
 		logger.info("Getting AD base DN ");
 		List<LdapEntry> retList =null;
@@ -114,7 +112,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Returns entries under selected ou."),
 			  @ApiResponse(responseCode = "417", description = "Could not retrieve entries under selected ou. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/child-entries-ou")
+	@PostMapping(value = "/child-entries-ou")
 	public ResponseEntity<List<LdapEntry>>  getChildEntriesOu(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Getting AD child OU entries for dn = "+ selectedEntry.getUid());
 		List<LdapEntry> oneLevelSubList=null;
@@ -150,7 +148,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Returns ldap sub list under selected entry."),
 			  @ApiResponse(responseCode = "417", description = "Could not retrieve ldap sub list. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/child-entries")
+	@PostMapping(value = "/child-entries")
 	public ResponseEntity<List<LdapEntry>> getChildEntries(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Getting AD child entries for dn = "+ selectedEntry.getDistinguishedName());
 		List<LdapEntry> oneLevelSubList=null;
@@ -185,7 +183,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Add user to AD."),
 			  @ApiResponse(responseCode = "417", description = "Could not add user to AD. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/add-user-two-ad")
+	@PostMapping(value = "/add-user-to-ad")
 	public ResponseEntity<?> addUser2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		 logger.info("Adding user to AD. User info : "+ selectedEntry.getDistinguishedName());
 		 
@@ -216,11 +214,11 @@ public class AdController {
 
 		// some useful constants from lmaccess.h
 		 int UF_ACCOUNTENABLE = 0x0001;   
-		 int UF_ACCOUNTDISABLE = 0x0002;
+//		 int UF_ACCOUNTDISABLE = 0x0002;
 	     int UF_PASSWD_NOTREQD = 0x0020;
-	     int UF_PASSWD_CANT_CHANGE = 0x0040;
+//	     int UF_PASSWD_CANT_CHANGE = 0x0040;
 	     int UF_NORMAL_ACCOUNT = 0x0200;
-	     int UF_DONT_EXPIRE_PASSWD = 0x10000;
+//	     int UF_DONT_EXPIRE_PASSWD = 0x10000;
 	     int UF_PASSWORD_EXPIRED = 0x800000;
 	        
 	     String uacStr=   Integer.toString(UF_NORMAL_ACCOUNT + UF_PASSWD_NOTREQD + UF_PASSWORD_EXPIRED + UF_ACCOUNTENABLE);
@@ -250,7 +248,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Add ou to AD."),
 			  @ApiResponse(responseCode = "417", description = "Could not add ou to AD. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/add-ou-two-ad")
+	@PostMapping(value = "/add-ou-to-ad")
 	public ResponseEntity<LdapEntry> addOu2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding OU to AD. Ou info {} {}", selectedEntry.getDistinguishedName(),selectedEntry.getOu());
 		Map<String, String[]> attributes = new HashMap<String, String[]>();
@@ -273,7 +271,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Add group to AD."),
 			  @ApiResponse(responseCode = "417", description = "Could not add group to AD. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/add-group-two-ad")	
+	@PostMapping(value = "/add-group-to-ad")	
 	public ResponseEntity<LdapEntry>  addGroup2AD(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding Group to AD. Group info {} {}", selectedEntry.getDistinguishedName(),selectedEntry.getCn());
 		
@@ -300,7 +298,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Add member to group"),
 			  @ApiResponse(responseCode = "417", description = "Could not add member to group. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/add-member-two-ad-group")
+	@PostMapping(value = "/add-member-to-ad-group")
 	public ResponseEntity<LdapEntry> addMember2ADGroup(HttpServletRequest request, LdapEntry selectedEntry) {
 		logger.info("Adding {} to group. Group info {} ", selectedEntry.getDistinguishedName(),selectedEntry.getParentName());
 		
@@ -393,7 +391,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Returns entry  list."),
 			  @ApiResponse(responseCode = "417", description = "Could not entry  list. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/search-entry")
+	@PostMapping(value = "/search-entry")
 	public ResponseEntity<List<LdapEntry>> searchEntry(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
@@ -427,7 +425,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "User created from ad to ldap."),
 			  @ApiResponse(responseCode = "417", description = "A new user could not be created. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/sync-user-from-ad-two-ldap")	
+	@PostMapping(value = "/sync-user-from-ad-to-ldap")	
 	public ResponseEntity<List<LdapEntry>> syncUserFromAd2Ldap(HttpServletRequest request,@RequestBody LdapEntry selectedLdapDn) {
 		logger.info("SYNC AD to LDAP starting.. Sync to LDAP OU ="+selectedLdapDn.getDistinguishedName() );
 		String filter="(objectClass=organizationalUnit)";
@@ -483,7 +481,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "User has been moved to the lider system."),
 			  			  @ApiResponse(responseCode = "417", description = "User could not be moved to the lider system.Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/move-ad-user-two-ldap")
+	@PostMapping(value = "/move-ad-user-to-ldap")
 	public ResponseEntity<List<LdapEntry>> moveAdUser2Ldap(HttpServletRequest request,@RequestBody LdapEntry selectedLdapDn) {
 		
 		List<LdapEntry> existUserList= new ArrayList<>();
@@ -539,7 +537,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Add selected AD group to LDAP"),
 			  			  @ApiResponse(responseCode = "417", description = "Could not LDAP user group list. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/sync-group-from-ad-two-ldap")
+	@PostMapping(value = "/sync-group-from-ad-to-ldap")
 	public ResponseEntity<List<LdapEntry>> syncGroupFromAd2Ldap(HttpServletRequest request,@RequestBody LdapEntry selectedLdapDn) {
 		logger.info("SYNC GROUP AD to LDAP starting.. Sync to LDAP OU ="+selectedLdapDn.getDistinguishedName() );
 		
@@ -851,7 +849,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Get child user"),
 			  			  @ApiResponse(responseCode = "417", description = "Could not get child user.Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/child-user")
+	@PostMapping(value = "/child-user")
 	public ResponseEntity<List<LdapEntry>>  getChildUSer(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
