@@ -27,11 +27,18 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.security.AESHash;
 import tr.org.lider.security.JwtProvider;
@@ -43,6 +50,7 @@ import tr.org.lider.services.OperationLogService;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "authenticate", description = "Authentication Rest Service")
 public class AuthController {
 
 	Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -67,8 +75,14 @@ public class AuthController {
 
 	@Value("${jwt.expiration}")
 	private int jwtExpiration;
-
-	@RequestMapping(value="/signin", method=RequestMethod.POST)
+	
+	
+	@Operation(summary = "", description = "", tags = { "authenticate" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Authentication has been done."),
+			  @ApiResponse(responseCode = "400", description = "Authentication failed. Bad Request.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginParams loginParams, HttpServletRequest request) {
 		Authentication authentication = null;
 		try {
