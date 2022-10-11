@@ -491,6 +491,7 @@ public class ComputerGroupsController {
 	@RequestMapping(method=RequestMethod.POST, value = "/agentReport/createAgentGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	public LdapEntry findAllAgents(
 			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
+			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
 			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
 			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
 			@RequestParam (value = "status") Optional<String> status,
@@ -508,6 +509,7 @@ public class ComputerGroupsController {
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				1, 
 				agentService.count().intValue(), 
+				sessionReportType,
 				registrationStartDate, 
 				registrationEndDate, 
 				status, 
@@ -564,6 +566,7 @@ public class ComputerGroupsController {
 	@RequestMapping(method=RequestMethod.POST, value = "/agentReport/existing/group", produces = MediaType.APPLICATION_JSON_VALUE)
 	public LdapEntry addClientToExistGroup(
 			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
+			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
 			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
 			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
 			@RequestParam (value = "status") Optional<String> status,
@@ -580,6 +583,7 @@ public class ComputerGroupsController {
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				1, 
 				agentService.count().intValue(), 
+				sessionReportType,
 				registrationStartDate, 
 				registrationEndDate, 
 				status, 
