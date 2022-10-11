@@ -12,12 +12,15 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +28,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
 import tr.org.lider.entities.OperationType;
@@ -49,8 +58,9 @@ import tr.org.lider.services.OperationLogService;;
 /**
  * Controller for computer url requests 
  */
-@RestController()
-@RequestMapping("/lider/computer")
+@RestController
+@RequestMapping("/api/lider/computer")
+@Tag(name="Computer Management Service",description = "Computer Management")
 public class ComputerController {
 
 	Logger logger = LoggerFactory.getLogger(ComputerController.class);
@@ -85,38 +95,74 @@ public class ComputerController {
 	@Autowired
 	private OperationLogService operationLogService;
 
-	@RequestMapping(value = "/getComputers")
-	public List<LdapEntry> getComputers() {
+	
+	@Operation(summary = "Get computer features list", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Retrieved the computer specs list."),
+			  @ApiResponse(responseCode = "417", description = "Could not get computer specs list.Unexpected error occured", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/computers")
+	public ResponseEntity<List<LdapEntry>>  getComputers() {
 		List<LdapEntry> retList = new ArrayList<LdapEntry>();
 		retList.add(ldapService.getLdapComputersTree());
-		return retList;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(retList);
 	}
 
-	@RequestMapping(value = "/getOuDetails")
-	public List<LdapEntry> task(LdapEntry selectedEntry) {
+	
+	@Operation(summary = "Get organization unit details list", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Retrieved the ou details list."),
+			  @ApiResponse(responseCode = "417", description = "Could not ou details list. Unexpected error occured", 
+			    content = @Content(schema = @Schema(implementation = String.class))) 
+	})
+	@PostMapping(value = "/ou-details")
+	public ResponseEntity<List<LdapEntry>>  task(LdapEntry selectedEntry) {
 		List<LdapEntry> subEntries = null;
 		try {
 			subEntries = ldapService.findSubEntries(selectedEntry.getUid(), "(objectclass=*)",
 					new String[] { "*" }, SearchScope.ONELEVEL);
 		} catch (LdapException e) {
 			e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.
+					status(HttpStatus.EXPECTATION_FAILED).
+					headers(headers)
+					.build();
 		}
 		Collections.sort(subEntries);
 		selectedEntry.setChildEntries(subEntries);
-		return subEntries;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(subEntries);
 	}
 
-	@RequestMapping(value = "/getOu")
-	public List<LdapEntry> getOu(LdapEntry selectedEntry) {
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/ou")
+	//@RequestMapping(value = "/getOu")
+	public ResponseEntity<List<LdapEntry>>  getOu(LdapEntry selectedEntry) {
 		List<LdapEntry> subEntries = null;
 		try {
 			subEntries = ldapService.findSubEntries(selectedEntry.getUid(), "(&(objectclass=organizationalUnit))",
 					new String[] { "*" }, SearchScope.ONELEVEL);
 		} catch (LdapException e) {
 			e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.
+					status(HttpStatus.EXPECTATION_FAILED).
+					headers(headers)
+					.build();
 		}
 		Collections.sort(subEntries);
-		return subEntries;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(subEntries);
+
 	}
 
 	/**
@@ -125,8 +171,14 @@ public class ComputerController {
 	 * @param value
 	 * @return
 	 */
-	@RequestMapping(method=RequestMethod.POST ,value = "/searchEntry", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<LdapEntry> searchEntry(
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/search-entry",produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST ,value = "/searchEntry", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<LdapEntry>>  searchEntry(
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
 			@RequestParam(value="value", required=true) String value) {
@@ -141,12 +193,25 @@ public class ComputerController {
 			results = ldapService.search(searchDn,filterAttributes, new String[] {"*"});
 		} catch (LdapException e) {
 			e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.
+					status(HttpStatus.EXPECTATION_FAILED).
+					headers(headers)
+					.build();
 		}
-		return results ;
-	}
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(results);
+		}
 
-	@RequestMapping(value = "/getOnlineAhenks", method = { RequestMethod.POST })
-	public String getOnlyOnlineAhenks(@RequestBody LdapEntry[] selectedEntryArr) {
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/online-ahenks")
+	//@RequestMapping(value = "/getOnlineAhenks", method = { RequestMethod.POST })
+	public ResponseEntity<String>  getOnlyOnlineAhenks(@RequestBody LdapEntry[] selectedEntryArr) {
 		List<LdapEntry> ahenkList=new ArrayList<>();
 		for (LdapEntry ldapEntry : selectedEntryArr) {
 			List<LdapSearchFilterAttribute> filterAttributes = new ArrayList<LdapSearchFilterAttribute>();
@@ -168,6 +233,11 @@ public class ComputerController {
 				}
 			} catch (LdapException e) {
 				e.printStackTrace();
+				HttpHeaders headers = new HttpHeaders();
+				return ResponseEntity.
+						status(HttpStatus.EXPECTATION_FAILED).
+						headers(headers)
+						.build();
 			}
 		}
 		ObjectMapper mapper = new ObjectMapper();
@@ -176,14 +246,29 @@ public class ComputerController {
 			ret = mapper.writeValueAsString(ahenkList);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.
+					status(HttpStatus.EXPECTATION_FAILED).
+					headers(headers)
+					.build();
+			
 		}
-		return ret;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(ret);
+				
 	}
 
 	//add new group and add selected agents
-	@RequestMapping(method=RequestMethod.POST ,value = "/createNewAgentGroup", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/create-new-agent-group", produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST ,value = "/createNewAgentGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public LdapEntry createNewAgentGroup(@RequestParam(value = "selectedOUDN", required=false) String selectedOUDN,
+	public ResponseEntity<LdapEntry> createNewAgentGroup(@RequestParam(value = "selectedOUDN", required=false) String selectedOUDN,
 			@RequestParam(value = "groupName", required=true) String groupName,
 			@RequestParam(value = "checkedList[]", required=true) String[] checkedList) {
 		String newGroupDN = "";
@@ -218,14 +303,26 @@ public class ComputerController {
 			entry = ldapService.getEntryDetail(newGroupDN);
 		} catch (LdapException e) {
 			System.out.println("Error occured while adding new group.");
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.
+					status(HttpStatus.EXPECTATION_FAILED).
+					headers(headers)
+					.build();
 		}
-		return entry;
-	}
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(entry);
+}
 
 	//add agents to existing group
-	@RequestMapping(method=RequestMethod.POST ,value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
-	public LdapEntry addAgentsToExistingGroup(@RequestParam(value="groupDN") String groupDN,
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST ,value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<LdapEntry>  addAgentsToExistingGroup(@RequestParam(value="groupDN") String groupDN,
 			@RequestParam(value = "checkedList[]", required=true) String[] checkedList) {
 		LdapEntry entry;
 		try {
@@ -250,9 +347,15 @@ public class ComputerController {
 			entry = ldapService.getEntryDetail(groupDN);
 		} catch (LdapException e) {
 			System.out.println("Error occured while adding new group.");
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.
+					status(HttpStatus.EXPECTATION_FAILED).
+					headers(headers)
+					.build();
 		}
-		return entry;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(entry);
 	}
 
 
@@ -262,8 +365,14 @@ public class ComputerController {
 	 * @param value
 	 * @return
 	 */
-	@RequestMapping(method=RequestMethod.POST ,value = "/searchOnlineEntries", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<LdapEntry> searchOnlineEntries(
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/search-online-entries", produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST ,value = "/searchOnlineEntries", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<LdapEntry>> searchOnlineEntries(
 			@RequestParam(value="searchDn", required=true) String searchDn) {
 
 		List<LdapEntry> results=null;
@@ -282,12 +391,26 @@ public class ComputerController {
 			}
 		} catch (LdapException e) {
 			e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.
+					status(HttpStatus.EXPECTATION_FAILED).
+					headers(headers)
+					.build();
 		}
-		return results ;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(results);
 	}
 
-	@RequestMapping(value = "/getAgentListSize")
-	public LdapEntry getAgentList(@RequestParam(value="searchDn") String searchDn) {
+	
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/agent-list-size", produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(value = "/getAgentListSize")
+	public ResponseEntity<LdapEntry>  getAgentList(@RequestParam(value="searchDn") String searchDn) {
 		LdapEntry returnLdapEntry=null;
 		List<LdapEntry> retList = new ArrayList<LdapEntry>();
 		List<LdapEntry> onlineRetList = new ArrayList<LdapEntry>();
@@ -309,12 +432,26 @@ public class ComputerController {
 			returnLdapEntry.setAgentListSize(retList.size());
 		} catch (LdapException e) {
 			e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.
+					status(HttpStatus.EXPECTATION_FAILED).
+					headers(headers)
+					.build();
 		}
-		return returnLdapEntry;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(returnLdapEntry);
+				
 	}
 
-	@RequestMapping(method=RequestMethod.POST ,value = "/move/agent", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Boolean moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/move/agent", produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST ,value = "/move/agent", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean>  moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
 			@RequestParam(value="sourceCN", required=true) String sourceCN,
 			@RequestParam(value="destinationDN", required=true) String destinationDN) {
 		try {
@@ -367,13 +504,24 @@ public class ComputerController {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			return false;
+			return ResponseEntity
+					.status(HttpStatus.EXPECTATION_FAILED)
+					.body(false);
+			//return false;
 		}
-		return true;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(true);
 	}
 
-	@RequestMapping(method=RequestMethod.POST ,value = "/delete/agent", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Boolean deleteAgent(@RequestParam(value="agentDN", required=true) String agentDN,
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/delete/agent", produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST ,value = "/delete/agent", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean>  deleteAgent(@RequestParam(value="agentDN", required=true) String agentDN,
 			@RequestParam(value="agentUID", required=true) String agentUID) {
 		logger.info("Agent delete request has been receieved. DN: " + agentDN);
 
@@ -420,13 +568,29 @@ public class ComputerController {
 			ldapService.deleteEntry(agentDN);
 		} catch (LdapException e) {
 			e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity.
+					status(HttpStatus.EXPECTATION_FAILED).
+					headers(headers)
+					.build();
+			
 		}
 		
 		commandService.deleteAgentCommands(agentDN, agentUID);
-		return true;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(true);
+
 	}
 
-	@RequestMapping(method=RequestMethod.POST ,value = "/rename/agent", produces = MediaType.APPLICATION_JSON_VALUE)
+
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/rename/agent", produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST ,value = "/rename/agent", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> renameAgent(
 			@RequestParam(value="agentDN", required=true) String agentDN,
 			@RequestParam(value="cn", required=true) String cn,
@@ -508,16 +672,26 @@ public class ComputerController {
 	 * @return
 	 */
 
-	@RequestMapping(method=RequestMethod.POST, value = "/deleteComputerOu")
+	
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@DeleteMapping(value = "/delete-computer-ou")
+	//@RequestMapping(method=RequestMethod.POST, value = "/deleteComputerOu")
 	@ResponseBody
-	public Boolean deleteComputerOu(@RequestBody LdapEntry[] selectedEntryArr) {
+	public ResponseEntity<Boolean> deleteComputerOu(@RequestBody LdapEntry[] selectedEntryArr) {
 		try {
 			for (LdapEntry ldapEntry : selectedEntryArr) {
 				if(ldapEntry.getType().equals(DNType.ORGANIZATIONAL_UNIT)) {
 					//					ldapService.updateOLCAccessRulesAfterEntryDelete(ldapEntry.getDistinguishedName());
 					LdapEntry entry= ldapService.getOuAndOuSubTreeDetail(ldapEntry.getDistinguishedName());
 					if(entry.getChildEntries().size()>0) {
-						return false;
+						return ResponseEntity
+								.status(HttpStatus.OK)
+								.body(false);
+							
 					}
 					else {
 						
@@ -534,19 +708,32 @@ public class ComputerController {
 						operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
 						
 						ldapService.deleteNodes(entry);
-						return true;
+						return ResponseEntity
+								.status(HttpStatus.OK)
+								.body(true);
 					}
 				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity
+					.status(HttpStatus.EXPECTATION_FAILED)
+					.headers(headers)
+					.build();
 		}
-		return null;
+		//return null;
+		return new ResponseEntity<Boolean>(HttpStatus.NOT_FOUND);
 	}
 
-	@RequestMapping(method=RequestMethod.POST ,value = "/get_agent_info", produces = MediaType.APPLICATION_JSON_VALUE)
-	public Boolean getAgentInfo(@RequestParam(value="agentDN", required=true) String agentDN) {
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/get-agent-info", produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST ,value = "/get_agent_info", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean>  getAgentInfo(@RequestParam(value="agentDN", required=true) String agentDN) {
 		logger.info("Agent info request has been receieved. DN: " + agentDN);
 		//send task to Ahenk to change DN with new DN
 		Map<String, Object> parameterMap = new  HashMap<>();
@@ -579,11 +766,19 @@ public class ComputerController {
 		//		logger.debug("Completed processing request, returning result: {}", restResponse.toJson());
 		//
 		//		commandService.deleteAgentCommands(agentDN, agentUID);
-		return true;
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(true);
 	}
 
-	@RequestMapping(method=RequestMethod.POST ,value = "/update_agent_info", produces = MediaType.APPLICATION_JSON_VALUE)
-	public AgentImpl updateAgentInfo(@RequestParam(value="ipAddresses", required=true) String ipAddresses,
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/update-agent-info",  produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST ,value = "/update_agent_info", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<AgentImpl>  updateAgentInfo(@RequestParam(value="ipAddresses", required=true) String ipAddresses,
 			@RequestParam(value="hostname", required=true) String hostname,
 			@RequestParam(value="agentVersion", required=true) String agentVersion,
 			@RequestParam(value="macAddresses", required=true) String macAddresses,
@@ -632,9 +827,17 @@ public class ComputerController {
 			} 
 			agentRepository.save(agent);
 			
-			return agent;
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(agent);
+					
 		} else {
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity
+					.status(HttpStatus.NOT_FOUND)
+					.headers(headers)
+					.build();
+					
 		}
 	}
 
@@ -652,8 +855,14 @@ public class ComputerController {
 		return isExist;
 	}
 	
-	@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
-	public LdapEntry addOu(LdapEntry selectedEntry) {
+	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/add-ou",  produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<LdapEntry>  addOu(LdapEntry selectedEntry) {
 		try {
 			Map<String, String[]> attributes = new HashMap<String,String[]>();
 			attributes.put("objectClass", new String[] {"organizationalUnit", "top", "pardusLider"} );
@@ -679,10 +888,17 @@ public class ComputerController {
 			String log = selectedEntry.getDistinguishedName() + " folder has been created";
 			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
 			
-			return selectedEntry;
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(selectedEntry);
+					
 		} catch (LdapException e) {
 			e.printStackTrace();
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+			return ResponseEntity
+					.status(HttpStatus.NOT_FOUND)
+					.headers(headers)
+					.build();
 		}
 	}
 }
