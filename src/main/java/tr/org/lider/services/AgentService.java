@@ -83,6 +83,7 @@ public class AgentService {
 	public Page<AgentImpl> findAllAgents(
 			int pageNumber,
 			int pageSize,
+			Optional<String> sessionReportType,
 			Optional<Date> registrationStartDate,
 			Optional<Date> registrationEndDate,
 			Optional<String> status,
@@ -114,9 +115,30 @@ public class AgentService {
 				e.printStackTrace();
 			}
 		}
+		if(sessionReportType.isPresent()) {
+			if(sessionReportType.get().equals("LAST_ONE_MONTH_NO_SESSIONS") 
+					|| sessionReportType.get().equals("LAST_TWO_MONTHS_NO_SESSIONS") 
+					|| sessionReportType.get().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
+				List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
+				try {
+		
+					listOfAgents = ldapService.findSubEntries(
+							configurationService.getAgentLdapBaseDn(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
+		
+					for (LdapEntry ldapEntry : listOfAgents) {
+						if(ldapEntry.isOnline()) {
+							listOfOnlineUsers.add(ldapEntry.getUid());
+						}
+					}
+				} catch (LdapException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents(
 				pageNumber, 
 				pageSize, 
+				sessionReportType,
 				registrationStartDate, 
 				registrationEndDate, 
 				status,

@@ -56,6 +56,7 @@ public class AgentInfoController {
 	public ResponseEntity<HashMap<String, Object>> findAllAgents(
 			@RequestParam (value = "pageNumber") int pageNumber,
 			@RequestParam (value = "pageSize") int pageSize,
+			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
 			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
 			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
 			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
@@ -80,6 +81,7 @@ public class AgentInfoController {
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				pageNumber, 
 				pageSize, 
+				sessionReportType,
 				registrationStartDate, 
 				registrationEndDate, 
 				status, 
@@ -90,7 +92,7 @@ public class AgentInfoController {
 				brand, 
 				model, 
 				processor, 
-				osVersion, 
+				osVersion,
 				agentVersion);
 				
 		resultMap.put("agents", listOfAgents);
@@ -133,6 +135,7 @@ public class AgentInfoController {
 			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
 			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
 			@RequestParam (value = "status") Optional<String> status,
+			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
 			@RequestParam (value = "dn") Optional<String> dn,
 			@RequestParam (value = "hostname") Optional<String> hostname,
 			@RequestParam (value = "macAddress") Optional<String> macAddress,
@@ -145,6 +148,7 @@ public class AgentInfoController {
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				1, 
 				agentService.count().intValue(), 
+				sessionReportType,
 				registrationStartDate, 
 				registrationEndDate, 
 				status, 
