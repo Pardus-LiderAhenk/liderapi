@@ -98,7 +98,7 @@ public class ComputerController {
 	
 	@Operation(summary = "Get computer features list", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Retrieved the computer specs list."),
+			  @ApiResponse(responseCode = "200", description = "Returns the computer specs list."),
 			  @ApiResponse(responseCode = "417", description = "Could not get computer specs list.Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/computers")
@@ -138,13 +138,12 @@ public class ComputerController {
 				.body(subEntries);
 	}
 
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Get organization unit list", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Returns the ou list "),
+			  @ApiResponse(responseCode = "417", description = "Could not ou list. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@GetMapping(value = "/ou")
-	//@RequestMapping(value = "/getOu")
 	public ResponseEntity<List<LdapEntry>>  getOu(LdapEntry selectedEntry) {
 		List<LdapEntry> subEntries = null;
 		try {
@@ -171,10 +170,10 @@ public class ComputerController {
 	 * @param value
 	 * @return
 	 */
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Getting search entry list ", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Returns search entry list"),
+			  @ApiResponse(responseCode = "417", description = "Could not get search entry list", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/search-entry",produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/searchEntry", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -194,9 +193,9 @@ public class ComputerController {
 		} catch (LdapException e) {
 			e.printStackTrace();
 			HttpHeaders headers = new HttpHeaders();
-			return ResponseEntity.
-					status(HttpStatus.EXPECTATION_FAILED).
-					headers(headers)
+			return ResponseEntity
+					.status(HttpStatus.EXPECTATION_FAILED)
+					.headers(headers)
 					.build();
 		}
 		return ResponseEntity
@@ -204,10 +203,10 @@ public class ComputerController {
 				.body(results);
 		}
 
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Getting ahenk list", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "417", description = "Could not ahenk list", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/online-ahenks")
 	//@RequestMapping(value = "/getOnlineAhenks", method = { RequestMethod.POST })
@@ -260,10 +259,10 @@ public class ComputerController {
 	}
 
 	//add new group and add selected agents
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Getting new agent group", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "The new agent group has been created."),
+			  @ApiResponse(responseCode = "417", description = "Could not create new agent group.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/create-new-agent-group", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/createNewAgentGroup", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -315,10 +314,10 @@ public class ComputerController {
 }
 
 	//add agents to existing group
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Adding agent to existing group", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Added agent to existing group"),
+			  @ApiResponse(responseCode = "404", description = "The group id not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -365,10 +364,10 @@ public class ComputerController {
 	 * @param value
 	 * @return
 	 */
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Search online entries", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "404", description = "Could not found online entries.Not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/search-online-entries", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/searchOnlineEntries", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -403,10 +402,10 @@ public class ComputerController {
 	}
 
 	
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Getting agent list", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Returns agents list"),
+			  @ApiResponse(responseCode = "417", description = "Could not retrieved agent list. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/agent-list-size", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(value = "/getAgentListSize")
@@ -444,10 +443,10 @@ public class ComputerController {
 				
 	}
 
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Move agent", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Moved to agent"),
+			  @ApiResponse(responseCode = "417", description = "Could not move agent. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/move/agent", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/move/agent", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -514,10 +513,10 @@ public class ComputerController {
 				.body(true);
 	}
 
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Delete agent by id", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Agent by id deleted"),
+			  @ApiResponse(responseCode = "404", description = "Agent id not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/delete/agent", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/delete/agent", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -584,10 +583,10 @@ public class ComputerController {
 	}
 
 
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Rename agent ", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Updated agent name"),
+			  @ApiResponse(responseCode = "417", description = "Could not rename agent. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/rename/agent", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/rename/agent", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -673,10 +672,10 @@ public class ComputerController {
 	 */
 
 	
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Delete computer by ou ", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Delete computer ou"),
+			  @ApiResponse(responseCode = "417", description = "Could not delete computer ou. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@DeleteMapping(value = "/delete-computer-ou")
 	//@RequestMapping(method=RequestMethod.POST, value = "/deleteComputerOu")
@@ -726,10 +725,10 @@ public class ComputerController {
 		return new ResponseEntity<Boolean>(HttpStatus.NOT_FOUND);
 	}
 
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Getting agent info", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Returns agent info"),
+			  @ApiResponse(responseCode = "417", description = "Could not get agent info. Unexpexted error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/get-agent-info", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/get_agent_info", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -771,10 +770,10 @@ public class ComputerController {
 				.body(true);
 	}
 
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Update agent info", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Update agent info"),
+			  @ApiResponse(responseCode = "404", description = "Agent info is not found. Not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/update-agent-info",  produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/update_agent_info", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -855,10 +854,10 @@ public class ComputerController {
 		return isExist;
 	}
 	
-	@Operation(summary = "", description = "", tags = { "computer-management" })
+	@Operation(summary = "Adding organization unit", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Add ou"),
+			  @ApiResponse(responseCode = "417", description = "Could not add organization unit. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-ou",  produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
