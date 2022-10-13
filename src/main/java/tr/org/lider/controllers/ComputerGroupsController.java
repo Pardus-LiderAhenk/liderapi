@@ -82,12 +82,11 @@ public class ComputerGroupsController {
 	
 	//gets tree of groups of names which just has agent members
 	
-	//@RequestMapping(value = "/getGroups")
-	
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	//@RequestMapping(value = "/getGroups")	
+	@Operation(summary = "Gets in group tree", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Included in the computer group. Successful"),
+			  @ApiResponse(responseCode = "417", description = "Could not be into computer group. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/groups", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<LdapEntry>>  getAgentGroups() {
@@ -99,10 +98,10 @@ public class ComputerGroupsController {
 		}
 	
 	//@RequestMapping(value = "/getOuDetails")
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Gets organization unit details", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Returns organizational unit details"),
+			  @ApiResponse(responseCode = "417", description = "Could not be fetched ou-details. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/ou-details", produces = MediaType.APPLICATION_JSON_VALUE)
 	public List<LdapEntry> getOuDetails(LdapEntry selectedEntry) {
@@ -118,11 +117,10 @@ public class ComputerGroupsController {
 		return subEntries;
 	}
 	
-	//	@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces={"application/json","application/xml"})
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Create organizational unit", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "New organizational unit added"),
+			  @ApiResponse(responseCode = "417", description = "Could not create organizational unit. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-ou", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	public ResponseEntity<LdapEntry>  addOu(@RequestBody LdapEntry selectedEntry) {
@@ -164,10 +162,10 @@ public class ComputerGroupsController {
 		}
 	}
 	
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Delete entry by dn", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Deleted entry with dn."),
+			  @ApiResponse(responseCode = "404", description = "Entry dn not found. ", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@DeleteMapping(value = "/delete-entry/{dn}")
 	public ResponseEntity<Boolean>  deleteEntry(@RequestParam(value = "dn") String dn) {
@@ -208,11 +206,10 @@ public class ComputerGroupsController {
 		}
 	}
 	
-	//@RequestMapping(value = "/getComputers")
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Gets computers added to ldap.", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Computers added to ldap list."),
+			  @ApiResponse(responseCode = "417", description = "Computers could not be added to the ldap list. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@GetMapping(value = "/computers}")
 	public ResponseEntity<List<LdapEntry>> getComputers() {
@@ -223,11 +220,10 @@ public class ComputerGroupsController {
 				.body(retList);
 	}
 	
-	//@RequestMapping(value = "/getAhenks", method = { RequestMethod.POST })
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Gets ahenks list", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Ahenk list received."),
+			  @ApiResponse(responseCode = "417", description = "Could not get list ahenk.Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/ahenks}")
 	public ResponseEntity<List<LdapEntry>>  getAhenks(HttpServletRequest request,Model model, @RequestBody LdapEntry[] selectedEntryArr) {
@@ -265,11 +261,10 @@ public class ComputerGroupsController {
 	}
 	
 	//add new group and add selected agents
-	//	@RequestMapping(method=RequestMethod.POST ,value = "/createNewAgentGroup", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Create new agent group", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Created new agent group"),
+			  @ApiResponse(responseCode = "417", description = "Could not created new agent group. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/create-new-agent-group", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -358,12 +353,10 @@ public class ComputerGroupsController {
 	}
 	
 	//add agents to existing group from agent info page
-	//@RequestMapping(method=RequestMethod.POST ,value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
-
-		@Operation(summary = "", description = "", tags = { "computer-groups" })
+		@Operation(summary = "Add agent to existing group", description = "", tags = { "computer-groups" })
 		@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "Added agent to existing group"),
+			  @ApiResponse(responseCode = "417", description = "Could not add agent to existing group. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 		@PostMapping(value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
 		public ResponseEntity<?> addAgentsToExistingGroup(@RequestBody Map<String, String> params) {
@@ -442,11 +435,10 @@ public class ComputerGroupsController {
 		}
 	
 	//get members of group
-	//@RequestMapping(method=RequestMethod.POST ,value = "/group/members", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Add member to group ", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-			@ApiResponse(responseCode = "200", description = ""),
-			 @ApiResponse(responseCode = "417", description = "", 
+			@ApiResponse(responseCode = "200", description = "Added member to group"),
+			 @ApiResponse(responseCode = "417", description = "Could not add member to group. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/group/members", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<LdapEntry>>  getMembersOfGroup(@RequestParam(value="dn", required=true) String dn) {
@@ -463,11 +455,10 @@ public class ComputerGroupsController {
 	}
 	
 	//delete member from group
-	//@RequestMapping(method=RequestMethod.POST ,value = "/delete/group/members", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Delete member from group", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-		  @ApiResponse(responseCode = "200", description = ""),
-		  @ApiResponse(responseCode = "417", description = "", 
+		  @ApiResponse(responseCode = "200", description = "Deleted member from group"),
+		  @ApiResponse(responseCode = "417", description = "Could not delete member from group. Unexpected error occured", 
 		    content = @Content(schema = @Schema(implementation = String.class))) })
 	@DeleteMapping(value = "/group/members/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -529,11 +520,10 @@ public class ComputerGroupsController {
 				
 	}
 	
-	//	@RequestMapping(method=RequestMethod.POST ,value = "/move/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Move  entry to destination", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-		  @ApiResponse(responseCode = "200", description = ""),
-		  @ApiResponse(responseCode = "417", description = "", 
+		  @ApiResponse(responseCode = "200", description = "Entry moved to destination."),
+		  @ApiResponse(responseCode = "417", description = "The entry could not be moved to the destination.Unexpected error occured", 
 		    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/move/entry", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean>  moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
@@ -567,11 +557,10 @@ public class ComputerGroupsController {
 	}
 	
 	
-	//@RequestMapping(method=RequestMethod.POST ,value = "/rename/entry", produces={"application/json","application/xml"})
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Entry rename", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = ""),
-			  @ApiResponse(responseCode = "417", description = "", 
+			  @ApiResponse(responseCode = "200", description = "The entry has been renamed"),
+			  @ApiResponse(responseCode = "417", description = "Could not rename entry.Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/rename/entry", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
 	public ResponseEntity<LdapEntry> renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
@@ -633,11 +622,10 @@ public class ComputerGroupsController {
 		return ahenks;
 	}
 	
-	//@RequestMapping(method=RequestMethod.POST, value = "/agentReport/createAgentGroup", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Create new agent group", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-		  @ApiResponse(responseCode = "200", description = ""),
-		  @ApiResponse(responseCode = "417", description = "", 
+		  @ApiResponse(responseCode = "200", description = "Created new agent group"),
+		  @ApiResponse(responseCode = "417", description = "Could not create agent group.Unexpected error occured", 
 		    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/agent-report/create-agent-group", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry>  findAllAgents(
@@ -721,12 +709,14 @@ public class ComputerGroupsController {
 				
 	}
 	
-	//@RequestMapping(method=RequestMethod.POST, value = "/agentReport/existing/group", produces = MediaType.APPLICATION_JSON_VALUE)
-	@Operation(summary = "", description = "", tags = { "computer-groups" })
+	@Operation(summary = "Update existing group", description = "", tags = { "computer-groups" })
 	@ApiResponses(value = { 
-		  @ApiResponse(responseCode = "200", description = ""),
-		  @ApiResponse(responseCode = "417", description = "", 
-		    content = @Content(schema = @Schema(implementation = String.class))) })
+		  @ApiResponse(responseCode = "200", description = "Existing group updated and agents added"),
+		  @ApiResponse(responseCode = "404", description = "No agents found to add to group. Not Found", 
+		    content = @Content(schema = @Schema(implementation = String.class))),
+		  @ApiResponse(responseCode = "417", description = "Error occured while adding agents to existing group. Unexpected error occured", 
+		    content = @Content(schema = @Schema(implementation = String.class)))
+		  })
 	@PostMapping(value = "/agent-report/existing/group", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry>  addClientToExistGroup(
 			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
@@ -765,7 +755,7 @@ public class ComputerGroupsController {
 		if(listOfAgents.getContent() == null || listOfAgents.getContent().size() == 0) {
 			logger.error("No agents found to add to group!");
 			return ResponseEntity.
-					status(HttpStatus.EXPECTATION_FAILED).
+					status(HttpStatus.NOT_FOUND).
 					headers(headers)
 					.build();
 		}
