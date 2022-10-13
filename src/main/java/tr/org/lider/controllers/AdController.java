@@ -320,7 +320,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Returns user list under selected entry."),
 			  @ApiResponse(responseCode = "417", description = "Could not retrieve user list under selected entry. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/search-entry-user")
+	@GetMapping(value = "/search-entry-user/search-dn/{searchDn}/key/{key}/value/{value}")
 	public ResponseEntity<List<LdapEntry>>  searchEntryUser(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
@@ -356,7 +356,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Returns entry group list."),
 			  @ApiResponse(responseCode = "417", description = "Could not retrieve entry group list. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/search-entry-group")
+	@GetMapping(value = "/search-entry-group/search-dn/{searchDn}/key/{key}/value/{value}")
 	public ResponseEntity<List<LdapEntry>>   searchEntryGroup(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
@@ -749,7 +749,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Delete member from Ldap group"),
 			  			  @ApiResponse(responseCode = "404", description = "Member is not found.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/member-from-group",produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(value = "/member-from-group/{dn}",produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public  ResponseEntity<LdapEntry> deleteMembersOfGroup(@RequestParam(value="dn", required=true) String dn, 
 			@RequestParam(value="dnList[]", required=true) List<String> dnList) {
@@ -881,7 +881,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Get child group"),
 			  			  @ApiResponse(responseCode = "417", description = "Could not get child group.Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/child-group")
+	@GetMapping(value = "/child-group/search-dn/{searchDn}/key/{key}/value/{value}")
 	public ResponseEntity<List<LdapEntry>>  getChildGroup(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 

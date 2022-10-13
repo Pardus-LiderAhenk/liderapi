@@ -60,7 +60,7 @@ import tr.org.lider.services.OperationLogService;;
  */
 @RestController
 @RequestMapping("/api/lider/computer")
-@Tag(name="Computer Management Service",description = "Computer Management")
+@Tag(name="Computer Management",description = "Computer Management Rest Service")
 public class ComputerController {
 
 	Logger logger = LoggerFactory.getLogger(ComputerController.class);

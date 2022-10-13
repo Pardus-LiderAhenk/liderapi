@@ -593,7 +593,6 @@ public class SettingsController {
 			  @ApiResponse(responseCode = "200", description = "Get open ldap check rule list"),
 			  @ApiResponse(responseCode = "417", description = "Could not retrieved open ldap  check rule list. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	//	@GetMapping(method=RequestMethod.POST ,value = "/getOLCAccessRules/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@GetMapping(value = "/OLC-access-rules/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<OLCAccessRule>> getUsersOLCAccessRules(@RequestParam (value = "dn", required = true) String dn) {
 		HttpHeaders headers = new HttpHeaders();
