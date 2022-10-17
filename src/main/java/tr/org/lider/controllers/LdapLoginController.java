@@ -93,7 +93,7 @@ public class LdapLoginController {
 	//updated user directory domain method by agent dn as null, AD or OpenLDAP
 	@Operation(summary = "Update change user directory domain ", description = "", tags = { "ldap-login-service" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "directory domain settings have changed"),
+			  @ApiResponse(responseCode = "200", description = "Directory domain settings have changed"),
 			  @ApiResponse(responseCode = "417",description = "Could not change directory domain settings. Unexpected error occured",
 		  		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/update-directory-domain", produces = MediaType.APPLICATION_JSON_VALUE)
