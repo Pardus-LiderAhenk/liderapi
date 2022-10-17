@@ -43,7 +43,6 @@ public class CommandController {
 			  @ApiResponse(responseCode = "417", description = "Command could not be run. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/command-execution-result",produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST, value="/commandexecutionresult")
 	public ResponseEntity<CommandExecutionResultImpl>   getCommandExecutionResult(@RequestParam(value="id") Long id) {
 		CommandExecutionResultImpl cer =  commandService.getCommandExecutionResultByID(id);
 		if(cer.getResponseData() != null)

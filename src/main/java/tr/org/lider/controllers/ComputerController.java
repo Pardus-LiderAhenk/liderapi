@@ -176,7 +176,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not get search entry list", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/search-entry",produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/searchEntry", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<LdapEntry>>  searchEntry(
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
@@ -209,7 +208,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not ahenk list", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/online-ahenks")
-	//@RequestMapping(value = "/getOnlineAhenks", method = { RequestMethod.POST })
 	public ResponseEntity<String>  getOnlyOnlineAhenks(@RequestBody LdapEntry[] selectedEntryArr) {
 		List<LdapEntry> ahenkList=new ArrayList<>();
 		for (LdapEntry ldapEntry : selectedEntryArr) {
@@ -265,8 +263,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not create new agent group.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/create-new-agent-group", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/createNewAgentGroup", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public ResponseEntity<LdapEntry> createNewAgentGroup(@RequestParam(value = "selectedOUDN", required=false) String selectedOUDN,
 			@RequestParam(value = "groupName", required=true) String groupName,
 			@RequestParam(value = "checkedList[]", required=true) String[] checkedList) {
@@ -320,7 +316,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "404", description = "The group id not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry>  addAgentsToExistingGroup(@RequestParam(value="groupDN") String groupDN,
 			@RequestParam(value = "checkedList[]", required=true) String[] checkedList) {
 		LdapEntry entry;
@@ -370,7 +365,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "404", description = "Could not found online entries.Not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/search-online-entries", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/searchOnlineEntries", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<LdapEntry>> searchOnlineEntries(
 			@RequestParam(value="searchDn", required=true) String searchDn) {
 
@@ -408,7 +402,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not retrieved agent list. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/agent-list-size", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(value = "/getAgentListSize")
 	public ResponseEntity<LdapEntry>  getAgentList(@RequestParam(value="searchDn") String searchDn) {
 		LdapEntry returnLdapEntry=null;
 		List<LdapEntry> retList = new ArrayList<LdapEntry>();
@@ -449,7 +442,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not move agent. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/move/agent", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/move/agent", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean>  moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
 			@RequestParam(value="sourceCN", required=true) String sourceCN,
 			@RequestParam(value="destinationDN", required=true) String destinationDN) {
@@ -519,7 +511,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "404", description = "Agent id not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/delete/agent", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/delete/agent", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean>  deleteAgent(@RequestParam(value="agentDN", required=true) String agentDN,
 			@RequestParam(value="agentUID", required=true) String agentUID) {
 		logger.info("Agent delete request has been receieved. DN: " + agentDN);
@@ -589,7 +580,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not rename agent. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/rename/agent", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/rename/agent", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> renameAgent(
 			@RequestParam(value="agentDN", required=true) String agentDN,
 			@RequestParam(value="cn", required=true) String cn,
@@ -678,8 +668,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not delete computer ou. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@DeleteMapping(value = "/delete-computer-ou")
-	//@RequestMapping(method=RequestMethod.POST, value = "/deleteComputerOu")
-	@ResponseBody
 	public ResponseEntity<Boolean> deleteComputerOu(@RequestBody LdapEntry[] selectedEntryArr) {
 		try {
 			for (LdapEntry ldapEntry : selectedEntryArr) {
@@ -731,7 +719,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not get agent info. Unexpexted error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/get-agent-info", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/get_agent_info", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean>  getAgentInfo(@RequestParam(value="agentDN", required=true) String agentDN) {
 		logger.info("Agent info request has been receieved. DN: " + agentDN);
 		//send task to Ahenk to change DN with new DN
@@ -776,7 +763,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "404", description = "Agent info is not found. Not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/update-agent-info",  produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/update_agent_info", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<AgentImpl>  updateAgentInfo(@RequestParam(value="ipAddresses", required=true) String ipAddresses,
 			@RequestParam(value="hostname", required=true) String hostname,
 			@RequestParam(value="agentVersion", required=true) String agentVersion,
@@ -860,7 +846,6 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not add organization unit. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-ou",  produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry>  addOu(LdapEntry selectedEntry) {
 		try {
 			Map<String, String[]> attributes = new HashMap<String,String[]>();

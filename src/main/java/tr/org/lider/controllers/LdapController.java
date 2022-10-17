@@ -371,8 +371,6 @@ public class LdapController {
 			  @ApiResponse(responseCode = "417",description = "Could not get Ldap list by filter. Unexpected error occured",
 		  		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/search-entry")
-	//@RequestMapping(method=RequestMethod.POST ,value = "/searchEntry")
-	@ResponseBody
 	public ResponseEntity<List<LdapEntry>> searchEntry(
 			@RequestParam(value="searchDn", required=false) String searchDn,
 			@RequestParam(value="key", required=true) String key, 
