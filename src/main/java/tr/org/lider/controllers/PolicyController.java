@@ -7,13 +7,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.PolicyImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -31,7 +38,8 @@ import tr.org.lider.utils.RestResponseStatus;
  */
 @Secured({"ROLE_ADMIN", "ROLE_COMPUTERS" })
 @RestController
-@RequestMapping("/policy")
+@RequestMapping("/api/policy")
+@Tag(name = "" , description = "")
 public class PolicyController {
 
 	Logger logger = LoggerFactory.getLogger(PolicyController.class);
@@ -40,78 +48,127 @@ public class PolicyController {
 	private PolicyService policyService;
 
 	//	return policies if deleted is false
-	@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<PolicyImpl> policyList() {
+	
+	//@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+	
+	@PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<PolicyImpl>> policyList() {
 		try {
-			return policyService.list();
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(policyService.list());
+					
 		} catch (DataAccessException e) {
 			logger.error("Error list policy: " + e.getCause().getMessage());
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 	}
 
 	//	return saved policy
-	@RequestMapping(method=RequestMethod.POST ,value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PolicyImpl policyAdd(@RequestBody PolicyImpl params) {
+	//@RequestMapping(method=RequestMethod.POST ,value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
+	
+	@PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<PolicyImpl> policyAdd(@RequestBody PolicyImpl params) {
 		try {
-			return policyService.add(params);
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(policyService.add(params));
+					
 		} catch (DataAccessException e) {
 			logger.error("Error saving policy: " + e.getCause().getMessage());
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 	}
 
 	//	return deleted policy. Never truly delete, just mark as deleted!
-	@RequestMapping(method=RequestMethod.POST ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PolicyImpl policyDelete(@RequestBody PolicyImpl params) {
+	@DeleteMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<PolicyImpl> policyDelete(@RequestBody PolicyImpl params) {
 		try {
-			return policyService.delete(params);
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(policyService.delete(params));
+					
 		} catch (DataAccessException e) {
 			logger.error("Error delete policy: " + e.getCause().getMessage());
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 	}
 
 	//	return active policy
-	@RequestMapping(method=RequestMethod.POST ,value = "/active", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PolicyImpl policyEnabled(@RequestBody PolicyImpl params) {
+	@PostMapping(value = "/active", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<PolicyImpl> policyEnabled(@RequestBody PolicyImpl params) {
 		try {
-			return policyService.active(params);
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(policyService.active(params));
+					
 		} catch (DataAccessException e) {
 			e.printStackTrace();
 			logger.error("Error active or passive policy: " + e.getCause().getMessage());
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 	}
 
 	//	return passive policy
-	@RequestMapping(method=RequestMethod.POST ,value = "/passive", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PolicyImpl policyDisabled(@RequestBody PolicyImpl params) {
+	@PostMapping(value = "/passive", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<PolicyImpl> policyDisabled(@RequestBody PolicyImpl params) {
 		try {
-			return policyService.passive(params);
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(policyService.passive(params));
+					
 		} catch (DataAccessException e) {
 			e.printStackTrace();
 			logger.error("Error passive policy: " + e.getCause().getMessage());
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 	}
 
 	//	return updated policy
-	@RequestMapping(method=RequestMethod.POST ,value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public PolicyImpl policyUpdated(@RequestBody PolicyImpl params) {
+	@PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<PolicyImpl> policyUpdated(@RequestBody PolicyImpl params) {
 		try {
-			return policyService.update(params);
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(policyService.update(params));
+			
 		} catch (DataAccessException e) {
 			e.printStackTrace();
 			logger.error("Error updated policy: " + e.getCause().getMessage());
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 	}
 	// executed policy
 	@RequestMapping(method=RequestMethod.POST ,value = "/execute", produces = MediaType.APPLICATION_JSON_VALUE)
-	public RestResponseImpl policyExecute(@RequestBody PolicyExecutionRequestImpl request) {
+	public ResponseEntity<String> policyExecute(@RequestBody PolicyExecutionRequestImpl request) {
 		policyService.executePolicy(request);
-		return new RestResponseImpl(RestResponseStatus.OK, new ArrayList<>(), null);
+		//return new RestResponseImpl(RestResponseStatus.OK, new ArrayList<>(), null);
+		return ResponseEntity.status(HttpStatus.OK).body("Task is executed.");
+			
 	}
 	
 	// 
@@ -133,7 +190,8 @@ public class PolicyController {
 			return policyService.activePolicies();
 		} catch (DataAccessException e) {
 			logger.error("Error get active policy list: " + e.getCause().getMessage());
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return null;
 		}
 	}
 }

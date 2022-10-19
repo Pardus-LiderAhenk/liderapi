@@ -16,7 +16,6 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +28,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.PackageInfo;
@@ -59,10 +57,10 @@ public class PackagesController {
 	@Autowired
 	private OperationLogService operationLogService;
 
-	@Operation(summary = "", description = "", tags = { "packages-service" })
+	@Operation(summary = "Gets package list", description = "", tags = { "packages-service" })
 	@ApiResponses(value = {
-      	  @ApiResponse(responseCode = "200", description = ""),
-		  @ApiResponse(responseCode = "417",description = "",
+      	  @ApiResponse(responseCode = "200", description = "Returns package list"),
+		  @ApiResponse(responseCode = "417",description = "Could not package list.Unexpected error occured",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<PackageInfo>> getPackageList(@RequestParam(value="type") String type,
@@ -80,10 +78,10 @@ public class PackagesController {
 				
 	}
 
-	@Operation(summary = "", description = "", tags = { "packages-service" })
+	@Operation(summary = "Update pardus repository", description = "", tags = { "packages-service" })
 	@ApiResponses(value = { 
-      	  @ApiResponse(responseCode = "200", description = ""),
-		  @ApiResponse(responseCode = "417",description = "",
+      	  @ApiResponse(responseCode = "200", description = "Updated pardus repository"),
+		  @ApiResponse(responseCode ="417",description = "Could not update pardus repository. Unexpected error occured",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/update/repo-address", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<HashMap<String, Object>> updateRepoAddrSettings(@RequestParam (value = "pardusRepoAddress", required = true) String pardusRepoAddress,
@@ -123,10 +121,10 @@ public class PackagesController {
 	}
 	
 //	get directory server(Active Directory and OpenLDAP) configurations method for ldap-login task
-	@Operation(summary = "", description = "", tags = { "packages-service" })
+	@Operation(summary = "Directory server configuration for ldap login task", description = "", tags = { "packages-service" })
 	@ApiResponses(value = { 
-      	  @ApiResponse(responseCode = "200", description = ""),
-		  @ApiResponse(responseCode = "417",description = "",
+      	  @ApiResponse(responseCode = "200", description = "Returns Open Ldap configurations"),
+		  @ApiResponse(responseCode = "417",description = "Could not configurations to directory server. Unexpected error occured",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@GetMapping(value = "/repo-address", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<HashMap<String, Object>> getConfigParams() {

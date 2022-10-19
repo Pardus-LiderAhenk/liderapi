@@ -32,7 +32,7 @@ import tr.org.lider.services.PluginService;
  */
 
 @RestController
-@Tag(name = "",description = "")
+@Tag(name = "Plugin Profil Pages",description = "Plugin Pfofil Rest Service")
 public class PluginProfilePagesController {
 	
 	Logger logger = LoggerFactory.getLogger(PluginProfilePagesController.class);
@@ -42,15 +42,14 @@ public class PluginProfilePagesController {
 	
 	
 	//@RequestMapping(value="/getPluginProfileList", method = {RequestMethod.POST })
-	@Operation(summary = "", description = "", tags = { "" })
+	@Operation(summary = "Gets plugin profile list", description = "", tags = { "plugin-profile-pages" })
 	@ApiResponses(value = { 
       	  @ApiResponse(responseCode = "200", description = "",
 			  content = { @Content(schema = @Schema(implementation = OperationLogImpl.class))}),
-		  @ApiResponse(responseCode = "417",description = "",
+		  @ApiResponse(responseCode = "417",description = "An error was received while fetching the plugin profile list.Unexpected error occured",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/api/get-plugin-profile-list")
 	public ResponseEntity<List<PluginProfile>> getPluginTaskList(Model model, PluginProfile pluginProfile) {
-		
 		logger.info("Getting plugink list ");
 		List<PluginProfile>  list = pluginService.findAllPluginProfile();
 		return ResponseEntity
@@ -58,5 +57,4 @@ public class PluginProfilePagesController {
 				.body(list);
 			
 	}
-
 }
