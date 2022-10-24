@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import tr.org.lider.entities.ConkyTemplate;
 import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ScriptTemplate;
@@ -42,6 +43,10 @@ public class ScriptService {
 
 	public Optional<ScriptTemplate> find(Long id){
 		return scriptRepository.findById(id);
+	}
+	
+	public List<ScriptTemplate> listAll(){
+		return scriptRepository.findAll();
 	}
 	
 	public Page<ScriptTemplate> list(int pageNumber, int pageSize){

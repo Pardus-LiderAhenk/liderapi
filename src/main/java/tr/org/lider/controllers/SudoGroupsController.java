@@ -165,7 +165,7 @@ public class SudoGroupsController {
 			  @ApiResponse(responseCode = "200", description = "Deleted entry by dn.Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not delete entry. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/entry/{dn}")
+	@DeleteMapping(value = "/entry{dn}")
 	//@RequestMapping(method=RequestMethod.POST, value = "/deleteEntry")
 	public ResponseEntity<Boolean> deleteEntry(@RequestParam(value = "dn") String dn) {
 		try {
