@@ -15,6 +15,7 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -199,7 +200,11 @@ public class UserGroupsController {
 			entry = ldapService.getEntryDetail(groupDN);
 		} catch (LdapException e) {
 			System.out.println("Error occured while adding new group.");
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 		return ResponseEntity
 				.status(HttpStatus.OK)
@@ -261,7 +266,11 @@ public class UserGroupsController {
 			entry = ldapService.getEntryDetail(params.get("groupDN"));
 		} catch (LdapException e) {
 			logger.error("Error occured while adding new group.");
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 		Map<String, Object> requestData = new HashMap<String, Object>();
 		List<String> userAdded = new ArrayList<>();
@@ -331,7 +340,11 @@ public class UserGroupsController {
 				ldapService.updateEntryRemoveAttributeWithValue(dn, "member", String.join(",", dnList));
 			} catch (LdapException e) {
 				e.printStackTrace();
-				return null;
+				HttpHeaders headers = new HttpHeaders();
+	    		return ResponseEntity
+	    				.status(HttpStatus.EXPECTATION_FAILED)
+	    				.headers(headers)
+	    				.build();
 			}
 		} else {
 			for (int i = 0; i < dnList.size(); i++) {
@@ -339,7 +352,11 @@ public class UserGroupsController {
 					ldapService.updateEntryRemoveAttributeWithValue(dn, "member", dnList.get(i));
 				} catch (LdapException e) {
 					e.printStackTrace();
-					return null;
+					HttpHeaders headers = new HttpHeaders();
+		    		return ResponseEntity
+		    				.status(HttpStatus.EXPECTATION_FAILED)
+		    				.headers(headers)
+		    				.build();
 				}
 			}
 		}
@@ -432,7 +449,11 @@ public class UserGroupsController {
 					
 		} catch (Exception e) {
 			logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 	}
 	
@@ -470,7 +491,11 @@ public class UserGroupsController {
 					
 		} catch (Exception e) {
 			logger.error("Error occured while mapping request data to json. Error: " +  e.getMessage());
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 	}
 	
@@ -576,7 +601,11 @@ public class UserGroupsController {
 			entry = ldapService.getEntryDetail(newGroupDN);
 		} catch (LdapException e) {
 			logger.error("Error occured while adding new group.");
-			return null;
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
 		}
 		
 		Map<String, Object> requestData = new HashMap<String, Object>();

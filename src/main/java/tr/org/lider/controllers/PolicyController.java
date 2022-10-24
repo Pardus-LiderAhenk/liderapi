@@ -212,7 +212,7 @@ public class PolicyController {
 			  @ApiResponse(responseCode = "200", description = "Returns group policies.Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not get policy group. Unexpected error occured ", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/policies-for-group", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/policies-for-group/dn/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<PolicyResponse>> getPolicies4Group(@RequestBody LdapEntry dn) {
 		logger.info("Getting executed policies for group. DN : " +dn.getDistinguishedName());
 		return ResponseEntity

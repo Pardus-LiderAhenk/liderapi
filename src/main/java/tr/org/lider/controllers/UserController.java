@@ -763,7 +763,7 @@ public class UserController {
 			  @ApiResponse(responseCode = "200", description = "Deleted attribute and vulues. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not delete attribute. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "attribute-with-value/dn/{dn}/attribute/{attribute}/value/{value}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(value = "/attribute-with-value/dn/{dn}/attribute/{attribute}/value/{value}", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/removeAttributeWithValue", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> removeAttributeWithValue(
 			@RequestParam(value="dn", required=true) String dn,
