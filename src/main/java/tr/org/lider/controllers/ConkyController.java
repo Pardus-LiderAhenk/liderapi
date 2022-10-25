@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,7 +53,6 @@ public class ConkyController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(conkyService.list(pageNumber, pageSize));
-				
 	}
 	
 //	get conky list all as no pagging
@@ -70,7 +68,6 @@ public class ConkyController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(conkyService.listAll());
-				
 	}
 
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
@@ -85,7 +82,6 @@ public class ConkyController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(conkyService.add(template));
-				
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
@@ -100,7 +96,6 @@ public class ConkyController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(conkyService.delete(template));
-				
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
@@ -115,6 +110,5 @@ public class ConkyController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(conkyService.update(template));
-				
 	}
 }

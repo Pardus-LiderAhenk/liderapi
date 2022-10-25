@@ -9,12 +9,8 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import tr.org.lider.entities.ConkyTemplate;
-import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ScriptTemplate;
 import tr.org.lider.entities.ScriptType;
@@ -46,7 +42,7 @@ public class ScriptService {
 	}
 	
 	public List<ScriptTemplate> listAll(){
-		return scriptRepository.findAll();
+		return scriptRepository.findAllByDeleted(false);
 	}
 	
 	public Page<ScriptTemplate> list(int pageNumber, int pageSize){

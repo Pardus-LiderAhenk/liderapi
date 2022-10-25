@@ -97,7 +97,7 @@ public class ConkyService {
 	}
 	
 	public List<ConkyTemplate> listAll(){
-		return conkyRepository.findAll();
+		return conkyRepository.findAllByDeleted(false);
 	}
 
 	public ConkyTemplate add(ConkyTemplate template) {
