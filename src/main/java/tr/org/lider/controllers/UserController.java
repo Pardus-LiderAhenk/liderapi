@@ -693,7 +693,7 @@ public class UserController {
 			  @ApiResponse(responseCode = "200", description = ""),
 			  @ApiResponse(responseCode = "417", description = "Could not get user session. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/user-session/{uid}")
+	@GetMapping(value = "/user-session/uid/{uid}")
 	//@RequestMapping(method=RequestMethod.POST, value = "/getUserSessions")
 	public ResponseEntity<List<UserSessionsModel>> getUserSessions(@RequestParam(value = "uid", required=true) String uid) {
 		List<UserSessionsModel> userSessions=null;
