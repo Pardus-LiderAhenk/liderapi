@@ -54,7 +54,7 @@ public class ScriptController {
 			) {
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(scriptService.list(pageSize, pageNumber));
+				.body(scriptService.list(pageNumber, pageSize));
 				
 	}
 	
