@@ -1,3 +1,5 @@
+
+
 package tr.org.lider.controllers;
 
 import java.util.List;
@@ -7,9 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,7 +33,7 @@ public class CommandController {
 	CommandService commandService;
 	
 	@GetMapping(value = "/dn/{dn}")
-	public ResponseEntity<List<CommandImpl>> findAllCommandByDNList(@RequestParam(value ="dn") String dn) {
+	public ResponseEntity<List<CommandImpl>> findAllCommandByDNList(@PathVariable String dn) {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(commandService.getExecutedTasks(dn));
@@ -45,7 +46,7 @@ public class CommandController {
 			  @ApiResponse(responseCode = "417", description = "Command could not be run. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@GetMapping(value = "/command-execution-result/id/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<CommandExecutionResultImpl>   getCommandExecutionResult(@RequestParam(value="id") Long id) {
+	public ResponseEntity<CommandExecutionResultImpl>   getCommandExecutionResult(@PathVariable Long id) {
 		CommandExecutionResultImpl cer =  commandService.getCommandExecutionResultByID(id);
 		if(cer.getResponseData() != null)
 			cer.setResponseDataStr((new String(cer.getResponseData())));

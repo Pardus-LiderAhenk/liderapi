@@ -667,7 +667,7 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "200", description = "Delete computer ou"),
 			  @ApiResponse(responseCode = "417", description = "Could not delete computer ou. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/delete-computer-ou")
+	@PostMapping(value = "/delete-computer-ou")
 	public ResponseEntity<Boolean> deleteComputerOu(@RequestBody LdapEntry[] selectedEntryArr) {
 		try {
 			for (LdapEntry ldapEntry : selectedEntryArr) {
