@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -213,11 +214,11 @@ public class PolicyController {
 			  @ApiResponse(responseCode = "417", description = "Could not get policy group. Unexpected error occured ", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@GetMapping(value = "/policies-for-group/dn/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<PolicyResponse>> getPolicies4Group(@RequestBody LdapEntry dn) {
-		logger.info("Getting executed policies for group. DN : " +dn.getDistinguishedName());
+	public ResponseEntity<List<PolicyResponse>> getPolicies4Group(@PathVariable String dn) {
+		logger.info("Getting executed policies for group. DN : " +dn);
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(policyService.getPoliciesForGroup(dn.getDistinguishedName()));
+				.body(policyService.getPoliciesForGroup(dn));
 	}
 	
 	@Operation(summary = "Unassignment on a policy", description = "", tags = { "policy" })
