@@ -881,7 +881,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Get child group"),
 			  			  @ApiResponse(responseCode = "417", description = "Could not get child group.Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/child-group/search-dn/{searchDn}/key/{key}/value/{value}")
+	@GetMapping(value = "/child-group/searchDn/{searchDn}/key/{key}/value/{value}")
 	public ResponseEntity<List<LdapEntry>>  getChildGroup(HttpServletRequest request,
 			@RequestParam(value="searchDn", required=true) String searchDn,
 			@RequestParam(value="key", required=true) String key, 

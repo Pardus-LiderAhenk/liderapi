@@ -67,7 +67,7 @@ public class OperationLogController {
 			@RequestParam (value = "operationType") String operationType) {
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(logService.getLoginLogsByLiderConsole(AuthenticationService.getDn(), pageNumber, pageSize, operationType));
+				.body(logService.getLoginLogsByLiderConsole(AuthenticationService.getDn(),pageSize, pageNumber, operationType));
 	}
 	
 	@Operation(summary = "Get operation log type", description = "", tags = { "operation-log" })

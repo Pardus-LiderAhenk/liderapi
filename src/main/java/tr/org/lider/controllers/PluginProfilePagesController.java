@@ -46,7 +46,7 @@ public class PluginProfilePagesController {
 	@ApiResponses(value = { 
       	  @ApiResponse(responseCode = "200", description = "",
 			  content = { @Content(schema = @Schema(implementation = OperationLogImpl.class))}),
-		  @ApiResponse(responseCode = "417",description = "An error was received while fetching the plugin profile list.Unexpected error occured",
+		  @ApiResponse(responseCode = "417",description = "An error was received while fetching the plugin profile list.Unexpected error occurred",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/api/get-plugin-profile-list")
 	public ResponseEntity<List<PluginProfile>> getPluginTaskList(Model model, PluginProfile pluginProfile) {

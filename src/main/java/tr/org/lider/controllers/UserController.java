@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -695,7 +696,7 @@ public class UserController {
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@GetMapping(value = "/user-session/uid/{uid}")
 	//@RequestMapping(method=RequestMethod.POST, value = "/getUserSessions")
-	public ResponseEntity<List<UserSessionsModel>> getUserSessions(@RequestParam(value = "uid", required=true) String uid) {
+	public ResponseEntity<List<UserSessionsModel>> getUserSessions(@PathVariable String uid) {
 		List<UserSessionsModel> userSessions=null;
 		try {
 			List<UserSessionImpl> userSessionsDb = userService.getUserSessions(uid);
