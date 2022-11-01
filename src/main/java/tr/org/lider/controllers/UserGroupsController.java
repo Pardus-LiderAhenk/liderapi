@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -667,5 +666,48 @@ public class UserGroupsController {
 			}
 		}
 		return users;
+	}
+	
+	@Operation(summary = "Domain admin privilege by group dn", description = "", tags = { "user-groups" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/domain-admin")
+	//@RequestMapping(method=RequestMethod.POST, value = "/deleteEntry")
+	public ResponseEntity<?> updateDomainAdmin(@RequestParam(value = "dn") String dn,
+			@RequestParam(value = "isDomainAdmin") Boolean isDomainAdmin) {
+		try {
+			if (isDomainAdmin) {
+				ldapService.updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_DOMAIN_ADMIN");
+			} else {
+				try {
+					ldapService.updateEntryRemoveAttributeWithValue(dn, "liderPrivilege", "ROLE_DOMAIN_ADMIN");
+				} catch (LdapException e) {
+					e.printStackTrace();
+					HttpHeaders headers = new HttpHeaders();
+		    		return ResponseEntity
+		    				.status(HttpStatus.EXPECTATION_FAILED)
+		    				.headers(headers)
+		    				.build();
+				}
+			}
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("dn", dn);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = dataMapper.writeValueAsString(requestData);
+			String log = "The group has been given domain admin privileges. " + dn;
+			if (isDomainAdmin) {
+				log = "The group's has been deleted domain admin privileges. " + dn;
+			}
+			operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+			LdapEntry selectedEntry = ldapService.getEntryDetail(dn);
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(selectedEntry);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String[]>(new String[] {"Hata oluştu"}, HttpStatus.EXPECTATION_FAILED);
+		}
 	}
 }
