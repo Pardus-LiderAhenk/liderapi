@@ -61,12 +61,12 @@ public class ScriptService {
 		return savedScript;
 	}
 
-	public ScriptTemplate delete(ScriptTemplate script) {
-		ScriptTemplate existScript = scriptRepository.findOne(script.getId());
-		existScript.setDeleted(true);
-		ScriptTemplate savedScript = scriptRepository.save(existScript);
+	public ScriptTemplate delete(Long id) {
+		ScriptTemplate existingScript = scriptRepository.findOne(id);
+		existingScript.setDeleted(true);
+		ScriptTemplate savedScript = scriptRepository.save(existingScript);
 		try {
-			operationLogService.saveOperationLog(OperationType.DELETE, "Betik Tanımı silindi.", existScript.getContents().getBytes());
+			operationLogService.saveOperationLog(OperationType.DELETE, "Betik Tanımı silindi.", existingScript.getContents().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

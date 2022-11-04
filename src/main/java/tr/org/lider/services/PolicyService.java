@@ -126,13 +126,13 @@ public class PolicyService {
 		return policyRepository.save(existPolicy);
 	}
 
-	public PolicyImpl delete(PolicyImpl policy) {
-		PolicyImpl existPolicy = policyRepository.findOne(policy.getId());
-		existPolicy.setDeleted(true);
-		existPolicy.setModifyDate(new Date());
-		String logMessage = "[ "+ existPolicy.getLabel() + " ] politikası silindi.";
-		operationLogService.saveOperationLog(OperationType.DELETE, logMessage, existPolicy.getLabel().getBytes(), null, existPolicy.getId(), null);
-		return policyRepository.save(existPolicy);
+	public PolicyImpl delete(Long id) {
+		PolicyImpl existingPolicy = policyRepository.findOne(id);
+		existingPolicy.setDeleted(true);
+		existingPolicy.setModifyDate(new Date());
+		String logMessage = "[ "+ existingPolicy.getLabel() + " ] politikası silindi.";
+		operationLogService.saveOperationLog(OperationType.DELETE, logMessage, existingPolicy.getLabel().getBytes(), null, existingPolicy.getId(), null);
+		return policyRepository.save(existingPolicy);
 	}
 
 	public PolicyImpl update(PolicyImpl policy) {

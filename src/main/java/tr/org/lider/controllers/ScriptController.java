@@ -93,11 +93,11 @@ public class ScriptController {
 			  @ApiResponse(responseCode = "200", description = "Deleted script. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not delete script. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ScriptTemplate> scriptDel(@RequestBody ScriptTemplate script){
+	@DeleteMapping(value = "/delete/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ScriptTemplate> scriptDel(@PathVariable Long id){
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(scriptService.delete(script));
+				.body(scriptService.delete(id));
 				
 	}
 	

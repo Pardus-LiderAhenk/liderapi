@@ -106,12 +106,12 @@ public class PolicyController {
 			  @ApiResponse(responseCode = "200", description = "Deleted policy. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not delete policy. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<PolicyImpl> policyDelete(@RequestBody PolicyImpl params) {
+	@DeleteMapping(value = "/delete/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<PolicyImpl> policyDelete(@PathVariable Long id) {
 		try {
 			return ResponseEntity
 					.status(HttpStatus.OK)
-					.body(policyService.delete(params));
+					.body(policyService.delete(id));
 					
 		} catch (DataAccessException e) {
 			logger.error("Error delete policy: " + e.getCause().getMessage());
