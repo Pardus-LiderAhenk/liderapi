@@ -177,7 +177,7 @@ public class PolicyController {
 			  @ApiResponse(responseCode = "200", description = "Updated policy. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not update policy. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<PolicyImpl> policyUpdated(@RequestBody PolicyImpl params) {
 		try {
 			return ResponseEntity

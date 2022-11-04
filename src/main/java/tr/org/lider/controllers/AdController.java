@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -675,7 +676,6 @@ public class AdController {
 			  			  @ApiResponse(responseCode = "404", description = "User is not found.Not found.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PutMapping(value = "/update-user-password",produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public  ResponseEntity<LdapEntry> updateUserPassword(LdapEntry selectedEntry) {
 		logger.info("Resetting user password. Dn: {}",selectedEntry.getDistinguishedName());
 		try {
@@ -711,15 +711,14 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Delete AD entries."),
 			  			  @ApiResponse(responseCode = "404", description = "Could not delete AD entry. Not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/entry",produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody	
-	public ResponseEntity<LdapEntry> deleteEntry(LdapEntry selectedEntry) {
+	@DeleteMapping(value = "/entry/selectedEntry/{selectedEntry}",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<LdapEntry> deleteEntry(@PathVariable String selectedEntry) {
 		try {
-			logger.info("AD Deleting entry. Dn: {}",selectedEntry.getDistinguishedName());
-			service.deleteEntry(selectedEntry.getDistinguishedName());
+			logger.info("AD Deleting entry. Dn: {}",selectedEntry);
+			service.deleteEntry(selectedEntry);
 			
-			operationLogService.saveOperationLog(OperationType.DELETE, selectedEntry.getDistinguishedName() + " entry has been deleted from " + "[Active Directroy]", null);
-			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
+			operationLogService.saveOperationLog(OperationType.DELETE, selectedEntry + " entry has been deleted from " + "[Active Directroy]", null);
+			return new ResponseEntity<LdapEntry>(HttpStatus.OK);
 		} catch (LdapException e) {
 			return new ResponseEntity<LdapEntry>(HttpStatus.EXPECTATION_FAILED);
 		}

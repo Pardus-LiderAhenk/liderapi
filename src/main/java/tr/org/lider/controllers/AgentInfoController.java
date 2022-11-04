@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -108,8 +110,8 @@ public class AgentInfoController {
 			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
 			  @ApiResponse(responseCode = "404", description = "Agent id not found.Not found.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/detail/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<AgentImpl>  findAgentByIDRest(@RequestParam (value = "agentID") Long agentID) {
+	@GetMapping(value = "/detail/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<AgentImpl>  findAgentByIDRest(@PathVariable Long agentID) {
 		logger.debug("Agent id:  {} ", agentID);
 		Optional<AgentImpl> agent = agentService.findAgentByID(agentID);
 		HttpHeaders headers = new HttpHeaders();
