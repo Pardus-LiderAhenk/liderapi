@@ -488,8 +488,8 @@ public class SettingsController {
 			  @ApiResponse(responseCode = "200", description = "Console user deleted on ldap entries"),
 			  @ApiResponse(responseCode = "417", description = "Could not delete console user in ldap entries. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/delete-console-user/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<List<LdapEntry>> deleteConsoleUser(@RequestParam (value = "dn", required = true) String dn,
+	@DeleteMapping(value = "/delete-console-user/dn/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<LdapEntry>> deleteConsoleUser(@PathVariable String dn,
 			Authentication authentication) {
 		List<LdapEntry> ldapEntries = null;
 		try {
