@@ -696,11 +696,16 @@ public class UserGroupsController {
 			requestData.put("dn", dn);
 			ObjectMapper dataMapper = new ObjectMapper();
 			String jsonString = dataMapper.writeValueAsString(requestData);
-			String log = "The group has been given domain admin privileges. " + dn;
+			
 			if (isDomainAdmin) {
-				log = "The group's has been deleted domain admin privileges. " + dn;
+				String logAdded = "The group has been given domain admin privileges. " + dn;
+				operationLogService.saveOperationLog(OperationType.UPDATE, logAdded, jsonString.getBytes(), null, null, null);
+			} else {
+				String logDeleted = "The group's has been deleted domain admin privileges. " + dn;
+				operationLogService.saveOperationLog(OperationType.DELETE, logDeleted, jsonString.getBytes(), null, null, null);
 			}
-			operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+			
+			
 			LdapEntry selectedEntry = ldapService.getEntryDetail(dn);
 			return ResponseEntity
 					.status(HttpStatus.OK)
