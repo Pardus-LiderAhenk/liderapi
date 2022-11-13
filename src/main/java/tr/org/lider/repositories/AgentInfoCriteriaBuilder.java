@@ -55,6 +55,7 @@ public class AgentInfoCriteriaBuilder {
 			Optional<String> processor,
 			Optional<String> osVersion,
 			Optional<String> agentVersion,
+			Optional<String> diskType,
 			List<String> listOfOnlineUsers) {
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
 
@@ -181,6 +182,21 @@ public class AgentInfoCriteriaBuilder {
 			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), agentVersion.get());
 			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
 		}
+		
+		if(diskType.isPresent() && !diskType.get().equals("")) {
+			
+			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
+			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class),diskType.get());
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), osVersion.get());
+			predicates.add(cb.and(namePredicate, valuePredicate));
+
+			//for count 
+			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
+			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class),diskType.get());
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue"), osVersion.get());
+			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
+		}
+		
 		
 		if(sessionReportType != null) {
 			Date sessionFilterDate = null;

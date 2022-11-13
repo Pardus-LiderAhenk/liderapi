@@ -95,7 +95,8 @@ public class AgentService {
 			Optional<String> model,
 			Optional<String> processor,
 			Optional<String> osVersion,
-			Optional<String> agentVersion) {
+			Optional<String> agentVersion,
+			Optional<String> diskType) {
 		
 		List<String> listOfOnlineUsers = new ArrayList<String>();
 		if(!status.get().equals("ALL")) {
@@ -151,7 +152,9 @@ public class AgentService {
 				processor, 
 				osVersion, 
 				agentVersion, 
-				listOfOnlineUsers);
+				diskType,
+				listOfOnlineUsers
+				);
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {
 			if(messagingService.isRecipientOnline(listOfAgentsCB.getContent().get(i).getJid())) {
 				listOfAgentsCB.getContent().get(i).setIsOnline(true);

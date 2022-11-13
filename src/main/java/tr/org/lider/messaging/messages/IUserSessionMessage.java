@@ -36,5 +36,9 @@ public interface IUserSessionMessage extends IAgentMessage {
 	String getOsVersion();
 	
 	String getAgentVersion();
+	
+	String getHardwareInfoSsd();
+	
+	String getHardwareInfoHdd();
 
 }

@@ -71,7 +71,8 @@ public class AgentInfoController {
 			@RequestParam (value = "model") Optional<String> model,
 			@RequestParam (value = "processor") Optional<String> processor,
 			@RequestParam (value = "osVersion") Optional<String> osVersion,
-			@RequestParam (value = "agentVersion") Optional<String> agentVersion) {
+			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
+			@RequestParam (value = "diskType") Optional<String> diskType) {
 		HashMap<String, Object> resultMap = new HashMap<>();
 		if(getFilterData.isPresent() && getFilterData.get()) {
 			resultMap.put("brands", agentService.getBrands());
@@ -95,7 +96,8 @@ public class AgentInfoController {
 				model, 
 				processor, 
 				osVersion,
-				agentVersion);
+				agentVersion,
+				diskType);
 				
 		resultMap.put("agents", listOfAgents);
 		return ResponseEntity
@@ -146,7 +148,8 @@ public class AgentInfoController {
 			@RequestParam (value = "model") Optional<String> model,
 			@RequestParam (value = "processor") Optional<String> processor,
 			@RequestParam (value = "osVersion") Optional<String> osVersion,
-			@RequestParam (value = "agentVersion") Optional<String> agentVersion) {
+			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
+			@RequestParam (value = "diskType") Optional<String> diskType){
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				1, 
 				agentService.count().intValue(), 
@@ -162,7 +165,8 @@ public class AgentInfoController {
 				model, 
 				processor, 
 				osVersion, 
-				agentVersion);
+				agentVersion,
+				diskType);
 		
 		try {
 			HttpHeaders headers = new HttpHeaders();

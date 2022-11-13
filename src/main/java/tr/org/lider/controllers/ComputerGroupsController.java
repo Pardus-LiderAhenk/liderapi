@@ -643,6 +643,7 @@ public class ComputerGroupsController {
 			@RequestParam (value = "model") Optional<String> model,
 			@RequestParam (value = "processor") Optional<String> processor,
 			@RequestParam (value = "osVersion") Optional<String> osVersion,
+			@RequestParam (value = "diskType") Optional<String> diskType,
 			@RequestParam(value = "selectedOUDN", required=false) String selectedOUDN,
 			@RequestParam(value = "groupName", required=true) String groupName,
 			@RequestParam (value = "agentVersion") Optional<String> agentVersion) {
@@ -660,7 +661,8 @@ public class ComputerGroupsController {
 				brand, 
 				model, 
 				processor, 
-				osVersion, 
+				osVersion,
+				diskType,
 				agentVersion);
 				
 		String newGroupDN = "";
@@ -734,7 +736,8 @@ public class ComputerGroupsController {
 			@RequestParam (value = "processor") Optional<String> processor,
 			@RequestParam (value = "osVersion") Optional<String> osVersion,
 			@RequestParam(value = "groupDN", required=false) String groupDN,
-			@RequestParam (value = "agentVersion") Optional<String> agentVersion) {
+			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
+			@RequestParam (value = "diskType") Optional<String> diskType){
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				1, 
 				agentService.count().intValue(), 
@@ -750,7 +753,8 @@ public class ComputerGroupsController {
 				model, 
 				processor, 
 				osVersion, 
-				agentVersion);
+				agentVersion,
+				diskType);
 		LdapEntry entry;			
 		HttpHeaders headers = new HttpHeaders();
 		if(listOfAgents.getContent() == null || listOfAgents.getContent().size() == 0) {

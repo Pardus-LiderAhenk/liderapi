@@ -120,6 +120,16 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 							&& prop.getPropertyValue() != message.getAgentVersion()) {
 						prop.setPropertyValue(message.getAgentVersion());
 					}
+					else if (prop.getPropertyName().equals("hardware.disk.ssd.info")
+							&& prop.getPropertyValue() != message.getAgentVersion()) {
+						logger.info("Ssd of Agent with ID {} has been changed. Updating in DB", agent.getId());
+						prop.setPropertyValue(message.getHardwareInfoSsd());
+					}
+					else if (prop.getPropertyName().equals("hardware.disk.hdd.info")
+							&& prop.getPropertyValue() != message.getAgentVersion()) {
+						logger.info("Hdd of Agent with ID {} has been changed. Updating in DB", agent.getId());
+						prop.setPropertyValue(message.getHardwareInfoHdd());
+					}
 				}
 				if (isPropertyName(uid, "agentVersion") == false) {
 					if (message.getAgentVersion()!= null) {
