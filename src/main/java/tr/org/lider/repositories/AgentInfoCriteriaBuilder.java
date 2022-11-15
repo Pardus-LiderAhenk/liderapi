@@ -183,18 +183,16 @@ public class AgentInfoCriteriaBuilder {
 			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
 		}
 		
-		if(diskType.isPresent() && !diskType.get().equals("")) {
+		if(diskType.isPresent() && !diskType.get().equals("") && !diskType.get().equals("ALL")) {
 			
 			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
 			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class),diskType.get());
-			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), osVersion.get());
-			predicates.add(cb.and(namePredicate, valuePredicate));
+			predicates.add(namePredicate);
 
 			//for count 
 			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
 			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class),diskType.get());
-			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue"), osVersion.get());
-			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
+			predicatesCount.add(namePredicateCount);
 		}
 		
 		

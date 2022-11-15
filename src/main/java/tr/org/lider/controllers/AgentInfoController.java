@@ -80,6 +80,7 @@ public class AgentInfoController {
 			resultMap.put("processors", agentService.getProcessors());
 			resultMap.put("osVersions", agentService.getOSVersions());
 			resultMap.put("agentVersions", agentService.getAgentVersions());
+			resultMap.put("diskType", agentService.getDiskType());
 		}
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				pageNumber, 

@@ -211,5 +211,9 @@ public class AgentService {
 		return agentRepository.getCountByLastLoginToday(startDate);
 	}
 	
+	public List<String> getDiskType() {
+		return agentRepository.getPropertyValueByName("diskType");
+	}
+	
 	
 }
