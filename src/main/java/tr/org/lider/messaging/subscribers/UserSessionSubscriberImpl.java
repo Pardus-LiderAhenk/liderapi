@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
-import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,12 +120,12 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 						prop.setPropertyValue(message.getAgentVersion());
 					}
 					else if (prop.getPropertyName().equals("hardware.disk.ssd.info")
-							&& prop.getPropertyValue() != message.getAgentVersion()) {
+							&& prop.getPropertyValue() != message.getHardwareInfoSsd()) {
 						logger.info("Ssd of Agent with ID {} has been changed. Updating in DB", agent.getId());
 						prop.setPropertyValue(message.getHardwareInfoSsd());
 					}
 					else if (prop.getPropertyName().equals("hardware.disk.hdd.info")
-							&& prop.getPropertyValue() != message.getAgentVersion()) {
+							&& prop.getPropertyValue() != message.getHardwareInfoHdd()) {
 						logger.info("Hdd of Agent with ID {} has been changed. Updating in DB", agent.getId());
 						prop.setPropertyValue(message.getHardwareInfoHdd());
 					}
