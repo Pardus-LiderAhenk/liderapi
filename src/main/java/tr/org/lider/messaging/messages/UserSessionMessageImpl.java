@@ -39,25 +39,27 @@ public class UserSessionMessageImpl implements IUserSessionMessage {
 	
 	private String agentVersion;
 	
-	private String hardwareInfoSsd;
+	private String hardwareDiskSsdInfo;
+	
+	private String hardwareDiskHddInfo;
 	
 	public String getHardwareInfoSsd() {
-		return hardwareInfoSsd;
+		return hardwareDiskSsdInfo;
 	}
 
-	public void setHardwareInfoSsd(String hardwareInfoSsd) {
-		this.hardwareInfoSsd = hardwareInfoSsd;
+	public void setHardwareInfoSsd(String hardwareDiskSsdInfo) {
+		this.hardwareDiskSsdInfo = hardwareDiskSsdInfo;
 	}
 
 	public String getHardwareInfoHdd() {
-		return hardwareInfoHdd;
+		return hardwareDiskHddInfo;
 	}
 
-	public void setHardwareInfoHdd(String hardwareInfoHdd) {
-		this.hardwareInfoHdd = hardwareInfoHdd;
+	public void setHardwareInfoHdd(String hardwareDiskHddInfo) {
+		this.hardwareDiskHddInfo = hardwareDiskHddInfo;
 	}
 
-	private String hardwareInfoHdd;
+	
 
 	
 

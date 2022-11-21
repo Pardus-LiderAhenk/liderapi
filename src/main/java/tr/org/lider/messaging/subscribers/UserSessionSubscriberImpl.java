@@ -143,13 +143,13 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 				if (isPropertyName(uid, "hardware.disk.ssd.info") == false) {
 					if (message.getAgentVersion()!= null) {
 						agent.addProperty(new AgentPropertyImpl(null, agent, "hardware.disk.ssd.info",
-								message.getAgentVersion().toString(), new Date()));
+								message.getHardwareInfoSsd().toString(), new Date()));
 					}
 				}
 				if (isPropertyName(uid, "hardware.disk.hdd.info") == false) {
 					if (message.getAgentVersion()!= null) {
 						agent.addProperty(new AgentPropertyImpl(null, agent, "hardware.disk.hdd.info",
-								message.getAgentVersion().toString(), new Date()));
+								message.getHardwareInfoHdd().toString(), new Date()));
 					}
 				}
 			}
