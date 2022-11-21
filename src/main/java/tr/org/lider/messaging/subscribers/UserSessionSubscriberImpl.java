@@ -140,6 +140,18 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 				if (userSession.getUsername() != null) {
 					ldapService.updateEntry(agent.getDn(), "o", userSession.getUsername());
 				}
+				if (isPropertyName(uid, "hardware.disk.ssd.info") == false) {
+					if (message.getAgentVersion()!= null) {
+						agent.addProperty(new AgentPropertyImpl(null, agent, "hardware.disk.ssd.info",
+								message.getAgentVersion().toString(), new Date()));
+					}
+				}
+				if (isPropertyName(uid, "hardware.disk.hdd.info") == false) {
+					if (message.getAgentVersion()!= null) {
+						agent.addProperty(new AgentPropertyImpl(null, agent, "hardware.disk.hdd.info",
+								message.getAgentVersion().toString(), new Date()));
+					}
+				}
 			}
 			// Merge records
 			agent.setLastLoginDate(new Date());
