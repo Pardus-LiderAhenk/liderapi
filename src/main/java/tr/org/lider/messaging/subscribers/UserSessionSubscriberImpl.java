@@ -120,14 +120,14 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 						prop.setPropertyValue(message.getAgentVersion());
 					}
 					else if (prop.getPropertyName().equals("hardware.disk.ssd.info")
-							&& prop.getPropertyValue() != message.getHardwareInfoSsd()) {
+							&& prop.getPropertyValue() != message.getHardwareDiskSsdInfo()) {
 						logger.info("Ssd of Agent with ID {} has been changed. Updating in DB", agent.getId());
-						prop.setPropertyValue(message.getHardwareInfoSsd());
+						prop.setPropertyValue(message.getHardwareDiskSsdInfo());
 					}
 					else if (prop.getPropertyName().equals("hardware.disk.hdd.info")
-							&& prop.getPropertyValue() != message.getHardwareInfoHdd()) {
+							&& prop.getPropertyValue() != message.getHardwareDiskHddInfo()) {
 						logger.info("Hdd of Agent with ID {} has been changed. Updating in DB", agent.getId());
-						prop.setPropertyValue(message.getHardwareInfoHdd());
+						prop.setPropertyValue(message.getHardwareDiskHddInfo());
 					}
 				}
 				if (isPropertyName(uid, "agentVersion") == false) {
@@ -139,16 +139,17 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 				if (userSession.getUsername() != null) {
 					ldapService.updateEntry(agent.getDn(), "o", userSession.getUsername());
 				}
+				
 				if (isPropertyName(uid, "hardware.disk.ssd.info") == false) {
-					if (message.getHardwareInfoSsd()!= null) {
+					if (message.getHardwareDiskSsdInfo()!= null) {
 						agent.addProperty(new AgentPropertyImpl(null, agent, "hardware.disk.ssd.info",
-								message.getHardwareInfoSsd().toString(), new Date()));
+								message.getHardwareDiskSsdInfo().toString(), new Date()));
 					}
 				}
 				if (isPropertyName(uid, "hardware.disk.hdd.info") == false) {
-					if (message.getHardwareInfoHdd()!= null) {
+					if (message.getHardwareDiskHddInfo()!= null) {
 						agent.addProperty(new AgentPropertyImpl(null, agent, "hardware.disk.hdd.info",
-								message.getHardwareInfoHdd().toString(), new Date()));
+								message.getHardwareDiskHddInfo().toString(), new Date()));
 					}
 				}
 			}
