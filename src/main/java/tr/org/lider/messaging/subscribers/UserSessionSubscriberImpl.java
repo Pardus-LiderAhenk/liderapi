@@ -140,13 +140,13 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 					ldapService.updateEntry(agent.getDn(), "o", userSession.getUsername());
 				}
 				if (isPropertyName(uid, "hardware.disk.ssd.info") == false) {
-					if (message.getAgentVersion()!= null) {
+					if (message.getHardwareInfoSsd()!= null) {
 						agent.addProperty(new AgentPropertyImpl(null, agent, "hardware.disk.ssd.info",
 								message.getHardwareInfoSsd().toString(), new Date()));
 					}
 				}
 				if (isPropertyName(uid, "hardware.disk.hdd.info") == false) {
-					if (message.getAgentVersion()!= null) {
+					if (message.getHardwareInfoHdd()!= null) {
 						agent.addProperty(new AgentPropertyImpl(null, agent, "hardware.disk.hdd.info",
 								message.getHardwareInfoHdd().toString(), new Date()));
 					}
