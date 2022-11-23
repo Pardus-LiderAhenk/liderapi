@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -718,8 +719,8 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "200", description = "Returns agent info"),
 			  @ApiResponse(responseCode = "417", description = "Could not get agent info. Unexpexted error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/get-agent-info", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean>  getAgentInfo(@RequestParam(value="agentDN", required=true) String agentDN) {
+	@GetMapping(value = "/get-agent-info/{agentDN}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean>  getAgentInfo(@PathVariable String agentDN) {
 		logger.info("Agent info request has been receieved. DN: " + agentDN);
 		//send task to Ahenk to change DN with new DN
 		Map<String, Object> parameterMap = new  HashMap<>();
