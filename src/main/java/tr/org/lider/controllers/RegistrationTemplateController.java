@@ -177,7 +177,7 @@ public class RegistrationTemplateController {
 			  @ApiResponse(responseCode = "200", description = ""),
 			  @ApiResponse(responseCode = "404", description = "Template id not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/registration-templates/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(value = "/registration-templates/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> deleteTemplate(@PathVariable Long id) {
 		logger.debug("Request to delete template {} ", id);
 		if(!registrationTemplateService.findByID(id).isPresent()) {

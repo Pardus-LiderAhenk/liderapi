@@ -912,7 +912,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Creat AD configuration"),
 			  			  @ApiResponse(responseCode = "417", description = "Could not get AD configuration.Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/configurations", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/configurations", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<HashMap<String, Object>> getConfigParams() {
 		HashMap<String, Object> configMap = new HashMap<String, Object>();
 		configMap.put("domainType", configurationService.getDomainType());
