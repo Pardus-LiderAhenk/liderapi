@@ -719,8 +719,8 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "200", description = "Returns agent info"),
 			  @ApiResponse(responseCode = "417", description = "Could not get agent info. Unexpexted error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/get-agent-info/{agentDN}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean>  getAgentInfo(@PathVariable String agentDN) {
+	@PostMapping(value = "/get-agent-info", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean>  getAgentInfo(@RequestParam(value="agentDN", required=true) String agentDN) {
 		logger.info("Agent info request has been receieved. DN: " + agentDN);
 		//send task to Ahenk to change DN with new DN
 		Map<String, Object> parameterMap = new  HashMap<>();
