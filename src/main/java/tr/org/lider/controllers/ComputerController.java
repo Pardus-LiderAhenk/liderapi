@@ -770,7 +770,9 @@ public class ComputerController {
 			@RequestParam(value="macAddresses", required=true) String macAddresses,
 			@RequestParam(value="phase", required=true) String phase,
 			@RequestParam(value="agentUid", required=true) String agentUid,
-			@RequestParam(value="osVersion", required=true) String osVersion){
+			@RequestParam(value="osVersion", required=true) String osVersion,
+			@RequestParam(value="hardwareDiskSsdInfo", required=true) String hardwareDiskSsdInfo,
+			@RequestParam(value="hardwareDiskHddInfo", required=true) String hardwareDiskHddInfo){
 
 		List<AgentImpl> agents =  agentService.findAgentByJid(agentUid);
 
@@ -801,6 +803,20 @@ public class ComputerController {
 						&& !prop.getPropertyValue().equals(osVersion)) {
 					prop.setPropertyValue(osVersion);
 				}
+				else if (phase != null && phase != "" && prop.getPropertyName().equals("phase")
+						&& prop.getPropertyValue() != phase) {
+					prop.setPropertyValue(phase);
+				}
+				else if (hardwareDiskSsdInfo != null 
+						&& prop.getPropertyName().equals("hardwareDiskSsdInfo") 
+						&& !prop.getPropertyValue().equals(hardwareDiskSsdInfo)) {
+					prop.setPropertyValue(hardwareDiskSsdInfo);
+				}
+				else if (hardwareDiskHddInfo != null 
+						&& prop.getPropertyName().equals("hardwareDiskHddInfo") 
+						&& !prop.getPropertyValue().equals(hardwareDiskHddInfo)) {
+					prop.setPropertyValue(hardwareDiskHddInfo);
+				}
 			}
 
 			if (isPropertyName(agentUid, "agentVersion") == false) {
@@ -809,6 +825,14 @@ public class ComputerController {
 			} 
 			if (isPropertyName(agentUid, "phase") == false) {
 				agent.addProperty(new AgentPropertyImpl(null, agent, "phase",
+						phase.toString(), new Date()));
+			} 
+			if (isPropertyName(agentUid, "hardwareDiskSsdInfo") == false) {
+				agent.addProperty(new AgentPropertyImpl(null, agent, "hardwareDiskSsdInfo",
+						phase.toString(), new Date()));
+			} 
+			if (isPropertyName(agentUid, "hardwareDiskHddInfo") == false) {
+				agent.addProperty(new AgentPropertyImpl(null, agent, "hardwareDiskHddInfo",
 						phase.toString(), new Date()));
 			} 
 			agentRepository.save(agent);
