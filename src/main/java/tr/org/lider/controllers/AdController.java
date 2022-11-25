@@ -675,7 +675,7 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Update user password"),
 			  			  @ApiResponse(responseCode = "404", description = "User is not found.Not found.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PutMapping(value = "/update-user-password",produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/update-user-password",produces = MediaType.APPLICATION_JSON_VALUE)
 	public  ResponseEntity<LdapEntry> updateUserPassword(LdapEntry selectedEntry) {
 		logger.info("Resetting user password. Dn: {}",selectedEntry.getDistinguishedName());
 		try {

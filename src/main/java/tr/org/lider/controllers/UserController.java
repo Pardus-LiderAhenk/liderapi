@@ -406,7 +406,6 @@ public class UserController {
 			  @ApiResponse(responseCode = "417", description = "Could not update user password.Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/update-user-password",produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST, value = "/updateUserPassword",produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> updateUserPassword(LdapEntry selectedEntry) {
 		try {
 		
