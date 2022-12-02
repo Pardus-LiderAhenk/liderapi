@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -90,12 +91,12 @@ public class ConkyController {
 			  @ApiResponse(responseCode = "200", description = "Deleted conky service. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not delete conky. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(value = "/delete/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 //RequestMapping(method=RequestMethod.POST ,value = "/delete", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ConkyTemplate> notifyDel(@RequestBody ConkyTemplate template){
+	public ResponseEntity<ConkyTemplate> notifyDel(@PathVariable Long id){
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(conkyService.delete(template));
+				.body(conkyService.delete(id));
 	}
 	
 	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
