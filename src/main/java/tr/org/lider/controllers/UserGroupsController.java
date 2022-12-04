@@ -21,7 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -503,9 +505,8 @@ public class UserGroupsController {
 			  @ApiResponse(responseCode = "200", description = ""),
 			  @ApiResponse(responseCode = "400", description = "", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/delete-entry")
-	//@RequestMapping(method=RequestMethod.POST, value = "/deleteEntry")
-	public ResponseEntity<?> deleteEntry(@RequestParam(value = "dn") String dn) {
+	@DeleteMapping(value = "/delete-entry/dn/{dn}")
+	public ResponseEntity<?> deleteEntry(@PathVariable String dn) {
 		try {
 			if(dn.equals("cn=adminGroups," + configurationService.getUserGroupLdapBaseDn())) {
 				return new ResponseEntity<String[]>(new String[] {"Admin grubu silinemez!"}, HttpStatus.CONFLICT);
