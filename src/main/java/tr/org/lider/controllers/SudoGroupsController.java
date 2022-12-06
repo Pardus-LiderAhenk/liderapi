@@ -54,7 +54,6 @@ import tr.org.lider.services.OperationLogService;
  */
 @Secured({"ROLE_ADMIN", "ROLE_SUDO_GROUPS" })
 @RestController
-//@RequestMapping("/lider/sudo_groups")
 @RequestMapping("/api/lider/sudo-groups")
 @Tag(name = "Sudo Groups", description = "Sudo Groups Rest Service")
 public class SudoGroupsController {

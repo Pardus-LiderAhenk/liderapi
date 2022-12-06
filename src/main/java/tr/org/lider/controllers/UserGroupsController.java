@@ -60,7 +60,6 @@ import tr.org.lider.services.OperationLogService;
 @RestController
 @RequestMapping("/api/lider/user-groups")
 @Tag(name = "User Groups", description = "User Groups Rest Service" )
-//@RequestMapping("/lider/user_groups")
 public class UserGroupsController {
 	Logger logger = LoggerFactory.getLogger(UserGroupsController.class);
 
@@ -220,7 +219,6 @@ public class UserGroupsController {
 			  @ApiResponse(responseCode = "400", description = "", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/group/existing/add-user" , produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/group/existing/addUser", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> addUsersToExistingGroup(@RequestBody Map<String, String> params) {
 		LdapEntry entry;
 		ObjectMapper mapper = new ObjectMapper();
@@ -385,7 +383,6 @@ public class UserGroupsController {
 			  @ApiResponse(responseCode = "400", description = "", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/move/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/move/entry", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Boolean> moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
 			@RequestParam(value="destinationDN", required=true) String destinationDN) {
 		try {
@@ -421,7 +418,6 @@ public class UserGroupsController {
 			  @ApiResponse(responseCode = "400", description = "", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/rename/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/rename/entry", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
 			@RequestParam(value="newName", required=true) String newName) {
 		try {	
@@ -464,7 +460,6 @@ public class UserGroupsController {
 			  @ApiResponse(responseCode = "400", description = "", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-ou", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> addOu(@RequestBody  LdapEntry selectedEntry) {
 		try {
 			Map<String, String[]> attributes = new HashMap<String,String[]>();
@@ -541,7 +536,6 @@ public class UserGroupsController {
 			  @ApiResponse(responseCode = "400", description = "", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/create-new-group" , produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/createNewGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> createNewUserGroup(@RequestBody Map<String, String> params) throws JsonMappingException, JsonProcessingException {
 		ObjectMapper mapper = new ObjectMapper();
 		String selectedOUDN = params.get("selectedOUDN");
@@ -675,7 +669,6 @@ public class UserGroupsController {
 			  @ApiResponse(responseCode = "417", description = "", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/domain-admin")
-	//@RequestMapping(method=RequestMethod.POST, value = "/deleteEntry")
 	public ResponseEntity<?> updateDomainAdmin(@RequestParam(value = "dn") String dn,
 			@RequestParam(value = "isDomainAdmin") Boolean isDomainAdmin) {
 		try {
