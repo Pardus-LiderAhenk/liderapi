@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import tr.org.lider.entities.ConkyTemplate;
 import tr.org.lider.entities.OperationType;
@@ -114,8 +115,8 @@ public class ConkyService {
 		return savedTemplate;
 	}
 
-	public ConkyTemplate delete(ConkyTemplate template) {
-		ConkyTemplate existTemplate = conkyRepository.findOne(template.getId());
+	public ConkyTemplate delete(Long id) {
+		ConkyTemplate existTemplate = conkyRepository.findOne(id);
 		existTemplate.setDeleted(true);
 		ArrayList<String> conky = new ArrayList<String>();
 		conky.add(existTemplate.getSettings());

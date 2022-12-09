@@ -406,7 +406,6 @@ public class UserController {
 			  @ApiResponse(responseCode = "417", description = "Could not update user password.Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/update-user-password",produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST, value = "/updateUserPassword",produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> updateUserPassword(LdapEntry selectedEntry) {
 		try {
 		
@@ -765,11 +764,10 @@ public class UserController {
 			  @ApiResponse(responseCode = "417", description = "Could not delete attribute. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@DeleteMapping(value = "/attribute-with-value/dn/{dn}/attribute/{attribute}/value/{value}", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/removeAttributeWithValue", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> removeAttributeWithValue(
-			@RequestParam(value="dn", required=true) String dn,
-			@RequestParam(value="attribute", required=true) String attribute, 
-			@RequestParam(value="value", required=true) String value) {
+			@PathVariable String dn,
+			@PathVariable String attribute, 
+			@PathVariable String value) {
 		
 		LdapEntry entry=null;
 		try {

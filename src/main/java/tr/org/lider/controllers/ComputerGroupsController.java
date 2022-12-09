@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -461,9 +462,9 @@ public class ComputerGroupsController {
 		  @ApiResponse(responseCode = "200", description = "Deleted member from group"),
 		  @ApiResponse(responseCode = "417", description = "Could not delete member from group. Unexpected error occured", 
 		    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/group/members/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
-	public ResponseEntity<LdapEntry> deleteMembersOfGroup(@RequestParam(value="dn", required=true) String dn, 
+	@PutMapping(value = "/group/members", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<LdapEntry> deleteMembersOfGroup(
+			@RequestParam(value="dn", required=true) String dn, 
 			@RequestParam(value="dnList[]", required=true) List<String> dnList) {
 		//when single dn comes spring boot takes it as multiple arrays
 		//so dn must be joined with comma
