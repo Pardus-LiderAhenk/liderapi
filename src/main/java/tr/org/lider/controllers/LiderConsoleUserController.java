@@ -12,9 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -76,7 +74,7 @@ public class LiderConsoleUserController {
 		String uid = authentication.getName();
 		try {
 			String filter="(&(uid="+ uid +"))";
-			List<LdapEntry> usersEntrylist = ldapService.findSubEntries(globalUserOu, filter,new String[] { "*" }, SearchScope.SUBTREE);
+			List<LdapEntry> usersEntrylist = ldapService.findSubEntries(globalUserOu, filter,new String[] { "*" }, SearchScope.ONELEVEL);
 			if(usersEntrylist.size()>0)
 			liderConsoleUser = usersEntrylist.get(usersEntrylist.size()-1);
 		} catch (LdapException e) {
@@ -122,8 +120,8 @@ public class LiderConsoleUserController {
 			  @ApiResponse(responseCode = "200", description = "Updated console user password"),
 			  @ApiResponse(responseCode = "417", description = "Could not update console user password. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PutMapping(value = "/update-profile",produces = MediaType.APPLICATION_JSON_VALUE)
-	
+	@PostMapping(value = "/update-profile",produces = MediaType.APPLICATION_JSON_VALUE)
+	//@RequestMapping(method=RequestMethod.POST, value = "/updateProfile",produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> updateLiderConsoleUser(@RequestBody LdapEntry selectedEntry) {
 		try {
 			if(!"".equals(selectedEntry.getCn())){
