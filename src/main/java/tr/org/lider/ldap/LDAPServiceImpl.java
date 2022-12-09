@@ -58,6 +58,7 @@ import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 import org.apache.directory.ldap.client.api.LdapConnectionPool;
 import org.apache.directory.ldap.client.api.PoolableLdapConnectionFactory;
+import org.hibernate.validator.constraints.Length;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1497,21 +1498,29 @@ public class LDAPServiceImpl implements ILDAPService {
 			//CASE 2 if moved entry is user update memberships
 			//CASE 3 if moved entry is agent update memberships
 			LdapEntry entry = getEntryDetail(sourceDN);
-			if(entry.getType().equals(DNType.USER)) {
-				String newUserDN = "uid=" + entry.getUid() + "," + destinationDN;
-				List<LdapEntry> subEntries = search("member", sourceDN, new String[] {"*"});
-				for (LdapEntry groupEntry : subEntries) {
-					updateEntryAddAtribute(groupEntry.getDistinguishedName(), "member", newUserDN);
-					updateEntryRemoveAttributeWithValue(groupEntry.getDistinguishedName(), "member", sourceDN);
+			if (entry != null) {
+				
+				if(entry.getType().equals(DNType.USER)) {
+					String newUserDN = "uid=" + entry.getUid() + "," + destinationDN;
+					List<LdapEntry> subEntries = search("member", sourceDN, new String[] {"*"});
+					for (LdapEntry groupEntry : subEntries) {
+						updateEntryAddAtribute(groupEntry.getDistinguishedName(), "member", newUserDN);
+						updateEntryRemoveAttributeWithValue(groupEntry.getDistinguishedName(), "member", sourceDN);
+					}
+				} else if(entry.getType().equals(DNType.AHENK)) {
+					String newAgentDN = "cn=" + entry.getCn() + "," + destinationDN;
+					List<LdapEntry> subEntries = search("member", sourceDN, new String[] {"*"});
+					if (subEntries.size() > 0 )
+					{
+						for (LdapEntry ldapEntry : subEntries) {
+							updateEntryAddAtribute(ldapEntry.getDistinguishedName(), "member", newAgentDN);
+							updateEntryRemoveAttributeWithValue(ldapEntry.getDistinguishedName(), "member", sourceDN);
+						}
+					}
 				}
-			} else if(entry.getType().equals(DNType.AHENK)) {
-				String newAgentDN = "cn=" + entry.getCn() + "," + destinationDN;
-				List<LdapEntry> subEntries = search("member", sourceDN, new String[] {"*"});
-				for (LdapEntry ldapEntry : subEntries) {
-					updateEntryAddAtribute(ldapEntry.getDistinguishedName(), "member", newAgentDN);
-					updateEntryRemoveAttributeWithValue(ldapEntry.getDistinguishedName(), "member", sourceDN);
-				}
+				
 			}
+				
 			connection.move(sourceDN,destinationDN);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

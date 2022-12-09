@@ -57,8 +57,8 @@ public class UpdateScheduledTask {
 			  @ApiResponse(responseCode = "200", description = ""),
 			  @ApiResponse(responseCode = "400", description = "Scheduled task id  not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PutMapping(value = "/cancel/id/{id}")
-	public ResponseEntity<?> cancelScheduledTask(@PathVariable Long id) {
+	@PostMapping(value = "/cancel")
+	public ResponseEntity<?> cancelScheduledTask(@RequestParam (value = "id", required=false) Long id) {
 		
 		logger.info("Request received. URL: '/api/lider/scheduled-task/cancel'");
 		ResponseEntity<?> response = scheduledTaskService.cancelScheduledTask(id);
