@@ -440,7 +440,7 @@ public class ComputerController {
 			  @ApiResponse(responseCode = "417", description = "Could not move agent. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/move/agent", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean>  moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
+	public ResponseEntity<LdapEntry>  moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
 			@RequestParam(value="sourceCN", required=true) String sourceCN,
 			@RequestParam(value="destinationDN", required=true) String destinationDN) {
 		try {
@@ -491,16 +491,17 @@ public class ComputerController {
 			IRestResponse restResponse = taskService.execute(requestBody);
 			logger.debug("Completed processing request, returning result: {}", restResponse.toJson());
 			
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(ldapEntry);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity
 					.status(HttpStatus.EXPECTATION_FAILED)
-					.body(false);
-			//return false;
+					.body(null);
 		}
-		return ResponseEntity
-				.status(HttpStatus.OK)
-				.body(true);
+
 	}
 
 	@Operation(summary = "Delete agent by id", description = "", tags = { "computer-management" })
