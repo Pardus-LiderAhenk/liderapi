@@ -74,9 +74,10 @@ public class LiderConsoleUserController {
 		String uid = authentication.getName();
 		try {
 			String filter="(&(uid="+ uid +"))";
-			List<LdapEntry> usersEntrylist = ldapService.findSubEntries(globalUserOu, filter,new String[] { "*" }, SearchScope.ONELEVEL);
+			List<LdapEntry> usersEntrylist = ldapService.findSubEntries(globalUserOu, filter,new String[] { "*" }, SearchScope.SUBTREE);
 			if(usersEntrylist.size()>0)
 			liderConsoleUser = usersEntrylist.get(usersEntrylist.size()-1);
+			
 		} catch (LdapException e) {
 			e.printStackTrace();
 		}
