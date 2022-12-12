@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.PutMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -121,8 +121,9 @@ public class LiderConsoleUserController {
 			  @ApiResponse(responseCode = "200", description = "Updated console user password"),
 			  @ApiResponse(responseCode = "417", description = "Could not update console user password. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/update-profile",produces = MediaType.APPLICATION_JSON_VALUE)
+//	@PostMapping(value = "/update-profile",produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST, value = "/updateProfile",produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value = "/update-profile",produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> updateLiderConsoleUser(@RequestBody LdapEntry selectedEntry) {
 		try {
 			if(!"".equals(selectedEntry.getCn())){
