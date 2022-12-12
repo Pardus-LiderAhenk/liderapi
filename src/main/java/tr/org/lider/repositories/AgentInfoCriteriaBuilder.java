@@ -195,8 +195,8 @@ public class AgentInfoCriteriaBuilder {
 			predicatesCount.add(namePredicateCount);
 		}
 		
-		
-		if(sessionReportType != null) {
+		if(sessionReportType.isPresent() && !sessionReportType.get().equals("")) {
+//		if(sessionReportType != null) {
 			Date sessionFilterDate = null;
 			Date now = new Date();
 			if(sessionReportType.get().equals("LAST_ONE_MONTH_NO_SESSIONS")) { 

@@ -663,8 +663,8 @@ public class ComputerGroupsController {
 				model, 
 				processor, 
 				osVersion,
-				diskType,
-				agentVersion);
+				agentVersion,
+				diskType);
 				
 		String newGroupDN = "";
 		LdapEntry entry;
