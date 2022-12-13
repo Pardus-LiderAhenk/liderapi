@@ -227,13 +227,14 @@ public class AdController {
 	     attributes.put("pwdLastSet", new String[] {"0"});
 	    
 		 try {
-			String rdn="CN="+selectedEntry.getCn()+","+selectedEntry.getParentName();
-			service.addEntry(rdn, attributes);
-			selectedEntry = service.getEntryDetail(rdn);
-			operationLogService.saveOperationLog(OperationType.CREATE, selectedEntry.getCn() + ", USER has been added " + rdn + " [Active Directroy]", null);
-//			return responseFactoryService.createResponse(RestResponseStatus.OK,"Kullanıcı Başarı ile oluşturuldu.");
+			 String rdn="CN="+selectedEntry.getCn()+","+selectedEntry.getParentName();
+			 service.addEntry(rdn, attributes);
+			 selectedEntry = service.getEntryDetail(rdn);
+			 operationLogService.saveOperationLog(OperationType.CREATE, selectedEntry.getCn() + ", USER has been added " + rdn + " [Active Directroy]", null);
+//				return responseFactoryService.createResponse(RestResponseStatus.OK,"Kullanıcı Başarı ile oluşturuldu.");
 			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
-			} catch (LdapException e) {
+			} 
+		 catch (LdapException e) {
 				e.printStackTrace();
 				String message=e.getLocalizedMessage();
 				if(message!=null && message.contains("ENTRY_EXISTS")) {
@@ -711,11 +712,11 @@ public class AdController {
 			  @ApiResponse(responseCode = "200", description = "Delete AD entries."),
 			  			  @ApiResponse(responseCode = "404", description = "Could not delete AD entry. Not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/entry/selectedEntry/{selectedEntry}",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LdapEntry> deleteEntry(@PathVariable String selectedEntry) {
+	@PostMapping(value = "/entry",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<LdapEntry> deleteEntry(LdapEntry selectedEntry) {
 		try {
-			logger.info("AD Deleting entry. Dn: {}",selectedEntry);
-			service.deleteEntry(selectedEntry);
+			logger.info("AD Deleting entry. Dn: {}",selectedEntry.getDistinguishedName());
+			service.deleteEntry(selectedEntry.getDistinguishedName());
 			
 			operationLogService.saveOperationLog(OperationType.DELETE, selectedEntry + " entry has been deleted from " + "[Active Directroy]", null);
 			return new ResponseEntity<LdapEntry>(HttpStatus.OK);
