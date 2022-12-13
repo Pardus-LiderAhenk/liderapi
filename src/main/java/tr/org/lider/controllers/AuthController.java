@@ -26,6 +26,7 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -112,5 +113,16 @@ public class AuthController {
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but other exception occured. Returned: " + HttpStatus.SEE_OTHER);
 			return new ResponseEntity<String>("Login failed", HttpStatus.SEE_OTHER);
 		}
+	}
+	
+	@Operation(summary = "", description = "", tags = { "authenticate" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Authentication has been done."),
+			  @ApiResponse(responseCode = "400", description = "Authentication failed. Bad Request.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/logout")
+	public ResponseEntity<String> logout(Model model, Authentication authentication) {
+		operationLogService.saveOperationLog(OperationType.LOGOUT,"User logout", null);
+		return new ResponseEntity<String>("logout", HttpStatus.OK);
 	}
 }

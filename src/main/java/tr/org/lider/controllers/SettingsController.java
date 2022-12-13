@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpHeaders;
 
@@ -702,7 +701,6 @@ public class SettingsController {
 			  @ApiResponse(responseCode = "417", description = "Could not add console user for ldap entries. Unexpected error occured", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-console-user-btn",produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody
 	public ResponseEntity<LdapEntry>  addConsoleUserBtn(LdapEntry user) {
 		try {
 			String gidNumber="6000";
@@ -787,6 +785,5 @@ public class SettingsController {
 				.body(true);
 		
 	}
-	
 	
 }
