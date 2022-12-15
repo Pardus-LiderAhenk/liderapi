@@ -159,14 +159,20 @@ public class UserController {
 			  @ApiResponse(responseCode = "226", description = "This uid was found.I am used", 
 			    content = @Content(schema = @Schema(implementation = String.class)))})
 	@PostMapping(value = "add-ou",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LdapEntry> addOu(LdapEntry selectedEntry,LdapEntry ldapEntry) {
+	public ResponseEntity<LdapEntry> addOu(LdapEntry selectedEntry) {
 		try {
 			Map<String, String[]> attributes = new HashMap<String,String[]>();
 			attributes.put("objectClass", new String[] {"organizationalUnit", "top", "pardusLider"} );
 			attributes.put("ou", new String[] { selectedEntry.getOu() });
 			
+			List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+			List<LdapEntry> ouList = null;
+			filterAttributesList.add(new LdapSearchFilterAttribute("ou", selectedEntry.getOu(), SearchFilterEnum.EQ));
+			ouList = ldapService.search(configurationService.getAhenkGroupLdapBaseDn(), filterAttributesList, new String[] {"*"});
+			System.out.println(ouList);
+			
 			HttpHeaders headers = new HttpHeaders();
-			if(selectedEntry.getOu().equals(ldapEntry.getOu())){
+			if(!ouList.equals("[]")){
 				return ResponseEntity.status(HttpStatus.IM_USED).headers(headers).build();
 			}
 
@@ -212,7 +218,7 @@ public class UserController {
 			  @ApiResponse(responseCode = "226", description = "This uid was found.I am used", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-user",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LdapEntry>  addUser(LdapEntry selectedEntry,LdapEntry ldapEntry) {
+	public ResponseEntity<LdapEntry>  addUser(LdapEntry selectedEntry) {
 		try {
 			String gidNumber="6000";
 			int randomInt = (int)(1000000.0 * Math.random());
@@ -239,8 +245,14 @@ public class UserController {
 				selectedEntry.setParentName(configurationService.getUserLdapBaseDn());
 			}
 			
+			List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+			List<LdapEntry> users = null;
+			filterAttributesList.add(new LdapSearchFilterAttribute("uid", selectedEntry.getUid(), SearchFilterEnum.EQ));
+			users = ldapService.search(configurationService.getUserLdapBaseDn(), filterAttributesList, new String[] {"*"});
 			HttpHeaders headers = new HttpHeaders();
-			if(selectedEntry.getUid().equals(ldapEntry.getUid())) {
+			System.out.println(users);
+			
+			if(users.isEmpty() == false) {
 				
 				return ResponseEntity.status(HttpStatus.IM_USED).headers(headers).build();
 			}
