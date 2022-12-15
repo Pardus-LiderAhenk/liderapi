@@ -169,10 +169,9 @@ public class UserController {
 			List<LdapEntry> ouList = null;
 			filterAttributesList.add(new LdapSearchFilterAttribute("ou", selectedEntry.getOu(), SearchFilterEnum.EQ));
 			ouList = ldapService.search(configurationService.getAhenkGroupLdapBaseDn(), filterAttributesList, new String[] {"*"});
-			System.out.println(ouList);
 			
 			HttpHeaders headers = new HttpHeaders();
-			if(!ouList.equals("[]")){
+			if(ouList.isEmpty() == false){
 				return ResponseEntity.status(HttpStatus.IM_USED).headers(headers).build();
 			}
 
