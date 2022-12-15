@@ -47,6 +47,7 @@ import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.UserSessionsModel;
 import tr.org.lider.security.CustomPasswordEncoder;
+import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.CommandService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
@@ -77,6 +78,8 @@ public class UserController {
 	
 	@Autowired
 	private OperationLogService operationLogService;
+
+	private Object object;
 	
 	//@RequestMapping(value = "/getOuDetails")
 	@Operation(summary = "Gets the ou detail of the selected entry.", description = "", tags = { "user" })
@@ -152,14 +155,20 @@ public class UserController {
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Created ou. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not create ou.Unexpected error occurred", 
-			    content = @Content(schema = @Schema(implementation = String.class))) })
+			    content = @Content(schema = @Schema(implementation = String.class))),
+			  @ApiResponse(responseCode = "226", description = "This uid was found.I am used", 
+			    content = @Content(schema = @Schema(implementation = String.class)))})
 	@PostMapping(value = "add-ou",produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LdapEntry> addOu(LdapEntry selectedEntry) {
+	public ResponseEntity<LdapEntry> addOu(LdapEntry selectedEntry,LdapEntry ldapEntry) {
 		try {
 			Map<String, String[]> attributes = new HashMap<String,String[]>();
 			attributes.put("objectClass", new String[] {"organizationalUnit", "top", "pardusLider"} );
 			attributes.put("ou", new String[] { selectedEntry.getOu() });
+			
+			HttpHeaders headers = new HttpHeaders();
+			if(selectedEntry.getOu().equals(ldapEntry.getOu())){
+				return ResponseEntity.status(HttpStatus.IM_USED).headers(headers).build();
+			}
 
 			String dn="ou="+selectedEntry.getOu()+","+selectedEntry.getParentName();
 			
@@ -175,7 +184,6 @@ public class UserController {
 				operationLogService.saveOperationLog(OperationType.CREATE, log, null);
 			} catch (Exception e) {
 				e.printStackTrace();
-				HttpHeaders headers = new HttpHeaders();
 	    		return ResponseEntity
 	    				.status(HttpStatus.EXPECTATION_FAILED)
 	    				.headers(headers)
@@ -200,9 +208,11 @@ public class UserController {
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Added user to selected entry.Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not add user. Unexpected error occurred", 
+			    content = @Content(schema = @Schema(implementation = String.class))) ,
+			  @ApiResponse(responseCode = "226", description = "This uid was found.I am used", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-user",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LdapEntry>  addUser(LdapEntry selectedEntry) {
+	public ResponseEntity<LdapEntry>  addUser(LdapEntry selectedEntry,LdapEntry ldapEntry) {
 		try {
 			String gidNumber="6000";
 			int randomInt = (int)(1000000.0 * Math.random());
@@ -229,6 +239,12 @@ public class UserController {
 				selectedEntry.setParentName(configurationService.getUserLdapBaseDn());
 			}
 			
+			HttpHeaders headers = new HttpHeaders();
+			if(selectedEntry.getUid().equals(ldapEntry.getUid())) {
+				
+				return ResponseEntity.status(HttpStatus.IM_USED).headers(headers).build();
+			}
+			
 			String rdn="uid="+selectedEntry.getUid()+","+selectedEntry.getParentName();
 			ldapService.addEntry(rdn, attributes);
 			selectedEntry.setAttributesMultiValues(attributes);
@@ -242,7 +258,6 @@ public class UserController {
 				operationLogService.saveOperationLog(OperationType.CREATE, log, null);
 			} catch (Exception e) {
 				e.printStackTrace();
-				HttpHeaders headers = new HttpHeaders();
 				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).headers(headers).build();
 			}
 			
