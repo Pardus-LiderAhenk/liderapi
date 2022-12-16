@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,7 +46,6 @@ import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.UserSessionsModel;
 import tr.org.lider.security.CustomPasswordEncoder;
-import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.CommandService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
@@ -87,7 +85,7 @@ public class UserController {
 			  @ApiResponse(responseCode = "200", description = "Returns the ou detail of the selected entry. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not get ou detail of the selected entry. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "ou-details")
+	@PostMapping(value = "/ou-details")
 	public ResponseEntity<List<LdapEntry>> task(LdapEntry selectedEntry) {
 		List<LdapEntry> subEntries = null;
 		try {
@@ -113,7 +111,7 @@ public class UserController {
 			  @ApiResponse(responseCode = "200", description = "Returns ou of selected entry. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not get ou of selected entry. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "ou")
+	@GetMapping(value = "/ou")
 	//@RequestMapping(value = "/getOu")
 	public ResponseEntity<List<LdapEntry>> getOu(LdapEntry selectedEntry) {
 		List<LdapEntry> subEntries = null;
@@ -140,8 +138,7 @@ public class UserController {
 			  @ApiResponse(responseCode = "200", description = "Returns users list. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not get users list. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "users")
-	//@RequestMapping(value = "/getUsers")
+	@PostMapping(value = "/users")
 	public ResponseEntity<List<LdapEntry>> getUsers() {
 		List<LdapEntry> retList = new ArrayList<LdapEntry>();
 		retList.add(ldapService.getLdapUserTree());
@@ -158,7 +155,7 @@ public class UserController {
 			    content = @Content(schema = @Schema(implementation = String.class))),
 			  @ApiResponse(responseCode = "226", description = "This uid was found.I am used", 
 			    content = @Content(schema = @Schema(implementation = String.class)))})
-	@PostMapping(value = "add-ou",produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/add-ou",produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> addOu(LdapEntry selectedEntry) {
 		try {
 			Map<String, String[]> attributes = new HashMap<String,String[]>();
@@ -168,10 +165,11 @@ public class UserController {
 			List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
 			List<LdapEntry> ouList = null;
 			filterAttributesList.add(new LdapSearchFilterAttribute("ou", selectedEntry.getOu(), SearchFilterEnum.EQ));
-			ouList = ldapService.search(configurationService.getAhenkGroupLdapBaseDn(), filterAttributesList, new String[] {"*"});
+			ouList = ldapService.search(selectedEntry.getDistinguishedName(), filterAttributesList, new String[] {"*"});
 			
 			HttpHeaders headers = new HttpHeaders();
-			if(ouList.isEmpty() == false){
+			if(!ouList.isEmpty()){
+				headers.add("message", "This uid was found. Could not create ou");
 				return ResponseEntity.status(HttpStatus.IM_USED).headers(headers).build();
 			}
 
@@ -211,10 +209,10 @@ public class UserController {
 	
 	@Operation(summary = "Add user to selected entry", description = "", tags = { "user" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Added user to selected entry.Successful"),
+			  @ApiResponse(responseCode = "200", description = "Added user to selected entry. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not add user. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) ,
-			  @ApiResponse(responseCode = "226", description = "This uid was found.I am used", 
+			  @ApiResponse(responseCode = "226", description = "This uid was found. I am used", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-user",produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry>  addUser(LdapEntry selectedEntry) {
@@ -249,10 +247,9 @@ public class UserController {
 			filterAttributesList.add(new LdapSearchFilterAttribute("uid", selectedEntry.getUid(), SearchFilterEnum.EQ));
 			users = ldapService.search(configurationService.getUserLdapBaseDn(), filterAttributesList, new String[] {"*"});
 			HttpHeaders headers = new HttpHeaders();
-			System.out.println(users);
 			
-			if(users.isEmpty() == false) {
-				
+			if(!users.isEmpty()) {
+				headers.add("message", "This uid was found. Could not create user ");
 				return ResponseEntity.status(HttpStatus.IM_USED).headers(headers).build();
 			}
 			
