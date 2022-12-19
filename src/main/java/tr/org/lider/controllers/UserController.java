@@ -79,7 +79,6 @@ public class UserController {
 
 	private Object object;
 	
-	//@RequestMapping(value = "/getOuDetails")
 	@Operation(summary = "Gets the ou detail of the selected entry.", description = "", tags = { "user" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Returns the ou detail of the selected entry. Successful"),
@@ -112,7 +111,6 @@ public class UserController {
 			  @ApiResponse(responseCode = "417", description = "Could not get ou of selected entry. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@GetMapping(value = "/ou")
-	//@RequestMapping(value = "/getOu")
 	public ResponseEntity<List<LdapEntry>> getOu(LdapEntry selectedEntry) {
 		List<LdapEntry> subEntries = null;
 		try {
@@ -162,16 +160,16 @@ public class UserController {
 			attributes.put("objectClass", new String[] {"organizationalUnit", "top", "pardusLider"} );
 			attributes.put("ou", new String[] { selectedEntry.getOu() });
 			
-			List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
-			List<LdapEntry> ouList = null;
-			filterAttributesList.add(new LdapSearchFilterAttribute("ou", selectedEntry.getOu(), SearchFilterEnum.EQ));
-			ouList = ldapService.search(selectedEntry.getDistinguishedName(), filterAttributesList, new String[] {"*"});
+//			List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+//			List<LdapEntry> ouList = null;
+//			filterAttributesList.add(new LdapSearchFilterAttribute("ou", selectedEntry.getOu(), SearchFilterEnum.EQ));	
+//			ouList = ldapService.search(selectedEntry.getDistinguishedName(), filterAttributesList, new String[] {"*"});
 			
 			HttpHeaders headers = new HttpHeaders();
-			if(!ouList.isEmpty()){
-				headers.add("message", "This uid was found. Could not create ou");
-				return ResponseEntity.status(HttpStatus.IM_USED).headers(headers).build();
-			}
+//			if(!ouList.isEmpty()){
+//				headers.add("message", "This uid was found. Could not create ou");
+//				return ResponseEntity.status(HttpStatus.IM_USED).headers(headers).build();
+//			}
 
 			String dn="ou="+selectedEntry.getOu()+","+selectedEntry.getParentName();
 			
