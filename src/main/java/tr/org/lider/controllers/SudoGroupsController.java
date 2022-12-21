@@ -21,7 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -118,7 +120,6 @@ public class SudoGroupsController {
 			  @ApiResponse(responseCode = "417", description = "Could not create organizational unit. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/add-ou", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST, value = "/addOu",produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> addOu(@RequestBody LdapEntry selectedEntry) {
 		try {
 			Map<String, String[]> attributes = new HashMap<String,String[]>();
@@ -160,9 +161,8 @@ public class SudoGroupsController {
 			  @ApiResponse(responseCode = "200", description = "Deleted entry by dn.Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not delete entry. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/entry{dn}")
-	//@RequestMapping(method=RequestMethod.POST, value = "/deleteEntry")
-	public ResponseEntity<Boolean> deleteEntry(@RequestParam(value = "dn") String dn) {
+	@DeleteMapping(value = "/entry/dn/{dn}")
+	public ResponseEntity<Boolean> deleteEntry(@PathVariable String dn) {
 		try {
 			if(dn != configurationService.getAgentLdapBaseDn()) {
 				ldapService.updateOLCAccessRulesAfterEntryDelete(dn);
@@ -198,9 +198,9 @@ public class SudoGroupsController {
 			  @ApiResponse(responseCode = "200", description = "Moved from source  dn to destination dn.Successful"),
 			  @ApiResponse(responseCode = "404", description = "Could not move from source dn to destination dn. Not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/move/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
-			@RequestParam(value="destinationDN", required=true) String destinationDN) {
+	@PutMapping(value = "/move/entry/sourceDN/{sourceDN}/destinationDN/{destinationDN}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> moveEntry(@PathVariable String sourceDN,
+			@PathVariable String destinationDN) {
 		
 		try {
 			Map<String, Object> requestData = new HashMap<String, Object>();
@@ -232,10 +232,8 @@ public class SudoGroupsController {
 			  @ApiResponse(responseCode = "200", description = "Entry has been renamed. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not rename entry. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/rename/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/rename/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LdapEntry> renameEntry(@RequestParam(value="oldDN", required=true) String oldDN,
-			@RequestParam(value="newName", required=true) String newName) {
+	@PutMapping(value = "/rename/entry/oldDN/{oldDN}/newName/{newName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<LdapEntry> renameEntry(@PathVariable String oldDN, @PathVariable String newName) {
 		try {
 			ldapService.renameEntry(oldDN, newName);
 			String newEntryDN = newName + ",";
@@ -296,7 +294,6 @@ public class SudoGroupsController {
 			  @ApiResponse(responseCode = "417", description = "Could not move users under ou. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/get-users-under-ou")
-	//@RequestMapping(value = "/getUsersUnderOU", method = { RequestMethod.POST })
 	public ResponseEntity<List<LdapEntry>> getUsersUnderOU(HttpServletRequest request,Model model, @RequestBody LdapEntry[] selectedEntryArr) {
 		List<LdapEntry> userList=new ArrayList<>();
 		for (LdapEntry ldapEntry : selectedEntryArr) {
@@ -341,7 +338,6 @@ public class SudoGroupsController {
 			  @ApiResponse(responseCode = "404", description = "Could not create sudo group. Not found unit", 
 			    content = @Content(schema = @Schema(implementation = String.class)))})
 	@PostMapping(value = "/create-sudo-group", produces = MediaType.APPLICATION_JSON_VALUE)
-	//@RequestMapping(method=RequestMethod.POST ,value = "/createSudoGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<LdapEntry> createSudoGroup(@RequestBody(required=false) String body) {
 		
 		try {
@@ -412,7 +408,6 @@ public class SudoGroupsController {
 	}
 	
 	//edit sudo group
-	//@RequestMapping(method=RequestMethod.POST ,value = "/editSudoGroup", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "Edit sudo group", description = "", tags = { "sudo-groups" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Edited sudo group. Successful"),
@@ -488,15 +483,13 @@ public class SudoGroupsController {
 	}
 	
 	//delete sudoUser from sudo groups
-	//@RequestMapping(method=RequestMethod.POST ,value = "/delete/sudo/user", produces = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "Delete ldap user", description = "", tags = { "sudo-groups" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Deleted user. Succcessful"),
 			  @ApiResponse(responseCode = "417", description = "Coould not delete user. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@DeleteMapping(value = "/delete/sudo/user/dn/{dn}/uid/{uid}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LdapEntry> deleteUserOfSudoGroup(@RequestParam(value="dn", required=true) String dn, 
-			@RequestParam(value="uid", required=true) String uid) {
+	public ResponseEntity<LdapEntry> deleteUserOfSudoGroup(@PathVariable String dn, @PathVariable String uid) {
 		try {
 			ldapService.updateEntryRemoveAttributeWithValue(dn, "sudoUser", uid);
 			
