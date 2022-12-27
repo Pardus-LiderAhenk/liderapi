@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.messaging.messages.ILiderMessage;
 
 @Service
@@ -32,9 +31,6 @@ public class MessageProducer {
 			String msgStr = mapper.writeValueAsString(message);
 			String jid = message.getRecipient();
 			
-	    	AgentImpl agent = new AgentImpl();
-	    	agent.setHostname("Agent 1");
-	    	agent.setDn("agent dn address");
 	        logger.info("Payload sent: {}",  msgStr);
 	        kafkaTemplate.send(jid, msgStr);
 		} catch (JsonProcessingException e) {

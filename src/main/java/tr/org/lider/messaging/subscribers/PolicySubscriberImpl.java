@@ -67,6 +67,7 @@ public class PolicySubscriberImpl implements IPolicySubscriber {
 	
 	@Autowired
 	private ConfigurationService configurationService;
+	
 	@Autowired
 	private PolicyRepository policyDao;
 	

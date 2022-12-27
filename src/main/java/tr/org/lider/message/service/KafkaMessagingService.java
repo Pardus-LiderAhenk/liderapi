@@ -56,7 +56,7 @@ public class KafkaMessagingService implements IMessagingService {
 	@Override
 	public boolean isRecipientOnline(String jid) {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override

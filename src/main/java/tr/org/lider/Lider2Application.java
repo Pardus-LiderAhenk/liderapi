@@ -1,5 +1,6 @@
 package tr.org.lider;
 
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -22,7 +23,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.Ordered;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -37,7 +37,7 @@ import tr.org.lider.security.CustomPasswordEncoder;
 @EntityScan(basePackages = {"tr.org.lider"})
 @ComponentScan(basePackages = {"tr.org.lider"})
 @EnableCaching
-@EnableKafka
+//@EnableKafka
 @EnableScheduling
 public class Lider2Application extends SpringBootServletInitializer {
 
@@ -51,7 +51,7 @@ public class Lider2Application extends SpringBootServletInitializer {
 	
 	@Value("${lider.url}")
 	private String liderURL;
-	
+    
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 		return application.sources(Lider2Application.class)
@@ -106,7 +106,7 @@ public class Lider2Application extends SpringBootServletInitializer {
 			}
 		} catch (LdapException e) {
 			logger.error(e.getLocalizedMessage());
-		}
+		}        
 	}
 
 }
