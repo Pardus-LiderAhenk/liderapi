@@ -674,6 +674,15 @@ public class UserGroupsController {
 			@RequestParam(value = "isDomainAdmin") Boolean isDomainAdmin) {
 		try {
 			if (isDomainAdmin) {
+				List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+				List<LdapEntry> groups = null;
+				filterAttributesList.add(new LdapSearchFilterAttribute("objectClass", "pardusLider", SearchFilterEnum.EQ));
+				filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", dn, SearchFilterEnum.EQ));
+				groups = ldapService.search(configurationService.getUserGroupLdapBaseDn(), filterAttributesList, new String[] {"*"});
+				
+				if (groups.isEmpty()) {
+					ldapService.updateEntryAddAtribute(dn, "objectClass", "pardusLider");
+				}
 				ldapService.updateEntryAddAtribute(dn, "liderPrivilege", "ROLE_DOMAIN_ADMIN");
 			} else {
 				try {
