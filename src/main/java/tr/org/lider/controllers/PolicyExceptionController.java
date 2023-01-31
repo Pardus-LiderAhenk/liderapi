@@ -1,0 +1,242 @@
+package tr.org.lider.controllers;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.directory.api.ldap.model.exception.LdapException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.entities.PolicyExceptionImpl;
+import tr.org.lider.ldap.DNType;
+import tr.org.lider.ldap.LDAPServiceImpl;
+//import tr.org.lider.ldap.LDAPServiceImpl;
+import tr.org.lider.ldap.LdapEntry;
+import tr.org.lider.ldap.LdapSearchFilterAttribute;
+import tr.org.lider.ldap.SearchFilterEnum;
+import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.PolicyExceptionService;
+import tr.org.lider.services.PolicyService;
+
+/**
+ * 
+ * Return the policy Exception, saved, edited and deleted policy exception
+ * @author <a href="mailto:tuncay.colak@tubitak.gov.tr">Tuncay ÇOLAK</a>
+ *
+ */
+@Secured({"ROLE_ADMIN", "ROLE_COMPUTERS" })
+@RestController
+@RequestMapping("/api/policy-exception")
+@Tag(name = "Policy Exception" , description = "Policy Exception Rest Service")
+public class PolicyExceptionController {
+
+	Logger logger = LoggerFactory.getLogger(PolicyExceptionController.class);
+	
+	@Autowired
+	private PolicyExceptionService policyExceptionService;
+	
+	@Autowired
+	private PolicyService policyService;
+	
+	@Autowired
+	private LDAPServiceImpl ldapService;
+	
+	@Autowired
+	private ConfigurationService configurationService;
+
+	//@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+	
+	@Operation(summary = "Get policy exception list all", description = "", tags = { "policy-exception" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns policy exception list successfully"),
+			  @ApiResponse(responseCode = "417", description = "Could not get policy exception list. Unexpected error occurred", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<PolicyExceptionImpl>> policyExceptionList() {
+		try {
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(policyExceptionService.list());
+					
+		} catch (DataAccessException e) {
+			logger.error("Error list policy exception: " + e.getCause().getMessage());
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
+		}
+	}
+	
+	@Operation(summary = "Get policy exception list by dn", description = "", tags = { "policy-exception" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns policy exception list successfully"),
+			  @ApiResponse(responseCode = "417", description = "Could not get policy exception list. Unexpected error occurred", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/list/dn/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<PolicyExceptionImpl>> policyExceptionListByDn(@PathVariable String dn) {
+		logger.info("Getting executed policies for group. DN : " +dn);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(policyExceptionService.listByDn(dn));
+	}
+	
+	@Operation(summary = "Get policy exception list by policy id", description = "", tags = { "policy-exception" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns policy exception list successfully"),
+			  @ApiResponse(responseCode = "417", description = "Could not get policy exception list. Unexpected error occurred", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/list/policy/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<PolicyExceptionImpl>> policyExceptionListByPolicy(@PathVariable Long id) {
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(policyExceptionService.listByPolicy(policyService.findPolicyByID(id).getId()));
+	}
+
+	//	return saved policy
+	//@RequestMapping(method=RequestMethod.POST ,value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Add policy exception", description = "", tags = { "policy-exception" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Added policy to policy exception service.Successful"),
+			  @ApiResponse(responseCode = "417", description = "Coul not add policy to policy exception service. Unexpected error occurred.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> policyExceptionAdd(@RequestBody PolicyExceptionImpl params) {
+		System.out.print(params);
+		try {
+			for (int i = 0; i < params.getMembers().size(); i++) {
+				PolicyExceptionImpl policyExceptionImpl = new PolicyExceptionImpl();
+				policyExceptionImpl.setPolicy(params.getPolicy());
+				policyExceptionImpl.setDn(params.getMembers().get(i).toString());
+				policyExceptionImpl.setDescription(params.getDescription());
+				policyExceptionImpl.setLabel(params.getLabel());
+				policyExceptionImpl.setDnType(getEntryType(params.getMembers().get(i).toString()));
+				policyExceptionService.add(policyExceptionImpl);
+				
+			}
+			
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(true);
+					
+		} catch (DataAccessException e) {
+			logger.error("Error saving policy exception: " + e.getCause().getMessage());
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
+		} catch (LdapException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	//	return deleted policy. Never truly delete, just mark as deleted!
+	@Operation(summary = "Delete policy exception", description = "", tags = { "policy-exception" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Deleted policy exception. Successful"),
+			  @ApiResponse(responseCode = "417", description = "Could not delete policy exception. Unexpected error occurred"),
+			  @ApiResponse(responseCode = "404", description = "Policy exception id not found", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@DeleteMapping(value = "/delete/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<PolicyExceptionImpl> policyExceptionDelete(@PathVariable Long id) {
+		try {
+			if(!policyExceptionService.findPolicyExceptionByID(id).isPresent()) {
+				logger.error("Policy exception to delete {} but id not found!", id);
+	        	HttpHeaders headers = new HttpHeaders();
+	        	headers.add("message", "Policy exception id not found !");
+	    		return ResponseEntity
+	    				.status(HttpStatus.NOT_FOUND)
+	    				.headers(headers)
+	    				.build();
+			}		
+			policyExceptionService.delete(id);
+					
+		} catch (DataAccessException e) {
+			logger.error("Error delete policy exception: " + e.getCause().getMessage());
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
+		}
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(null);
+	}
+
+	
+	
+	
+	
+	
+	//	return updated policy exception
+	@Operation(summary = "Update policy exception", description = "", tags = { "policy-exception" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Updated policy exception successfully"),
+			  @ApiResponse(responseCode = "417", description = "Could not update policy exception. Unexpected error occurred", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<PolicyExceptionImpl> policyExceptionUpdated(@RequestBody PolicyExceptionImpl params) {
+		try {
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(policyExceptionService.update(params));
+			
+		} catch (DataAccessException e) {
+			e.printStackTrace();
+			logger.error("Error updated policy exception: " + e.getCause().getMessage());
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
+		}
+	}
+	
+//	@Operation(summary = "List group policies", description = "", tags = { "policy-exception" })
+//	@ApiResponses(value = { 
+//			  @ApiResponse(responseCode = "200", description = "Returns group policy exceptions successfully"),
+//			  @ApiResponse(responseCode = "417", description = "Could not get policy exception group. Unexpected error occured ", 
+//			    content = @Content(schema = @Schema(implementation = String.class))) })
+//	@GetMapping(value = "/policies-for-group/dn/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
+//	public ResponseEntity<List<PolicyResponse>> getPolicies4Group(@PathVariable String dn) {
+//		logger.info("Getting executed policy exceptions for group. DN : " +dn);
+//		return ResponseEntity
+//				.status(HttpStatus.OK)
+//				.body(policyService.getPoliciesForGroup(dn));
+//	}
+	
+	
+	private DNType getEntryType(String dn) throws LdapException {
+		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+		List<LdapEntry> entry = null;
+		filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", dn, SearchFilterEnum.EQ));
+		entry = ldapService.search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
+		
+		return entry.get(0).getType();
+	}
+}
