@@ -161,7 +161,7 @@ public class PolicyExceptionController {
 			  @ApiResponse(responseCode = "417", description = "Could not delete policy exception. Unexpected error occurred"),
 			  @ApiResponse(responseCode = "404", description = "Policy exception id not found", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@DeleteMapping(value = "/delete/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<PolicyExceptionImpl> policyExceptionDelete(@PathVariable Long id) {
 		try {
 			if(!policyExceptionService.findPolicyExceptionByID(id).isPresent()) {
