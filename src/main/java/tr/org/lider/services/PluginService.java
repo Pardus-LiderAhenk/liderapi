@@ -65,7 +65,7 @@ public class PluginService {
 		pluginList.add(new PluginImpl("user-privilege", "1.0.0", "Kullanıcı yetkilendierme ve kısıtlaması", true, false, true, true, true, true, false, false));
 		pluginList.add(new PluginImpl("ldap", "1.0.0", "İstemci silme, ad değiştirme ve taşıma işlemleri", true, false, true, true, false, true, false, false));
 		pluginList.add(new PluginImpl("screenshot", "1.0.0", "Ekran görüntüsü", true, false, true, true, true, true, true, false));
-		pluginList.add(new PluginImpl("browser-chrome", "108", "Chrome Tarayıcı yönetimi", true, false, true, true, true, true, false, false));
+		pluginList.add(new PluginImpl("browser-chrome", "1.0.0", "Chrome Tarayıcı yönetimi", true, false, true, true, true, true, false, false));
 		
 		
 		for (int i = 0; i < pluginList.size(); i++) {
