@@ -2583,16 +2583,27 @@ public class LDAPServiceImpl implements ILDAPService {
 		    			List<LdapEntry> subGroupList = getMembersInGroupAsGroup(groupListTemp.currentDn);
 		    			if (subGroupList != null) {
 	                        for (LdapEntry subGroup : subGroupList) {
-	                        	
-	                            if (!groupListTemp.currentDn.contains(subGroup.getDistinguishedName())) {
-	                            	groupList.append(subGroup.getDistinguishedName(), false);
-	                            }
+	                        	GroupLinkedList.Node fnode = groupList.head;
+	    		        		while(fnode != null) {
+	    		        			if(fnode.currentDn.equals(subGroup.getDistinguishedName())) {
+	    		        				break;
+	    		        			}
+	    		        			if (fnode.next == null) {
+	    		        				groupList.append(subGroup.getDistinguishedName(), false);
+	    		    	        		break;
+	    		    	        	}
+	    		        			fnode = fnode.next;
+	    		        		}
 	                        }
 	                    }
 		    			groupList.updateValue(groupListTemp, false, true);
-		    			if (!totalGroupList.contains(groupList.head.currentDn)) {
-							totalGroupList.add(groupList.head.currentDn);
+//		    			if (!totalGroupList.contains(groupList.head.currentDn)) {
+//							totalGroupList.add(groupList.head.currentDn);
+//						}
+		    			if (!totalGroupList.contains(groupListTemp.currentDn)) {
+							totalGroupList.add(groupListTemp.currentDn);
 						}
+		    			
 		    			if (groupListTemp.next == null) {
 		    				break;
 		    			}

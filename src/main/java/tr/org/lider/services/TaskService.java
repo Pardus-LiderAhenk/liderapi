@@ -190,7 +190,9 @@ public class TaskService {
 				targetEntries.add(ldapEntry); 
 			}
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
-				ldapService.getGroupInGroups(ldapEntry);
+				
+				List <String> tuncay= ldapService.getGroupInGroups(ldapEntry);
+				
 				String[] members= ldapEntry.getAttributesMultiValues().get("member");
 				for (int i = 0; i < members.length; i++) {
 					String dn = members[i];
