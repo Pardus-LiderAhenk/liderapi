@@ -290,7 +290,7 @@ public class ComputerGroupsController {
 		List<LdapEntry> directories = new ArrayList<>();
 		
 		for (LdapEntry ldapEntry : entries) {
-			if(ldapEntry.getType().equals(DNType.AHENK)) {
+			if(ldapEntry.getType().equals(DNType.AHENK) || ldapEntry.getType().equals(DNType.GROUP)) {
 				agents.add(ldapEntry);
 			}
 		}
@@ -372,9 +372,35 @@ public class ComputerGroupsController {
 			}
 			List<LdapEntry> agents = new ArrayList<>();
 			List<LdapEntry> directories = new ArrayList<>();
+			List <String> memberDn = new ArrayList<>();
+			List <String> memberOfDn = new ArrayList<>();
+			String a = null;
+			
+			for (LdapEntry ldapMember : entries){
+					
+				if(ldapMember.getType().equals(DNType.GROUP)){
+					memberDn.addAll(Arrays.asList(ldapMember.getAttributesMultiValues().get("member")));
+					memberOfDn.addAll(Arrays.asList(ldapMember.getAttributesMultiValues().get("member")));
+				}
+			}
+			System.out.println(memberDn);
 			
 			for (LdapEntry ldapEntry : entries) {
-				if(ldapEntry.getType().equals(DNType.AHENK)) {
+				if(ldapEntry.getType().equals(DNType.AHENK) || ldapEntry.getType().equals(DNType.GROUP)) {
+					if(ldapEntry.getType().equals(DNType.GROUP)) {
+						if (ldapEntry.getAttributesMultiValues().get("member").equals(null)) {
+							continue;
+						}
+						else {
+							System.out.println(ldapEntry.getAttributesMultiValues().get("member"));
+//							for (LdapEntry groupLdapEntry : ldapEntry.getAttributesMultiValues().get("member")) {
+//								if (groupLdapEntry.getDistinguishedName() == ldapEntry.getDistinguishedName()) {
+//									System.err.println("AYNI GRUP");
+//									break;
+//								}
+//							}
+						}
+					}
 					agents.add(ldapEntry);
 				}
 			}
@@ -604,7 +630,7 @@ public class ComputerGroupsController {
 	public List<LdapEntry> getAhenksUnderOUs(List<LdapEntry> directories, List<LdapEntry> ahenks) {
 		for (LdapEntry ldapEntry : directories) {
 			try {
-				List<LdapEntry> retList = ldapService.findSubEntries(ldapEntry.getDistinguishedName(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
+				List<LdapEntry> retList = ldapService.findSubEntries(ldapEntry.getDistinguishedName(), "(|(objectclass=pardusDevice)(objectclass=groupOfNames))" , new String[] { "*" }, SearchScope.SUBTREE);
 				for (LdapEntry ldapEntry2 : retList) {
 					boolean isExist=false;
 					for (LdapEntry ldapEntryAhenk : ahenks) {
@@ -797,4 +823,87 @@ public class ComputerGroupsController {
 				.status(HttpStatus.OK)
 				.body(entry);
 	}
+	
+	
+//	//add agents to existing group from agent info page
+//			@Operation(summary = "Add agent to existing group", description = "", tags = { "computer-groups" })
+//			@ApiResponses(value = { 
+//				  @ApiResponse(responseCode = "200", description = "Added agent to existing group"),
+//				  @ApiResponse(responseCode = "417", description = "Could not add agent to existing group. Unexpected error occured", 
+//				    content = @Content(schema = @Schema(implementation = String.class))) })
+//			@PostMapping(value = "/group/existing", produces = MediaType.APPLICATION_JSON_VALUE)
+//			public ResponseEntity<?> addAgentsToExistingGroupp(@RequestBody Map<String, String> params) {
+//				LdapEntry entry;
+//				ObjectMapper mapper = new ObjectMapper();
+//				List<LdapEntry> entries = new ArrayList<>();
+//				try {
+//					entries = Arrays.asList(mapper.readValue(params.get("checkedEntries"), LdapEntry[].class));
+//				} catch (JsonProcessingException e) {
+//					logger.error("Error occured while mapping checked entry list to object");
+//				}
+//				List<LdapEntry> agents = new ArrayList<>();
+//				List<LdapEntry> directories = new ArrayList<>();
+//				
+//				for (LdapEntry ldapEntry : entries) {
+//					if(ldapEntry.getType().equals(DNType.AHENK)) {
+//						agents.add(ldapEntry);
+//					}
+//				}
+//				
+//				for (LdapEntry ldapEntry : entries) {
+//					Boolean hasParentChecked = false;
+//					for (LdapEntry entryTemp : entries) {
+//						if(ldapEntry.getType().equals(DNType.ORGANIZATIONAL_UNIT) && entryTemp.getType().equals(DNType.ORGANIZATIONAL_UNIT)) {
+//							if(!ldapEntry.getDistinguishedName().equals(entryTemp.getDistinguishedName()) 
+//									&& ldapEntry.getDistinguishedName().contains(entryTemp.getDistinguishedName())) {
+//								hasParentChecked = true;
+//								break;
+//							}
+//						}
+//					}
+//					if(ldapEntry.getType().equals(DNType.ORGANIZATIONAL_UNIT)  && !hasParentChecked) {
+//						directories.add(ldapEntry);
+//					}
+//				}
+//
+//				List<LdapEntry> allAgents = getAhenksUnderOUs(directories, agents);
+//				if(allAgents.size() == 0) {
+//					return new ResponseEntity<String>("Seçili klasörlerde istemci bulunamadı. Lütfen en az bir istemci seçiniz.", HttpStatus.NOT_ACCEPTABLE);
+//				}
+//				try {
+//					String [] allAgentDNs = allAgents.stream().map(LdapEntry::getDistinguishedName).toArray(String[]::new);
+//					for (int i = 0; i < allAgentDNs.length; i++) {
+//						ldapService.updateEntryAddAtribute(params.get("groupDN"), "member", allAgentDNs[i]);
+//					}
+//					entry = ldapService.getEntryDetail(params.get("groupDN"));
+//				} catch (LdapException e) {
+//					logger.error("Error occured while adding new group.");
+//					HttpHeaders headers = new HttpHeaders();
+//					return ResponseEntity.
+//							status(HttpStatus.EXPECTATION_FAILED).
+//							headers(headers)
+//							.build();
+//				}
+//				
+//				Map<String, Object> requestData = new HashMap<String, Object>();
+//				List<String> computerAdded = new ArrayList<>();
+//				
+//				for (LdapEntry computer : entries) {
+//					if (computer.getUid() != null) {
+//						computerAdded.add(computer.getUid());
+//					}
+//				}
+//				requestData.put("uid",computerAdded);
+//				ObjectMapper dataMapper = new ObjectMapper();
+//				String jsonString = null;
+//				try {
+//					jsonString = dataMapper.writeValueAsString(requestData);
+//				} catch (JsonProcessingException e1) {
+//					logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+//				}
+//				String log = "Computers has been added to " + entry.getDistinguishedName();
+//				operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+//				
+//				return new ResponseEntity<LdapEntry>(entry, HttpStatus.OK);
+//			}
 }

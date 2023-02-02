@@ -11,10 +11,12 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,9 +79,12 @@ import tr.org.lider.services.ConfigurationService;
  * 
  */
 
+
+
 @Service
 @Qualifier("ldapImpl")
 public class LDAPServiceImpl implements ILDAPService {
+	
 
 	private final static Logger logger = LoggerFactory.getLogger(LDAPServiceImpl.class);
 	private final static String configOLCDN = "olcDatabase={1}mdb,cn=config";
@@ -1214,9 +1219,7 @@ public class LDAPServiceImpl implements ILDAPService {
 		}
 		return treeList;
 	}
-
-
-
+	
 	public void createTreeList(LdapEntry entry, List<LdapEntry> treeList) {
 
 		if(entry.getType()!=null && entry.getType().equals(DNType.USER)) {
@@ -2541,7 +2544,175 @@ public class LDAPServiceImpl implements ILDAPService {
 		else 
 			return false;
 	}
+	
+	
+//	----------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	
+	
+	
+	
+	
+	
+	public List<String> getGroupInGroups(LdapEntry selectedEntry) {
+		
+		List<String> totalGroupList= new ArrayList<>();
 
+		
+		GroupLinkedList groupList = new GroupLinkedList();
+		groupList.append(selectedEntry.getDistinguishedName(), false);
+		
+//		tr.org.lider.ldap.LinkedList.Node = 
 
-}
+		
+//	    Map<String, Boolean> groups = new HashMap<>();
+//	    groups.put(selectedEntry.getDistinguishedName(), false);
+	    
+	    try {
+	    	if(!groupList.head.equals(null)) {
+	    		GroupLinkedList.Node groupListTemp = groupList.head;
+	    		while(!groupListTemp.viseted && groupListTemp!= null)  {
+	    			if(groupListTemp.viseted) {
+	    				if (groupListTemp.next == null) {
+			        		break;
+			        	}
+	    				groupListTemp = groupListTemp.next;
+		        		continue;
+	    			}
+	    			else {
+		    			List<LdapEntry> subGroupList = getMembersInGroupAsGroup(groupListTemp.currentDn);
+		    			if (subGroupList != null) {
+	                        for (LdapEntry subGroup : subGroupList) {
+	                        	
+	                            if (!groupListTemp.currentDn.contains(subGroup.getDistinguishedName())) {
+	                            	groupList.append(subGroup.getDistinguishedName(), false);
+	                            }
+	                        }
+	                    }
+		    			groupList.updateValue(groupListTemp, false, true);
+		    			if (!totalGroupList.contains(groupList.head.currentDn)) {
+							totalGroupList.add(groupList.head.currentDn);
+						}
+		    			if (groupListTemp.next == null) {
+		    				break;
+		    			}
+		    			groupListTemp = groupListTemp.next;
+		    		
+	    			}
+	    		}
+	    		
+//		        for (Map.Entry<String, Boolean> entry : groups.entrySet()) {
+//		            String key = entry.getKey();
+//		            Boolean value = entry.getValue();
+//		            
+//		            if (!groups.containsKey(key)) {
+//		                groups.put(selectedEntry.getDistinguishedName(), false);
+//		            } else {
+//		                if (!value) {
+//		                    List<LdapEntry> subGroupList = getMembersInGroupAsGroup(key);
+//		                    if (subGroupList != null) {
+//		                        for (LdapEntry subGroup : subGroupList) {
+//		                            if (!groups.containsKey(subGroup.getDistinguishedName())) {
+//		                                groups.put(subGroup.getDistinguishedName(), false);
+//		                            }
+//		                        }
+//		                    }
+//		                }
+//		                groups.replace(key, true);
+//		            }
+//		        }
+	    	}
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return totalGroupList;
+	}
+	
+	public List<LdapEntry> getMembersInGroupAsGroup(String disDn) {
+		
+//		
+//		LdapConnection connection = null;
+//		
+//			try {
+//				connection = getConnection();
+//			} catch (LdapException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//			Entry entry = null;
+//			try {
+//				entry = connection.getRootDse();
+//
+//		
+//				
+//				
+//				
+//				
+//				
+//				
+//				String globalUserOu = configurationService.getUserLdapBaseDn(); //"ou=Kullanıcılar,dc=mys,dc=pardus,dc=org";
+//				LdapEntry usersDn = null;
+//				try {
+//					List<LdapEntry> usersEntrylist = findSubEntries(globalUserOu, "(objectclass=*)",
+//							new String[] { "*" }, SearchScope.OBJECT);
+//
+//					if (usersEntrylist.size() > 0) {
+//						usersDn = usersEntrylist.get(0);
+//						usersDn.setExpandedUser("FALSE");
+//					}
+//
+//				} catch (LdapException e) {
+//					e.printStackTrace();
+//				}	
+//				
+				
+	
+			
+		
+		List<LdapEntry> ldapEntry = null;
+//		ldapEntry.setDistinguishedName(disDn);
+		List<LdapEntry> targetEntries= new ArrayList<>();
+		
+		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+		filterAttributesList.add(new LdapSearchFilterAttribute("objectClass", "groupOfNames", SearchFilterEnum.EQ));
+		filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", disDn, SearchFilterEnum.EQ));
+		try {
+			ldapEntry = search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
+		} catch (LdapException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+
+		if(ldapEntry != null && ldapEntry.get(0).getType().equals(DNType.GROUP)) {
+			String[] members= ldapEntry.get(0).getAttributesMultiValues().get("member");
+			for (int i = 0; i < members.length; i++) {
+				String dn = members[i];
+				try {
+					List<LdapEntry> member = findSubEntries(dn, "(objectclass=groupOfNames)", new String[] { "*" }, SearchScope.OBJECT);
+					if(member!=null && member.size()>0) {
+						targetEntries.add(member.get(0));
+					}
+
+				} catch (LdapException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return targetEntries; //çankay ve yenimahalle
+			}
+//		catch (Exception e) {
+//			// TODO: handle exception
+//		}
+//		return null;
+		
+	} 
+	
+	
+	
+	
+//}
 

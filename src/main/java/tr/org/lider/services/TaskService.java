@@ -187,14 +187,16 @@ public class TaskService {
 		List<LdapEntry> selectedtEntries= request.getEntryList();
 		for (LdapEntry ldapEntry : selectedtEntries) {
 			if(ldapEntry.getType().equals(DNType.AHENK)) {
-				targetEntries.add(ldapEntry);
+				targetEntries.add(ldapEntry); 
 			}
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
+				ldapService.getGroupInGroups(ldapEntry);
 				String[] members= ldapEntry.getAttributesMultiValues().get("member");
 				for (int i = 0; i < members.length; i++) {
 					String dn = members[i];
 					try {
-						List<LdapEntry> member= ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.OBJECT);
+//						List<LdapEntry> member= ldapService.findSubEntries(dn, "(|(objectclass=pardusDevice)(objectclass=groupOfNames))(", new String[] { "*" }, SearchScope.OBJECT);
+						List<LdapEntry> member= ldapService.findSubEntries(dn, "((objectclass=pardusDevice))(", new String[] { "*" }, SearchScope.OBJECT);
 						if(member!=null && member.size()>0) {
 							targetEntries.add(member.get(0));
 						}

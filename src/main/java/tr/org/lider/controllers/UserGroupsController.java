@@ -233,7 +233,7 @@ public class UserGroupsController {
 		List<LdapEntry> directories = new ArrayList<>();
 		
 		for (LdapEntry ldapEntry : entries) {
-			if(ldapEntry.getType().equals(DNType.USER)) {
+			if(ldapEntry.getType().equals(DNType.USER) || ldapEntry.getType().equals(DNType.GROUP)) {
 				users.add(ldapEntry);
 			}
 		}
