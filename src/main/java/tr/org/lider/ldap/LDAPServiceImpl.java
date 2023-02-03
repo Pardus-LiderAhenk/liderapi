@@ -2715,6 +2715,38 @@ public class LDAPServiceImpl implements ILDAPService {
 		
 		return targetEntries; //çankay ve yenimahalle
 			}
+	
+//	********************************************************************************************************************
+	public List <LdapEntry> getLdapDnStringToEntry(List <String> groupDnList){
+		List<LdapEntry> groupLdapEtries = new ArrayList<LdapEntry>();
+		if(groupDnList.size()>0) {
+			for(int i = 0; i < groupDnList.size(); i++) {
+				List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+				filterAttributesList.add(new LdapSearchFilterAttribute("objectClass", "groupOfNames", SearchFilterEnum.EQ));
+				filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", groupDnList.get(i), SearchFilterEnum.EQ));
+				try {
+					List<LdapEntry> search = search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
+					System.out.println("adsjsadj");
+					
+					groupLdapEtries.add(search.get(0));
+				} catch (LdapException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
+		return groupLdapEtries;
+	}
+	
+	public Boolean isExistInLdapEntry(List <LdapEntry> entryList, LdapEntry entry) {
+			for (LdapEntry eachEntry : entryList) {
+				if(eachEntry.getDistinguishedName().equals(entry.getDistinguishedName())) {
+					return true;
+				}
+			}
+		return false;
+	}
+	
 //		catch (Exception e) {
 //			// TODO: handle exception
 //		}
