@@ -1,7 +1,10 @@
 package tr.org.lider.controllers;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.slf4j.Logger;
@@ -22,12 +25,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.PolicyExceptionImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -36,6 +43,7 @@ import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.PolicyExceptionService;
 import tr.org.lider.services.PolicyService;
 
@@ -64,6 +72,9 @@ public class PolicyExceptionController {
 	
 	@Autowired
 	private ConfigurationService configurationService;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 
 	//@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
 	
@@ -125,7 +136,10 @@ public class PolicyExceptionController {
 	public ResponseEntity<Boolean> policyExceptionAdd(@RequestBody PolicyExceptionImpl params) {
 		System.out.print(params);
 		try {
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			List<String> memberList = new ArrayList<>();
 			for (int i = 0; i < params.getMembers().size(); i++) {
+				memberList.add(params.getMembers().get(i).toString());
 				PolicyExceptionImpl policyExceptionImpl = new PolicyExceptionImpl();
 				policyExceptionImpl.setPolicy(params.getPolicy());
 				policyExceptionImpl.setDn(params.getMembers().get(i).toString());
@@ -133,8 +147,17 @@ public class PolicyExceptionController {
 				policyExceptionImpl.setLabel(params.getLabel());
 				policyExceptionImpl.setDnType(getEntryType(params.getMembers().get(i).toString()));
 				policyExceptionService.add(policyExceptionImpl);
-				
 			}
+			requestData.put("memberList", memberList);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = null;
+			try {
+				jsonString = dataMapper.writeValueAsString(requestData);
+			} catch (JsonProcessingException e1) {
+				logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+			}
+			String log = "New policy exception has been created for " + params.getPolicy().getLabel();
+			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
 			
 			return ResponseEntity
 					.status(HttpStatus.OK)
@@ -164,6 +187,7 @@ public class PolicyExceptionController {
 	@DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<PolicyExceptionImpl> policyExceptionDelete(@PathVariable Long id) {
 		try {
+			Optional<PolicyExceptionImpl> existingPolicyException = policyExceptionService.findPolicyExceptionByID(id);
 			if(!policyExceptionService.findPolicyExceptionByID(id).isPresent()) {
 				logger.error("Policy exception to delete {} but id not found!", id);
 	        	HttpHeaders headers = new HttpHeaders();
@@ -172,8 +196,10 @@ public class PolicyExceptionController {
 	    				.status(HttpStatus.NOT_FOUND)
 	    				.headers(headers)
 	    				.build();
-			}		
+			}
 			policyExceptionService.delete(id);
+			String log = existingPolicyException.get().getDn() + " deleted(policy exception) from " + existingPolicyException.get().getPolicy().getLabel();
+			operationLogService.saveOperationLog(OperationType.DELETE, log, null, null, null, null);
 					
 		} catch (DataAccessException e) {
 			logger.error("Error delete policy exception: " + e.getCause().getMessage());

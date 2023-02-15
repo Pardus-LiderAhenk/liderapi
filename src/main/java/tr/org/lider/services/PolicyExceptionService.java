@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.PolicyExceptionImpl;
+import tr.org.lider.entities.PolicyImpl;
 import tr.org.lider.repositories.PolicyExceptionRepository;
 
 /**
@@ -58,6 +59,10 @@ public class PolicyExceptionService {
 
 	public Optional<PolicyExceptionImpl> findPolicyExceptionByID(Long id) {
 		return policyExceptionRepository.findById(id);
+	}
+	
+	public void deletePolicyExceptionByPolicy(PolicyImpl policy) {
+		policyExceptionRepository.deleteByPolicy(policy);
 	}
 
 
