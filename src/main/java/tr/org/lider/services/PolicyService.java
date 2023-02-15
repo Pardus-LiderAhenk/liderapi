@@ -18,18 +18,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.PolicyImpl;
 import tr.org.lider.ldap.ILDAPService;
+import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.models.PolicyExecutionRequestImpl;
 import tr.org.lider.models.PolicyResponse;
 import tr.org.lider.repositories.PolicyRepository;
+
 
 /**
  * Service for getting policy parameters from database and added, updated and deleted policy to database.
@@ -44,10 +48,13 @@ public class PolicyService {
 
 	@Autowired
 	private PolicyRepository policyRepository;
-
+	
 	@Autowired
 	private CommandService commandService;
 
+	@Autowired
+	private LDAPServiceImpl ldapServiceImpl;
+	
 	@Autowired
 	@Qualifier("ldapImpl")
 	private ILDAPService ldapService;
@@ -66,34 +73,56 @@ public class PolicyService {
 		logger.debug("Finding Policy by requested policyId.");
 		PolicyImpl policy = findPolicyByID(request.getId());
 		logger.debug("Creating ICommand object.");
-		CommandImpl command = createCommanEntity(request, policy);
+//		CommandImpl command = createCommanEntity(request, policy);
 		/*
 		 * target entry must be group..
 		 * all policies send only group entry.
 		 */
-
+		List <LdapEntry> ldapEntryGroups = new ArrayList<>();
 		List<LdapEntry> targetEntries= getTargetList(request.getDnList());
 		
-		String logMessage = "[ "+ request.getDnList().get(0) +" ] kullanıcı grubuna [ " + policy.getLabel() + " ] politikası uygulandı.";
-		operationLogService.saveOperationLog(OperationType.EXECUTE_POLICY, logMessage, policy.getLabel().getBytes(), null, policy.getId(), null);
+		LdapEntry ldapEntry = targetEntries.get(0);
 
-		for (LdapEntry targetEntry : targetEntries) {
+		
+		List <String> tuncay1= ldapServiceImpl.getGroupInGroups(ldapEntry);
+		ldapEntryGroups = ldapServiceImpl.getLdapDnStringToEntry(tuncay1);
+		
+		
+//		PAZARETSİ BURDASIn
+		
+		
+		
+		
+//		String logMessage = "[ "+ request.getDnList().get(0) +" ] kullanıcı grubuna [ " + policy.getLabel() + " ] politikası uygulandı.";
+//		operationLogService.saveOperationLog(OperationType.EXECUTE_POLICY, logMessage, policy.getLabel().getBytes(), null, policy.getId(), null);
+
+		for (LdapEntry targetEntry : ldapEntryGroups) {
+			String logMessage = "[ "+ targetEntry.getDistinguishedName() +" ] kullanıcı grubuna [ " + policy.getLabel() + " ] politikası uygulandı.";
+			operationLogService.saveOperationLog(OperationType.EXECUTE_POLICY, logMessage, policy.getLabel().getBytes(), null, policy.getId(), null);
+
+			List<String> dnList = new ArrayList<String>();
+			dnList.add(targetEntry.getDistinguishedName());
+			CommandImpl command = createCommanEntity(request, policy, dnList);
+//			
+
+//			command.setDnListJsonString(jsonString);
 			String uid=targetEntry.get(configService.getAgentLdapIdAttribute()); // group uid is cn value.
 			CommandExecutionImpl commandExecutionImpl=	new CommandExecutionImpl(null, (CommandImpl) command, uid, targetEntry.getType(), targetEntry.getDistinguishedName(),
 					new Date(), null, false);
-
+			
 			command.addCommandExecution(commandExecutionImpl);
+			if(command!=null)
+				commandService.addCommand(command);
 		}
-		if(command!=null)
-			commandService.addCommand(command);
+		
 
 
 	}
 
-	private CommandImpl createCommanEntity(PolicyExecutionRequestImpl request, PolicyImpl policy) {
+	private CommandImpl createCommanEntity(PolicyExecutionRequestImpl request, PolicyImpl policy, List<String> dnLists) {
 		CommandImpl command=null;
 		try {
-			command= new CommandImpl(null, policy, null, request.getDnList(), request.getDnType(), null, findCommandOwnerJid(), 
+			command= new CommandImpl(null, policy, null, dnLists, request.getDnType(), null, findCommandOwnerJid(), 
 					request.getActivationDate(), 
 					request.getExpirationDate(), new Date(), null, false, false);
 		} catch (JsonGenerationException e) {
@@ -224,9 +253,38 @@ public class PolicyService {
 
 	public CommandImpl unassignmentCommandForUserPolicy(CommandImpl comImpl) {
 		CommandImpl existCommand = commandService.getCommand(comImpl.getId());
-		existCommand.setDeleted(true);
-		String logMessage = "[ "+ existCommand.getDnList().get(0) +" ] kullanıcı grubunun [ " + existCommand.getPolicy().getLabel() + " ] politikası kaldırıldı.";
-		operationLogService.saveOperationLog(OperationType.UNASSIGMENT_POLICY, logMessage, existCommand.getPolicy().getLabel().getBytes(), null, existCommand.getPolicy().getId(), null);
+		List <String> headDn = new ArrayList<>();
+		headDn.add(existCommand.getCommandExecutions().get(0).getDn());
+		
+		List <LdapEntry> ldapHeadNode = new ArrayList<>();
+		
+		List <LdapEntry> ldapEntryGroups = new ArrayList<>();
+
+		ldapHeadNode.addAll(ldapServiceImpl.getLdapDnStringToEntry(headDn));
+		
+		List <String> tuncay1= ldapServiceImpl.getGroupInGroups(ldapHeadNode.get(0));
+		ldapEntryGroups = ldapServiceImpl.getLdapDnStringToEntry(tuncay1);
+		
+		
+		
+		for (LdapEntry targetEnrty:ldapEntryGroups)
+		{
+			List<CommandImpl> existCommand2 = commandService.findByPolicyAndByDn(existCommand.getPolicy().getId(), targetEnrty.getDistinguishedName());
+			if(existCommand2.get(0).isDeleted() == false) {
+				existCommand2.get(0).setDeleted(true);
+				String logMessage = "[ "+ existCommand2.get(0).getDnList().get(0) +" ] kullanıcı grubunun [ " + existCommand.getPolicy().getLabel() + " ] politikası kaldırıldı.";
+				operationLogService.saveOperationLog(OperationType.UNASSIGMENT_POLICY, logMessage, existCommand.getPolicy().getLabel().getBytes(), null, existCommand.getPolicy().getId(), null);
+				commandService.updateCommand(existCommand2.get(0));
+			}
+		}
+		
+//		existCommand.setDeleted(true);
+//		String logMessage = "[ "+ existCommand.getDnList().get(0) +" ] kullanıcı grubunun [ " + existCommand.getPolicy().getLabel() + " ] politikası kaldırıldı.";
+//		operationLogService.saveOperationLog(OperationType.UNASSIGMENT_POLICY, logMessage, existCommand.getPolicy().getLabel().getBytes(), null, existCommand.getPolicy().getId(), null);
 		return commandService.updateCommand(existCommand);
 	}
+	
+
+	
+	
 }

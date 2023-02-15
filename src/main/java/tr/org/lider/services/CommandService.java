@@ -55,6 +55,10 @@ public class CommandService {
 		return 	commandRepository.save(commandImpl);
 	}
 
+	public List<CommandImpl> findByPolicyAndByDn(Long id, String dn) {
+		return 	commandRepository.findByPolicyAndDn(id, dn);
+	}
+	
 	// command execution CRUD operations
 	public CommandExecutionImpl getCommandExecution(Long id) {
 		return commandExecutionRepository.findOne(id);

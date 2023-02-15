@@ -2726,8 +2726,6 @@ public class LDAPServiceImpl implements ILDAPService {
 				filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", groupDnList.get(i), SearchFilterEnum.EQ));
 				try {
 					List<LdapEntry> search = search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
-					System.out.println("adsjsadj");
-					
 					groupLdapEtries.add(search.get(0));
 				} catch (LdapException e1) {
 					// TODO Auto-generated catch block
@@ -2746,16 +2744,6 @@ public class LDAPServiceImpl implements ILDAPService {
 			}
 		return false;
 	}
+} 
 	
-//		catch (Exception e) {
-//			// TODO: handle exception
-//		}
-//		return null;
-		
-	} 
-	
-	
-	
-	
-//}
 
