@@ -139,12 +139,18 @@ public class PolicyExceptionController {
 			Map<String, Object> requestData = new HashMap<String, Object>();
 			List<String> memberList = new ArrayList<>();
 			for (int i = 0; i < params.getMembers().size(); i++) {
+				
+				DNType dnType = getEntryType(params.getMembers().get(i).toString());
+//				if (dnType.toString().equals("GROUP")) {
+//					burda grup altında grup olması durumunda memeber olarak bulunan gruplar da exception olarak eklenecek.
+//				}
+				
 				memberList.add(params.getMembers().get(i).toString());
 				PolicyExceptionImpl policyExceptionImpl = new PolicyExceptionImpl();
 				policyExceptionImpl.setPolicy(params.getPolicy());
-				policyExceptionImpl.setDn(params.getMembers().get(i).toString());
 				policyExceptionImpl.setDescription(params.getDescription());
 				policyExceptionImpl.setLabel(params.getLabel());
+				policyExceptionImpl.setDn(params.getMembers().get(i).toString());
 				policyExceptionImpl.setDnType(getEntryType(params.getMembers().get(i).toString()));
 				policyExceptionService.add(policyExceptionImpl);
 			}
