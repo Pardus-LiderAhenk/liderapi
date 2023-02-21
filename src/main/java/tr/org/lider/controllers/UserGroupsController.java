@@ -245,7 +245,6 @@ public class UserGroupsController {
 			}
 		}
 		
-//		PERŞEMBE BURDASINNNNN
 		entry = ldapService.getEntryDetail(params.get("groupDN"));
 		List<PolicyResponse> policyParentDn= new ArrayList<>();
 		policyParentDn = policyService.getPoliciesForGroup(entry.getDistinguishedName());
@@ -259,16 +258,8 @@ public class UserGroupsController {
 						tempDnList, policy.getCommandImpl().getDnType(), null, null, null);
 				
 				policyService.executePolicy(executePolicyTemp);
-				
-	//			policyService.executePolicy(policy);
 			}
 		}
-		
-		
-		
-		
-		
-//		PERŞEMBE BURDASINNNNN
 		
 		for (LdapEntry ldapEntry : entries) {
 			Boolean hasParentChecked = false;

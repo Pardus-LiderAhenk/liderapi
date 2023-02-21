@@ -198,9 +198,8 @@ public class TaskService {
 				targetEntries.add(ldapEntry); 
 			}
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
-				
-				List <String> tuncay= ldapService.getGroupInGroups(ldapEntry);
-				ldapEntryGroups = ldapService.getLdapDnStringToEntry(tuncay);
+				List <String> dnList= ldapService.getGroupInGroups(ldapEntry);
+				ldapEntryGroups = ldapService.getLdapDnStringToEntry(dnList);
 				
 					for(LdapEntry ldapEntryGroup : ldapEntryGroups) {
 						String[] members= ldapEntryGroup.getAttributesMultiValues().get("member");
@@ -208,14 +207,10 @@ public class TaskService {
 							String dn = members[i];
 							try {
 								List<LdapEntry> member= ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.OBJECT);
-
-//								List<LdapEntry> member= ldapService.findSubEntries(dn, "((objectclass=pardusDevice))", new String[] { "*" }, SearchScope.OBJECT);
 								if(member!=null && member.size()>0 ) {
 									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0)))
 										targetEntries.add(member.get(0));
 								}
-		
-		
 							} catch (LdapException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();

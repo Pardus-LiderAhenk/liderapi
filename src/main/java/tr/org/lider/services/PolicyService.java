@@ -80,22 +80,10 @@ public class PolicyService {
 		 */
 		List <LdapEntry> ldapEntryGroups = new ArrayList<>();
 		List<LdapEntry> targetEntries= getTargetList(request.getDnList());
-		
 		LdapEntry ldapEntry = targetEntries.get(0);
-
+		List <String> dnList= ldapServiceImpl.getGroupInGroups(ldapEntry);
+		ldapEntryGroups = ldapServiceImpl.getLdapDnStringToEntry(dnList);
 		
-		List <String> tuncay1= ldapServiceImpl.getGroupInGroups(ldapEntry);
-		ldapEntryGroups = ldapServiceImpl.getLdapDnStringToEntry(tuncay1);
-		
-		
-//		PAZARETSİ BURDASIn
-		
-		
-		
-		
-//		String logMessage = "[ "+ request.getDnList().get(0) +" ] kullanıcı grubuna [ " + policy.getLabel() + " ] politikası uygulandı.";
-//		operationLogService.saveOperationLog(OperationType.EXECUTE_POLICY, logMessage, policy.getLabel().getBytes(), null, policy.getId(), null);
-
 		for (LdapEntry targetEntry : ldapEntryGroups) {
 			
 			List<CommandImpl> existCommand = commandService.findByPolicyAndByDn(policy.getId(), targetEntry.getDistinguishedName());
@@ -103,17 +91,10 @@ public class PolicyService {
 			if (existCommand.isEmpty() || existCommand.get(0).isDeleted()== true) {
 				String logMessage = "[ "+ targetEntry.getDistinguishedName() +" ] kullanıcı grubuna [ " + policy.getLabel() + " ] politikası uygulandı.";
 				operationLogService.saveOperationLog(OperationType.EXECUTE_POLICY, logMessage, policy.getLabel().getBytes(), null, policy.getId(), null);
-
-				List<String> dnList = new ArrayList<String>();
-				dnList.add(targetEntry.getDistinguishedName());
-				CommandImpl command = createCommanEntity(request, policy, dnList);
-//				
-
-//				command.setDnListJsonString(jsonString);
+				List<String> dnListTemp = new ArrayList<String>();
+				dnListTemp.add(targetEntry.getDistinguishedName());
+				CommandImpl command = createCommanEntity(request, policy, dnListTemp);
 				String uid=targetEntry.get(configService.getAgentLdapIdAttribute()); // group uid is cn value.
-//				if(command.getPolicy().getId() == ) {
-//					
-//				}
 				CommandExecutionImpl commandExecutionImpl=	new CommandExecutionImpl(null, (CommandImpl) command, uid, targetEntry.getType(), targetEntry.getDistinguishedName(),
 						new Date(), null, false);
 				
@@ -122,11 +103,8 @@ public class PolicyService {
 					commandService.addCommand(command);
 			}
 			
-			
 		}
 		
-
-
 	}
 
 	private CommandImpl createCommanEntity(PolicyExecutionRequestImpl request, PolicyImpl policy, List<String> dnLists) {

@@ -2545,28 +2545,11 @@ public class LDAPServiceImpl implements ILDAPService {
 			return false;
 	}
 	
-	
-//	----------------------------------------------------------------------------------------------------------------------------------------------------------------
-	
-	
-	
-	
-	
-	
-	
 	public List<String> getGroupInGroups(LdapEntry selectedEntry) {
 		
 		List<String> totalGroupList= new ArrayList<>();
-
-		
 		GroupLinkedList groupList = new GroupLinkedList();
 		groupList.append(selectedEntry.getDistinguishedName(), false);
-		
-//		tr.org.lider.ldap.LinkedList.Node = 
-
-		
-//	    Map<String, Boolean> groups = new HashMap<>();
-//	    groups.put(selectedEntry.getDistinguishedName(), false);
 	    
 	    try {
 	    	if(!groupList.head.equals(null)) {
@@ -2597,41 +2580,15 @@ public class LDAPServiceImpl implements ILDAPService {
 	                        }
 	                    }
 		    			groupList.updateValue(groupListTemp, false, true);
-//		    			if (!totalGroupList.contains(groupList.head.currentDn)) {
-//							totalGroupList.add(groupList.head.currentDn);
-//						}
 		    			if (!totalGroupList.contains(groupListTemp.currentDn)) {
 							totalGroupList.add(groupListTemp.currentDn);
 						}
-		    			
 		    			if (groupListTemp.next == null) {
 		    				break;
 		    			}
 		    			groupListTemp = groupListTemp.next;
-		    		
 	    			}
 	    		}
-	    		
-//		        for (Map.Entry<String, Boolean> entry : groups.entrySet()) {
-//		            String key = entry.getKey();
-//		            Boolean value = entry.getValue();
-//		            
-//		            if (!groups.containsKey(key)) {
-//		                groups.put(selectedEntry.getDistinguishedName(), false);
-//		            } else {
-//		                if (!value) {
-//		                    List<LdapEntry> subGroupList = getMembersInGroupAsGroup(key);
-//		                    if (subGroupList != null) {
-//		                        for (LdapEntry subGroup : subGroupList) {
-//		                            if (!groups.containsKey(subGroup.getDistinguishedName())) {
-//		                                groups.put(subGroup.getDistinguishedName(), false);
-//		                            }
-//		                        }
-//		                    }
-//		                }
-//		                groups.replace(key, true);
-//		            }
-//		        }
 	    	}
 	    } catch (Exception e) {
 	        e.printStackTrace();
@@ -2642,59 +2599,18 @@ public class LDAPServiceImpl implements ILDAPService {
 	
 	public List<LdapEntry> getMembersInGroupAsGroup(String disDn) {
 		
-//		
-//		LdapConnection connection = null;
-//		
-//			try {
-//				connection = getConnection();
-//			} catch (LdapException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//			Entry entry = null;
-//			try {
-//				entry = connection.getRootDse();
-//
-//		
-//				
-//				
-//				
-//				
-//				
-//				
-//				String globalUserOu = configurationService.getUserLdapBaseDn(); //"ou=Kullanıcılar,dc=mys,dc=pardus,dc=org";
-//				LdapEntry usersDn = null;
-//				try {
-//					List<LdapEntry> usersEntrylist = findSubEntries(globalUserOu, "(objectclass=*)",
-//							new String[] { "*" }, SearchScope.OBJECT);
-//
-//					if (usersEntrylist.size() > 0) {
-//						usersDn = usersEntrylist.get(0);
-//						usersDn.setExpandedUser("FALSE");
-//					}
-//
-//				} catch (LdapException e) {
-//					e.printStackTrace();
-//				}	
-//				
-				
-	
-			
-		
 		List<LdapEntry> ldapEntry = null;
-//		ldapEntry.setDistinguishedName(disDn);
 		List<LdapEntry> targetEntries= new ArrayList<>();
-		
 		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
 		filterAttributesList.add(new LdapSearchFilterAttribute("objectClass", "groupOfNames", SearchFilterEnum.EQ));
 		filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", disDn, SearchFilterEnum.EQ));
+		
 		try {
 			ldapEntry = search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
 		} catch (LdapException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
 
 		if(ldapEntry != null && ldapEntry.get(0).getType().equals(DNType.GROUP)) {
 			String[] members= ldapEntry.get(0).getAttributesMultiValues().get("member");
@@ -2705,18 +2621,15 @@ public class LDAPServiceImpl implements ILDAPService {
 					if(member!=null && member.size()>0) {
 						targetEntries.add(member.get(0));
 					}
-
 				} catch (LdapException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		}
-		
-		return targetEntries; //çankay ve yenimahalle
+		return targetEntries; 
 			}
-	
-//	********************************************************************************************************************
+
 	public List <LdapEntry> getLdapDnStringToEntry(List <String> groupDnList){
 		List<LdapEntry> groupLdapEtries = new ArrayList<LdapEntry>();
 		if(groupDnList.size()>0) {
