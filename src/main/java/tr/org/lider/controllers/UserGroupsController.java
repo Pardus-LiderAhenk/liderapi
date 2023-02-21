@@ -47,8 +47,11 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
+import tr.org.lider.models.PolicyResponse;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
+import tr.org.lider.models.PolicyExecutionRequestImpl;
+import tr.org.lider.services.PolicyService;
 
 
 /**
@@ -72,6 +75,9 @@ public class UserGroupsController {
 	
 	@Autowired
 	private ConfigurationService configurationService;
+	
+	@Autowired
+	private PolicyService policyService;
 	
 	//gets tree of groups of names which just has user members
 	@Operation(summary = "Gets tree of groups", description = "", tags = { "user-groups" })
@@ -214,6 +220,7 @@ public class UserGroupsController {
 	}
 	
 //	Add user list to existing group by checked node list
+	@SuppressWarnings("null")
 	@Operation(summary = "", description = "", tags = { "user-groups" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = ""),
@@ -237,6 +244,31 @@ public class UserGroupsController {
 				users.add(ldapEntry);
 			}
 		}
+		
+//		PERŞEMBE BURDASINNNNN
+		entry = ldapService.getEntryDetail(params.get("groupDN"));
+		List<PolicyResponse> policyParentDn= new ArrayList<>();
+		policyParentDn = policyService.getPoliciesForGroup(entry.getDistinguishedName());
+		
+		for(LdapEntry ldapEntry : entries) {
+			for (PolicyResponse policy : policyParentDn) {
+				List<String> tempDnList= new ArrayList<>();
+				tempDnList.add(ldapEntry.getDistinguishedName());
+				
+				PolicyExecutionRequestImpl executePolicyTemp = new PolicyExecutionRequestImpl(policy.getPolicyImpl().getId(), 
+						tempDnList, policy.getCommandImpl().getDnType(), null, null, null);
+				
+				policyService.executePolicy(executePolicyTemp);
+				
+	//			policyService.executePolicy(policy);
+			}
+		}
+		
+		
+		
+		
+		
+//		PERŞEMBE BURDASINNNNN
 		
 		for (LdapEntry ldapEntry : entries) {
 			Boolean hasParentChecked = false;

@@ -97,22 +97,32 @@ public class PolicyService {
 //		operationLogService.saveOperationLog(OperationType.EXECUTE_POLICY, logMessage, policy.getLabel().getBytes(), null, policy.getId(), null);
 
 		for (LdapEntry targetEntry : ldapEntryGroups) {
-			String logMessage = "[ "+ targetEntry.getDistinguishedName() +" ] kullanıcı grubuna [ " + policy.getLabel() + " ] politikası uygulandı.";
-			operationLogService.saveOperationLog(OperationType.EXECUTE_POLICY, logMessage, policy.getLabel().getBytes(), null, policy.getId(), null);
-
-			List<String> dnList = new ArrayList<String>();
-			dnList.add(targetEntry.getDistinguishedName());
-			CommandImpl command = createCommanEntity(request, policy, dnList);
-//			
-
-//			command.setDnListJsonString(jsonString);
-			String uid=targetEntry.get(configService.getAgentLdapIdAttribute()); // group uid is cn value.
-			CommandExecutionImpl commandExecutionImpl=	new CommandExecutionImpl(null, (CommandImpl) command, uid, targetEntry.getType(), targetEntry.getDistinguishedName(),
-					new Date(), null, false);
 			
-			command.addCommandExecution(commandExecutionImpl);
-			if(command!=null)
-				commandService.addCommand(command);
+			List<CommandImpl> existCommand = commandService.findByPolicyAndByDn(policy.getId(), targetEntry.getDistinguishedName());
+			
+			if (existCommand.isEmpty() || existCommand.get(0).isDeleted()== true) {
+				String logMessage = "[ "+ targetEntry.getDistinguishedName() +" ] kullanıcı grubuna [ " + policy.getLabel() + " ] politikası uygulandı.";
+				operationLogService.saveOperationLog(OperationType.EXECUTE_POLICY, logMessage, policy.getLabel().getBytes(), null, policy.getId(), null);
+
+				List<String> dnList = new ArrayList<String>();
+				dnList.add(targetEntry.getDistinguishedName());
+				CommandImpl command = createCommanEntity(request, policy, dnList);
+//				
+
+//				command.setDnListJsonString(jsonString);
+				String uid=targetEntry.get(configService.getAgentLdapIdAttribute()); // group uid is cn value.
+//				if(command.getPolicy().getId() == ) {
+//					
+//				}
+				CommandExecutionImpl commandExecutionImpl=	new CommandExecutionImpl(null, (CommandImpl) command, uid, targetEntry.getType(), targetEntry.getDistinguishedName(),
+						new Date(), null, false);
+				
+				command.addCommandExecution(commandExecutionImpl);
+				if(command!=null )
+					commandService.addCommand(command);
+			}
+			
+			
 		}
 		
 
@@ -270,6 +280,8 @@ public class PolicyService {
 		for (LdapEntry targetEnrty:ldapEntryGroups)
 		{
 			List<CommandImpl> existCommand2 = commandService.findByPolicyAndByDn(existCommand.getPolicy().getId(), targetEnrty.getDistinguishedName());
+			if(existCommand2.isEmpty())
+				continue;
 			if(existCommand2.get(0).isDeleted() == false) {
 				existCommand2.get(0).setDeleted(true);
 				String logMessage = "[ "+ existCommand2.get(0).getDnList().get(0) +" ] kullanıcı grubunun [ " + existCommand.getPolicy().getLabel() + " ] politikası kaldırıldı.";
