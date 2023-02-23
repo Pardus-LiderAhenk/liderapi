@@ -42,6 +42,8 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
+import tr.org.lider.messaging.enums.DomainType;
+import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.PolicyExceptionService;
@@ -75,6 +77,10 @@ public class PolicyExceptionController {
 	
 	@Autowired
 	private OperationLogService operationLogService;
+	
+	@Autowired
+	private AdService adService;
+
 
 	//@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
 	
@@ -219,11 +225,6 @@ public class PolicyExceptionController {
 				.status(HttpStatus.OK)
 				.body(null);
 	}
-
-	
-	
-	
-	
 	
 	//	return updated policy exception
 	@Operation(summary = "Update policy exception", description = "", tags = { "policy-exception" })
@@ -266,9 +267,15 @@ public class PolicyExceptionController {
 	private DNType getEntryType(String dn) throws LdapException {
 		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
 		List<LdapEntry> entry = null;
-		filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", dn, SearchFilterEnum.EQ));
-		entry = ldapService.search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
 		
+		if(configurationService.getDomainType().equals(DomainType.ACTIVE_DIRECTORY)) {
+			filterAttributesList.add(new LdapSearchFilterAttribute("distinguishedName", dn, SearchFilterEnum.EQ));
+			String baseDn = adService.getADDomainName();
+			entry = adService.search(baseDn, filterAttributesList, new String[] {"*"});
+		} else {
+			filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", dn, SearchFilterEnum.EQ));
+			entry = ldapService.search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
+		}
 		return entry.get(0).getType();
 	}
 }
