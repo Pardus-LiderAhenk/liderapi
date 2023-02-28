@@ -38,6 +38,13 @@ public interface CommandRepository extends BaseJpaRepository<CommandImpl, Long>{
 			+ "AND c.deleted = False")
 	List<CommandImpl> findByPolicyAndDn(Long id, String dn);
 	
+	@Query("SELECT c "
+			+ "FROM CommandImpl c "
+			+ "LEFT OUTER JOIN c.policy p "
+			+ "WHERE c.dnListJsonString LIKE %?1% "
+			+ "AND c.deleted = False")
+	List<CommandImpl> findAllPolicyByDn(String dn);
+	
 	@Transactional
 	@Modifying(clearAutomatically = true)
     @Query("UPDATE CommandImpl ce SET ce.dnListJsonString = :newDN WHERE ce.id = :commandID")

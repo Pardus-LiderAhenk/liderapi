@@ -1,5 +1,6 @@
 package tr.org.lider.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +43,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.entities.CommandExecutionImpl;
+import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -351,6 +355,32 @@ public class UserGroupsController {
 		//so dn must be joined with comma
 		//if member dn that will be added to group is cn=agent1,ou=Groups,dn=liderahenk,dc=org
 		//spring boot gets this param as array which has size 4
+		
+		String dnStringTemp = null;
+		for(int i = 0; i < dnList.size(); i++) {
+			if(i == 0)
+				dnStringTemp = dnList.get(i) + ",";
+			else if(i == dnList.size()-1)
+				dnStringTemp = dnStringTemp + dnList.get(i);
+			else
+				dnStringTemp = dnStringTemp + dnList.get(i) + ",";
+		}
+		
+		List <String> dnListTemp = new ArrayList<>();
+		dnListTemp.add(dnStringTemp);
+		
+		DNType dnType= null;
+		try {
+			dnType = getEntryType(dnListTemp.get(0).toString());
+		} catch (LdapException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+	
+		if(dnType.toString().equals("GROUP")) 
+			policyService.unassignmentPolicyDeletedMember(dnList, dn) ;
+	
+		
 		Boolean checkedArraySizeIsOne = true;
 		for (int i = 0; i < dnList.size(); i++) {
 			if(dnList.get(i).contains(",")) {
@@ -733,4 +763,15 @@ public class UserGroupsController {
 			return new ResponseEntity<String[]>(new String[] {"Hata oluştu"}, HttpStatus.EXPECTATION_FAILED);
 		}
 	}
+	
+	private DNType getEntryType(String dn) throws LdapException {
+		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+		List<LdapEntry> entry = null;
+		
+		filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", dn, SearchFilterEnum.EQ));
+		entry = ldapService.search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
+		
+		return entry.get(0).getType();
+	}
+	
 }
