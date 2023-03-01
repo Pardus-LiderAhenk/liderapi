@@ -236,7 +236,6 @@ public class PolicyController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(policyService.unassignmentCommandForUserPolicy(id));
-				
 	}
 	
 	@Operation(summary = "Returns active policies", description = "", tags = { "policy" })

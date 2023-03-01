@@ -1,5 +1,6 @@
 package tr.org.lider.controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,14 +43,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.entities.CommandExecutionImpl;
+import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
+import tr.org.lider.models.PolicyResponse;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
+import tr.org.lider.models.PolicyExecutionRequestImpl;
+import tr.org.lider.services.PolicyService;
 
 
 /**
@@ -72,6 +79,9 @@ public class UserGroupsController {
 	
 	@Autowired
 	private ConfigurationService configurationService;
+	
+	@Autowired
+	private PolicyService policyService;
 	
 	//gets tree of groups of names which just has user members
 	@Operation(summary = "Gets tree of groups", description = "", tags = { "user-groups" })
@@ -214,6 +224,7 @@ public class UserGroupsController {
 	}
 	
 //	Add user list to existing group by checked node list
+	@SuppressWarnings("null")
 	@Operation(summary = "", description = "", tags = { "user-groups" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = ""),
@@ -233,11 +244,24 @@ public class UserGroupsController {
 		List<LdapEntry> directories = new ArrayList<>();
 		
 		for (LdapEntry ldapEntry : entries) {
-			if(ldapEntry.getType().equals(DNType.USER)) {
+			if(ldapEntry.getType().equals(DNType.USER) || ldapEntry.getType().equals(DNType.GROUP)) {
 				users.add(ldapEntry);
 			}
 		}
-		
+		entry = ldapService.getEntryDetail(params.get("groupDN"));
+		List<PolicyResponse> policyParentDn= new ArrayList<>();
+		policyParentDn = policyService.getPoliciesForGroup(entry.getDistinguishedName());
+		for(LdapEntry ldapEntry : entries) {
+			for (PolicyResponse policy : policyParentDn) {
+				List<String> tempDnList= new ArrayList<>();
+				tempDnList.add(ldapEntry.getDistinguishedName());
+				
+				PolicyExecutionRequestImpl executePolicyTemp = new PolicyExecutionRequestImpl(policy.getPolicyImpl().getId(), 
+						tempDnList, policy.getCommandImpl().getDnType(), null, null, null);
+				
+				policyService.executePolicy(executePolicyTemp);
+			}
+		}
 		for (LdapEntry ldapEntry : entries) {
 			Boolean hasParentChecked = false;
 			for (LdapEntry entryTemp : entries) {
@@ -328,6 +352,18 @@ public class UserGroupsController {
 		//so dn must be joined with comma
 		//if member dn that will be added to group is cn=agent1,ou=Groups,dn=liderahenk,dc=org
 		//spring boot gets this param as array which has size 4
+		String dnStringTemp = String.join(",", dn);
+		List <String> dnListTemp = new ArrayList<>();
+		dnListTemp.add(dnStringTemp);
+		DNType dnType= null;
+		try {
+			dnType = getEntryType(dnListTemp.get(0).toString());
+		} catch (LdapException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+		if(dnType.toString().equals("GROUP")) 
+			policyService.unassignmentPolicyDeletedMember(dnList, dn) ;
 		Boolean checkedArraySizeIsOne = true;
 		for (int i = 0; i < dnList.size(); i++) {
 			if(dnList.get(i).contains(",")) {
@@ -719,4 +755,15 @@ public class UserGroupsController {
 			return new ResponseEntity<String[]>(new String[] {"Hata oluştu"}, HttpStatus.EXPECTATION_FAILED);
 		}
 	}
+	
+	private DNType getEntryType(String dn) throws LdapException {
+		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
+		List<LdapEntry> entry = null;
+		
+		filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", dn, SearchFilterEnum.EQ));
+		entry = ldapService.search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
+		
+		return entry.get(0).getType();
+	}
+	
 }

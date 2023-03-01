@@ -838,4 +838,50 @@ public class UserController {
 				.body(configMap);
 				
 	}
+	
+	@Operation(summary = "Make user Enable or Disable ", description = "", tags = { "user" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = ""),
+			  @ApiResponse(responseCode = "417", description = "", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/user-enable-disable")
+	public ResponseEntity<?> updateDomainAdmin(@RequestParam(value = "dn") String dn,
+			@RequestParam(value = "isDisableUser") Boolean isDisableUser) {
+		try {
+			if (isDisableUser) {
+				ldapService.updateEntryAddAtribute(dn, "pwdAccountLockedTime", "20280112065328.185Z");
+			} else {
+				try {
+					ldapService.updateEntryRemoveAttributeWithValue(dn, "pwdAccountLockedTime", "20280112065328.185Z");
+				} catch (LdapException e) {
+					e.printStackTrace();
+					HttpHeaders headers = new HttpHeaders();
+		    		return ResponseEntity
+		    				.status(HttpStatus.EXPECTATION_FAILED)
+		    				.headers(headers)
+		    				.build();
+				}
+			}
+			Map<String, Object> requestData = new HashMap<String, Object>();
+			requestData.put("dn", dn);
+			ObjectMapper dataMapper = new ObjectMapper();
+			String jsonString = dataMapper.writeValueAsString(requestData);
+			
+			if (isDisableUser) {
+				String logAdded = "The user has been disabled. " + dn;
+				operationLogService.saveOperationLog(OperationType.UPDATE, logAdded, jsonString.getBytes(), null, null, null);
+			} else {
+				String logDeleted = "The user has been enabled. " + dn;
+				operationLogService.saveOperationLog(OperationType.UPDATE, logDeleted, jsonString.getBytes(), null, null, null);
+			}
+			
+			LdapEntry selectedEntry = ldapService.getEntryDetail(dn);
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(selectedEntry);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String[]>(new String[] {"Hata oluştu"}, HttpStatus.EXPECTATION_FAILED);
+		}
+	}
 }
