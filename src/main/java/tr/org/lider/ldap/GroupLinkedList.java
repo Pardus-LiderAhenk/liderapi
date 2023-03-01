@@ -1,6 +1,10 @@
 package tr.org.lider.ldap;
 
-import tr.org.lider.ldap.GroupLinkedList.Node;
+/**
+ * 
+ * @author Agah Hulusi ÖZ
+ *
+ */
 
 public class GroupLinkedList {
 
@@ -128,18 +132,4 @@ public class GroupLinkedList {
         last.next = new_node;
         return;
     }
- 
-    /* This function prints contents of
-       linked list starting from the
-       given node */
-    public void printList()
-    {
-        Node tnode = head;
-        while (tnode != null)
-        {
-            System.out.println(tnode.currentDn + " ," + tnode.viseted + " ---- ");
-            tnode = tnode.next;
-        }
-    }
- 
 }

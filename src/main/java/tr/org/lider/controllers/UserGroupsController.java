@@ -248,11 +248,9 @@ public class UserGroupsController {
 				users.add(ldapEntry);
 			}
 		}
-		
 		entry = ldapService.getEntryDetail(params.get("groupDN"));
 		List<PolicyResponse> policyParentDn= new ArrayList<>();
 		policyParentDn = policyService.getPoliciesForGroup(entry.getDistinguishedName());
-		
 		for(LdapEntry ldapEntry : entries) {
 			for (PolicyResponse policy : policyParentDn) {
 				List<String> tempDnList= new ArrayList<>();
@@ -264,7 +262,6 @@ public class UserGroupsController {
 				policyService.executePolicy(executePolicyTemp);
 			}
 		}
-		
 		for (LdapEntry ldapEntry : entries) {
 			Boolean hasParentChecked = false;
 			for (LdapEntry entryTemp : entries) {
@@ -355,20 +352,9 @@ public class UserGroupsController {
 		//so dn must be joined with comma
 		//if member dn that will be added to group is cn=agent1,ou=Groups,dn=liderahenk,dc=org
 		//spring boot gets this param as array which has size 4
-		
-		String dnStringTemp = null;
-		for(int i = 0; i < dnList.size(); i++) {
-			if(i == 0)
-				dnStringTemp = dnList.get(i) + ",";
-			else if(i == dnList.size()-1)
-				dnStringTemp = dnStringTemp + dnList.get(i);
-			else
-				dnStringTemp = dnStringTemp + dnList.get(i) + ",";
-		}
-		
+		String dnStringTemp = String.join(",", dn);
 		List <String> dnListTemp = new ArrayList<>();
 		dnListTemp.add(dnStringTemp);
-		
 		DNType dnType= null;
 		try {
 			dnType = getEntryType(dnListTemp.get(0).toString());
@@ -376,11 +362,8 @@ public class UserGroupsController {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-	
 		if(dnType.toString().equals("GROUP")) 
 			policyService.unassignmentPolicyDeletedMember(dnList, dn) ;
-	
-		
 		Boolean checkedArraySizeIsOne = true;
 		for (int i = 0; i < dnList.size(); i++) {
 			if(dnList.get(i).contains(",")) {

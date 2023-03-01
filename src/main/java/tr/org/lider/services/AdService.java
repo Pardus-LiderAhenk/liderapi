@@ -802,8 +802,6 @@ public class AdService implements ILDAPService{
 		return ouEntry;
 	}
 	
-//	********0000000
-	
 	public List<String> getParentsDnOfLdapEntry (LdapEntry selectedEntry){
 		List <String> parentDnList = new ArrayList<>();
 		LdapEntry ldapEntry = selectedEntry;
@@ -819,23 +817,17 @@ public class AdService implements ILDAPService{
 						parentDnList.add(memberOf);
 					}
 				}
-				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
 		return parentDnList;
 	}
 	
 	public List<String> getGroupInGroups(LdapEntry selectedEntry) {
-		
 		List<String> totalGroupList= new ArrayList<>();
 		GroupLinkedList groupList = new GroupLinkedList();
 		groupList.append(selectedEntry.getDistinguishedName(), false);
-		
-	    
 	    try {
 	    	if(!groupList.head.equals(null)) {
 	    		GroupLinkedList.Node groupListTemp = groupList.head;
@@ -878,51 +870,13 @@ public class AdService implements ILDAPService{
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-	    
 	    return totalGroupList;
 	}
 	
-//	public List<LdapEntry> getMembersInGroupAsGroupAd(String disDn) {
-//		
-//		List<LdapEntry> ldapEntry = null;
-//		List<LdapEntry> targetEntries= new ArrayList<>();
-//		
-//		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
-//		filterAttributesList.add(new LdapSearchFilterAttribute("objectClass", "group", SearchFilterEnum.EQ));
-//		filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", disDn, SearchFilterEnum.EQ));
-//		
-//		try {
-//			ldapEntry = search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
-//		} catch (LdapException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
-//
-//		if(ldapEntry != null && ldapEntry.get(0).getType().equals(DNType.GROUP)) {
-//			String[] members= ldapEntry.get(0).getAttributesMultiValues().get("member");
-//			for (int i = 0; i < members.length; i++) {
-//				String dn = members[i];
-//				try {
-//					List<LdapEntry> member = findSubEntries(dn, "(objectclass=groupOfNames)", new String[] { "*" }, SearchScope.OBJECT);
-//					if(member!=null && member.size()>0) {
-//						targetEntries.add(member.get(0));
-//					}
-//				} catch (LdapException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}
-//		return targetEntries; 
-//			}
-	
 	public List<LdapEntry> getMembersInGroupAsGroup(String disDn) {
-		
 		List<LdapEntry> ldapEntry = null;
 		List<LdapEntry> targetEntries= new ArrayList<>();
-		
 		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
-
 		filterAttributesList.add(new LdapSearchFilterAttribute("objectclass", "group", SearchFilterEnum.EQ));
 		filterAttributesList.add(new LdapSearchFilterAttribute("distinguishedName", disDn, SearchFilterEnum.EQ));
 		String baseDn = getADDomainName();
@@ -948,10 +902,7 @@ public class AdService implements ILDAPService{
 					}
 				}
 			}
-			
 		}
-		
-		
 		return targetEntries; 
 	}
 

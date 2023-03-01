@@ -730,20 +730,9 @@ public class AdController {
 		// if member dn that will be added to group is
 		// cn=agent1,ou=Groups,dn=liderahenk,dc=org
 		// spring boot gets this param as array which has size 4
-
-		String dnStringTemp = null;
-		for (int i = 0; i < dnList.size(); i++) {
-			if (i == 0)
-				dnStringTemp = dnList.get(i) + ",";
-			else if (i == dnList.size() - 1)
-				dnStringTemp = dnStringTemp + dnList.get(i);
-			else
-				dnStringTemp = dnStringTemp + dnList.get(i) + ",";
-		}
-
+		String dnStringTemp = String.join(",", dn);
 		List<String> dnListTemp = new ArrayList<>();
 		dnListTemp.add(dnStringTemp);
-
 		DNType dnType = null;
 		try {
 			dnType = getEntryType(dnListTemp.get(0).toString());
@@ -751,10 +740,8 @@ public class AdController {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
 		}
-
 		if (dnType.toString().equals("GROUP"))
 			policyService.unassignmentPolicyDeletedMember(dnList, dn);
-
 		Boolean checkedArraySizeIsOne = true;
 		for (int i = 0; i < dnList.size(); i++) {
 			if (dnList.get(i).contains(",")) {

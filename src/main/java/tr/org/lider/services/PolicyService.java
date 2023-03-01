@@ -82,7 +82,6 @@ public class PolicyService {
 		 * all policies send only group entry.
 		 */
 		
-		
  		List <LdapEntry> ldapEntryGroups = new ArrayList<>();
 		List<LdapEntry> targetEntries= getTargetList(request.getDnList());
 		LdapEntry ldapEntry = targetEntries.get(0);
@@ -94,12 +93,8 @@ public class PolicyService {
 			List <String> dnList= ldapServiceImpl.getGroupInGroups(ldapEntry);
 			ldapEntryGroups = ldapServiceImpl.getLdapDnStringToEntry(dnList);
 		}
-		
-		
 		for (LdapEntry targetEntry : ldapEntryGroups) {
-			
 			List<CommandImpl> existCommand = commandService.findByPolicyAndByDn(policy.getId(), targetEntry.getDistinguishedName());
-			
 			if (existCommand.isEmpty() || existCommand.get(0).isDeleted()== true) {
 				String logMessage = "[ "+ targetEntry.getDistinguishedName() +" ] kullanıcı grubuna [ " + policy.getLabel() + " ] politikası uygulandı.";
 				operationLogService.saveOperationLog(OperationType.EXECUTE_POLICY, logMessage, policy.getLabel().getBytes(), null, policy.getId(), null);
@@ -109,14 +104,11 @@ public class PolicyService {
 				String uid=targetEntry.get(configService.getAgentLdapIdAttribute()); // group uid is cn value.
 				CommandExecutionImpl commandExecutionImpl=	new CommandExecutionImpl(null, (CommandImpl) command, uid, targetEntry.getType(), targetEntry.getDistinguishedName(),
 						new Date(), null, false);
-				
 				command.addCommandExecution(commandExecutionImpl);
 				if(command!=null )
 					commandService.addCommand(command);
 			}
-			
 		}
-		
 	}
 
 	private CommandImpl createCommanEntity(PolicyExecutionRequestImpl request, PolicyImpl policy, List<String> dnLists) {
@@ -252,42 +244,24 @@ public class PolicyService {
 	}
 
 	public CommandImpl unassignmentPolicyDeletedMember(List <String>dn, String sourceDn) {
-		
-		String dnStringTemp = null;
-		for(int i = 0; i < dn.size(); i++) {
-			if(i == 0)
-				dnStringTemp = dn.get(i) + ",";
-			else if(i == dn.size()-1)
-				dnStringTemp = dnStringTemp + dn.get(i);
-			else
-				dnStringTemp = dnStringTemp + dn.get(i) + ",";
-		}
-		
+		String dnStringTemp = String.join(",", dn);
 		List <String> dnList = new ArrayList<>();
 		dnList.add(dnStringTemp);
-		
 		List<CommandImpl> existingPolicies = new ArrayList<CommandImpl> ();
 
-		
-		
 		if(configService.getDomainType().equals(DomainType.ACTIVE_DIRECTORY)) {
 			List <LdapEntry> deletedEntryDn = new ArrayList<>();
 			deletedEntryDn = adService.getLdapDnStringToEntry(dnList);
-			
 			LdapEntry deletedEntry = deletedEntryDn.get(0);
-			
 			List <String> parentDnList = new ArrayList<>();
-
 			parentDnList = adService.getParentsDnOfLdapEntry(deletedEntry);
 			List <LdapEntry> ldapEntryParentsDn = new ArrayList<>();
 			ldapEntryParentsDn = adService.getLdapDnStringToEntry(parentDnList);
-			
 			existingPolicies = commandService.findAllPolicyByDn(deletedEntry.getDistinguishedName());
 			
 			for(CommandImpl targetPolicy : existingPolicies) {
 				targetPolicy.setDeleted(true);
 			}
-			
 			for(LdapEntry parentsDn : ldapEntryParentsDn) {
 				if (parentsDn.getDistinguishedName().equals(sourceDn)) {
 					continue;
@@ -303,28 +277,22 @@ public class PolicyService {
 							}
 						}
 					}
-					System.out.println(parentPolicies);
 				}
 			}
 		}
 		else if(configService.getDomainType().equals(DomainType.LDAP) || configService.getDomainType().equals(DomainType.NONE)) {
 			List <LdapEntry> deletedEntryDn = new ArrayList<>();
 			deletedEntryDn = ldapServiceImpl.getLdapDnStringToEntry(dnList);
-			
 			LdapEntry deletedEntry = deletedEntryDn.get(0);
-			
 			List <String> parentDnList = new ArrayList<>();
-
 			parentDnList = ldapServiceImpl.getParentsDnOfLdapEntry(deletedEntry);
 			List <LdapEntry> ldapEntryParentsDn = new ArrayList<>();
 			ldapEntryParentsDn = ldapServiceImpl.getLdapDnStringToEntry(parentDnList);
-			
 			existingPolicies = commandService.findAllPolicyByDn(deletedEntry.getDistinguishedName());
 			
 			for(CommandImpl targetPolicy : existingPolicies) {
 				targetPolicy.setDeleted(true);
 			}
-			
 			for(LdapEntry parentsDn : ldapEntryParentsDn) {
 				if (parentsDn.getDistinguishedName().equals(sourceDn)) {
 					continue;
@@ -340,60 +308,23 @@ public class PolicyService {
 							}
 						}
 					}
-					System.out.println(parentPolicies);
 				}
 			}
 		}
-		
-		
-		
-		
-		
 		return commandService.updateCommand(existingPolicies.get(0));
 	}
 	
 	public CommandImpl unassignmentCommandForUserPolicy(CommandImpl comImpl) {
 		CommandImpl existCommand = commandService.getCommand(comImpl.getId());
 		List <String> headDn = new ArrayList<>();
-//		if(existCommand != null) {
 		headDn.add(existCommand.getCommandExecutions().get(0).getDn());
-		
 		List <LdapEntry> ldapHeadNode = new ArrayList<>();
-		
 		List <LdapEntry> ldapEntryGroups = new ArrayList<>();
-		
 		
 		if(configService.getDomainType().equals(DomainType.ACTIVE_DIRECTORY)) {
 			ldapHeadNode.addAll(adService.getLdapDnStringToEntry(headDn));
-			
-			List <String> tuncay1= adService.getGroupInGroups(ldapHeadNode.get(0));
-			ldapEntryGroups = adService.getLdapDnStringToEntry(tuncay1);
-			
-			LdapEntry agah = ldapEntryGroups.get(0);
-			
-//			*************************************
-
-			List <String> mark01dnlist = new ArrayList<>();
-
-			mark01dnlist = adService.getParentsDnOfLdapEntry(agah);
-			List <LdapEntry> ldapEntryParentsDn = new ArrayList<>();
-			ldapEntryParentsDn = adService.getLdapDnStringToEntry(mark01dnlist);
-			
-			// No parent DN or Just one Parent
-			if(ldapEntryParentsDn.size() <= 1) {
-				
-			}
-			else {
-				List<CommandImpl> existingPolicyVOL2 = commandService.findAllPolicyByDn(ldapEntryGroups.get(0).getDistinguishedName());
-				System.out.println(existingPolicyVOL2);
-				for(CommandImpl policy : existingPolicyVOL2) {
-					
-				}
-			}
-			
-
-//			*****************************************************
-			
+			List <String> groupsUnderEntry= adService.getGroupInGroups(ldapHeadNode.get(0));
+			ldapEntryGroups = adService.getLdapDnStringToEntry(groupsUnderEntry);
 			for (LdapEntry targetEnrty:ldapEntryGroups)
 			{
 				List<CommandImpl> existCommand2 = commandService.findByPolicyAndByDn(existCommand.getPolicy().getId(), targetEnrty.getDistinguishedName());
@@ -409,35 +340,8 @@ public class PolicyService {
 		}
 		else if(configService.getDomainType().equals(DomainType.LDAP) || configService.getDomainType().equals(DomainType.NONE)) {
 			ldapHeadNode.addAll(ldapServiceImpl.getLdapDnStringToEntry(headDn));
-			
-			List <String> tuncay1= ldapServiceImpl.getGroupInGroups(ldapHeadNode.get(0));
-			ldapEntryGroups = ldapServiceImpl.getLdapDnStringToEntry(tuncay1);
-			
-			LdapEntry agah = ldapEntryGroups.get(0);
-			
-//			*************************************
-
-			List <String> mark01dnlist = new ArrayList<>();
-
-			mark01dnlist = ldapServiceImpl.getParentsDnOfLdapEntry(agah);
-			List <LdapEntry> ldapEntryParentsDn = new ArrayList<>();
-			ldapEntryParentsDn = ldapServiceImpl.getLdapDnStringToEntry(mark01dnlist);
-			
-			// No parent DN or Just one Parent
-			if(ldapEntryParentsDn.size() <= 1) {
-				
-			}
-			else {
-				List<CommandImpl> existingPolicyVOL2 = commandService.findAllPolicyByDn(ldapEntryGroups.get(0).getDistinguishedName());
-				System.out.println(existingPolicyVOL2);
-				for(CommandImpl policy : existingPolicyVOL2) {
-					
-				}
-			}
-			
-
-//			*****************************************************
-			
+			List <String> groupsUnderEntry= ldapServiceImpl.getGroupInGroups(ldapHeadNode.get(0));
+			ldapEntryGroups = ldapServiceImpl.getLdapDnStringToEntry(groupsUnderEntry);
 			for (LdapEntry targetEnrty:ldapEntryGroups)
 			{
 				List<CommandImpl> existCommand2 = commandService.findByPolicyAndByDn(existCommand.getPolicy().getId(), targetEnrty.getDistinguishedName());
@@ -453,8 +357,4 @@ public class PolicyService {
 		}
 		return commandService.updateCommand(existCommand);
 	}
-	
-
-	
-	
 }
