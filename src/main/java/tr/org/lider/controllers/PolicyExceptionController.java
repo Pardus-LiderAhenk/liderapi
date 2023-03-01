@@ -80,6 +80,9 @@ public class PolicyExceptionController {
 	
 	@Autowired
 	private AdService adService;
+	
+	@Autowired
+	private ConfigurationService configService;
 
 
 	//@RequestMapping(method=RequestMethod.POST ,value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -146,19 +149,35 @@ public class PolicyExceptionController {
 			List<String> memberList = new ArrayList<>();
 			for (int i = 0; i < params.getMembers().size(); i++) {
 				
-				DNType dnType = getEntryType(params.getMembers().get(i).toString());
-//				if (dnType.toString().equals("GROUP")) {
-//					burda grup altında grup olması durumunda memeber olarak bulunan gruplar da exception olarak eklenecek.
-//				}
-				
-				memberList.add(params.getMembers().get(i).toString());
-				PolicyExceptionImpl policyExceptionImpl = new PolicyExceptionImpl();
-				policyExceptionImpl.setPolicy(params.getPolicy());
-				policyExceptionImpl.setDescription(params.getDescription());
-				policyExceptionImpl.setLabel(params.getLabel());
-				policyExceptionImpl.setDn(params.getMembers().get(i).toString());
-				policyExceptionImpl.setDnType(getEntryType(params.getMembers().get(i).toString()));
-				policyExceptionService.add(policyExceptionImpl);
+				DNType dnType = getLdapEntry(params.getMembers().get(i).toString()).getType();
+				if (dnType.toString().equals("GROUP")) {
+					List <String> dnList = null;
+					if(configService.getDomainType().equals(DomainType.ACTIVE_DIRECTORY)) {
+						dnList = adService.getGroupInGroups(getLdapEntry(params.getMembers().get(i).toString()));
+					}
+					else if(configService.getDomainType().equals(DomainType.LDAP) || configService.getDomainType().equals(DomainType.NONE)) {
+						dnList = ldapService.getGroupInGroups(getLdapEntry(params.getMembers().get(i).toString()));
+					}
+					for (int j = 0; j < dnList.size(); j++) {
+						memberList.add(dnList.get(j));
+						PolicyExceptionImpl policyExceptionImpl = new PolicyExceptionImpl();
+						policyExceptionImpl.setPolicy(params.getPolicy());
+						policyExceptionImpl.setDescription(params.getDescription());
+						policyExceptionImpl.setLabel(params.getLabel());
+						policyExceptionImpl.setDn(dnList.get(j));
+						policyExceptionImpl.setDnType(DNType.GROUP);
+						policyExceptionService.add(policyExceptionImpl);
+					}
+				} else {
+					memberList.add(params.getMembers().get(i).toString());
+					PolicyExceptionImpl policyExceptionImpl = new PolicyExceptionImpl();
+					policyExceptionImpl.setPolicy(params.getPolicy());
+					policyExceptionImpl.setDescription(params.getDescription());
+					policyExceptionImpl.setLabel(params.getLabel());
+					policyExceptionImpl.setDn(params.getMembers().get(i).toString());
+					policyExceptionImpl.setDnType(getLdapEntry(params.getMembers().get(i).toString()).getType());
+					policyExceptionService.add(policyExceptionImpl);
+				}
 			}
 			requestData.put("memberList", memberList);
 			ObjectMapper dataMapper = new ObjectMapper();
@@ -264,7 +283,7 @@ public class PolicyExceptionController {
 //	}
 	
 	
-	private DNType getEntryType(String dn) throws LdapException {
+	private LdapEntry getLdapEntry(String dn) throws LdapException {
 		List<LdapSearchFilterAttribute> filterAttributesList = new ArrayList<LdapSearchFilterAttribute>();
 		List<LdapEntry> entry = null;
 		
@@ -276,6 +295,6 @@ public class PolicyExceptionController {
 			filterAttributesList.add(new LdapSearchFilterAttribute("entryDN", dn, SearchFilterEnum.EQ));
 			entry = ldapService.search(configurationService.getLdapRootDn(), filterAttributesList, new String[] {"*"});
 		}
-		return entry.get(0).getType();
+		return entry.get(0);
 	}
 }
