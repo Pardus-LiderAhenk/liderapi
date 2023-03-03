@@ -374,8 +374,6 @@ public class ComputerGroupsController {
 			List<LdapEntry> directories = new ArrayList<>();
 			List <String> memberDn = new ArrayList<>();
 			List <String> memberOfDn = new ArrayList<>();
-			String a = null;
-			
 			for (LdapEntry ldapMember : entries){
 					
 				if(ldapMember.getType().equals(DNType.GROUP)){
