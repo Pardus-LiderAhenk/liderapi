@@ -352,7 +352,7 @@ public class UserGroupsController {
 		//so dn must be joined with comma
 		//if member dn that will be added to group is cn=agent1,ou=Groups,dn=liderahenk,dc=org
 		//spring boot gets this param as array which has size 4
-		String dnStringTemp = String.join(",", dn);
+		String dnStringTemp = String.join(",", dnList);
 		List <String> dnListTemp = new ArrayList<>();
 		dnListTemp.add(dnStringTemp);
 		DNType dnType= null;
