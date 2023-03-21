@@ -18,6 +18,8 @@ public interface PolicyExceptionRepository extends BaseJpaRepository<PolicyExcep
 	List<PolicyExceptionImpl> findByPolicy(Long id);
 	
 	List<PolicyExceptionImpl> findByPolicyAndDn(PolicyImpl policy, String dn);
+	
+	List<PolicyExceptionImpl> findByPolicyAndGroupDn(PolicyImpl policy, String dn);
 
 	@Transactional
 	@Modifying(clearAutomatically = true)
