@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,9 +27,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.PolicyImpl;
-import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.models.PolicyExecutionRequestImpl;
 import tr.org.lider.models.PolicyResponse;
+import tr.org.lider.services.PolicyExceptionService;
 import tr.org.lider.services.PolicyService;
 
 /**
@@ -49,6 +48,9 @@ public class PolicyController {
 
 	@Autowired
 	private PolicyService policyService;
+	
+	@Autowired
+	private PolicyExceptionService policyExceptionService;
 
 	//	return policies if deleted is false
 	
@@ -109,6 +111,8 @@ public class PolicyController {
 	@DeleteMapping(value = "/delete/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<PolicyImpl> policyDelete(@PathVariable Long id) {
 		try {
+			
+			policyExceptionService.deletePolicyExceptionByPolicy(policyService.findPolicyByID(id));
 			return ResponseEntity
 					.status(HttpStatus.OK)
 					.body(policyService.delete(id));
@@ -232,7 +236,6 @@ public class PolicyController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(policyService.unassignmentCommandForUserPolicy(id));
-				
 	}
 	
 	@Operation(summary = "Returns active policies", description = "", tags = { "policy" })

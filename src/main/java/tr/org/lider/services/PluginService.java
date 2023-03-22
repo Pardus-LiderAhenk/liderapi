@@ -65,6 +65,7 @@ public class PluginService {
 		pluginList.add(new PluginImpl("user-privilege", "1.0.0", "Kullanıcı yetkilendierme ve kısıtlaması", true, false, true, true, true, true, false, false));
 		pluginList.add(new PluginImpl("ldap", "1.0.0", "İstemci silme, ad değiştirme ve taşıma işlemleri", true, false, true, true, false, true, false, false));
 		pluginList.add(new PluginImpl("screenshot", "1.0.0", "Ekran görüntüsü", true, false, true, true, true, true, true, false));
+		pluginList.add(new PluginImpl("browser-chrome", "1.0.0", "Chrome Tarayıcı yönetimi", true, false, true, true, true, true, false, false));
 		
 		
 		for (int i = 0; i < pluginList.size(); i++) {
@@ -161,12 +162,13 @@ public class PluginService {
 //		String name(1), String page(2), String description(3), String command_id(4), PluginImpl plugin_id(5), Integer state(6)
 		pluginProfileList.add(new PluginProfile("Sistem Gözlemcisi Profili", "conky-profile", "Masaüstü mesaj yönetimi", "EXECUTE_CONKY", findPluginIdByName("conky"), 1));
 		pluginProfileList.add(new PluginProfile("Betik Profili", "execute-script-profile", "Betik çalıştır", "EXECUTE_SCRIPT", findPluginIdByName("script"), 1));
-		pluginProfileList.add(new PluginProfile("Ağ Tarayıcı Profili", "browser-profile", "Ağ tarayıcı yönetimi", "BROWSER", findPluginIdByName("browser"), 1));
+		pluginProfileList.add(new PluginProfile("Ağ Tarayıcı-Firefox Profili", "browser-profile", "Ağ tarayıcı-Firefox yönetimi", "BROWSER", findPluginIdByName("browser"), 1));
 		pluginProfileList.add(new PluginProfile("Disk Kota Profili", "disk-quota-profile", "Kullanıcı disk kota yönetimi", "GET_QUOTA", findPluginIdByName("disk-quota"), 0));
 		pluginProfileList.add(new PluginProfile("Oturum Yönetimi Profili", "login-manager-profile", "Kullanıcı oturum yönetimi", "MANAGE", findPluginIdByName("login-manager"), 1));
 		pluginProfileList.add(new PluginProfile("Rsyslog Profili", "rsyslog-profile", "Rsyslog ile log yönetimi", "CONFIGURE_RSYSLOG", findPluginIdByName("rsyslog"), 1));
 		pluginProfileList.add(new PluginProfile("USB Profili", "usb-profile", "I/O yönetimi", "MANAGE-USB", findPluginIdByName("usb"), 1));
 		pluginProfileList.add(new PluginProfile("Kullanıcı Ayrıcalıkları Profili", "user-privilege-profile", "Kullanıcı ayrıcalıkları yönetimi", "USER-PRIVILEGE", findPluginIdByName("user-privilege"), 0));
+		pluginProfileList.add(new PluginProfile("Ağ Tarayıcı-Chrome Profili", "browser-chrome-profile", "Ağ tarayıcı-Chrome yönetimi", "BROWSER-CHROME", findPluginIdByName("browser-chrome"), 1));
 		
 		for (int i = 0; i < pluginProfileList.size(); i++) {
 			if (findPluginProfileByPage(pluginProfileList.get(i).getPage()).isEmpty()) {
