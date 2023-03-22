@@ -43,6 +43,10 @@ public class PolicyExceptionService {
 		return policyExceptionRepository.findByPolicyAndDn(policy, dn);
 	}
 	
+	public List<PolicyExceptionImpl> findByPolicyAndGroupDn(PolicyImpl policy, String dn){
+		return policyExceptionRepository.findByPolicyAndGroupDn(policy, dn);
+	}
+	
 	public PolicyExceptionImpl add(PolicyExceptionImpl policyExceptionImpl) {
 		PolicyExceptionImpl existPolicyException = policyExceptionRepository.save(policyExceptionImpl);
 		return existPolicyException;

@@ -29,10 +29,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -92,6 +89,9 @@ public class PolicyExceptionImpl implements Serializable {
 
 	@Column(name = "DN",columnDefinition = "TEXT", length = 1000, nullable = false)
 	private String dn;
+	
+	@Column(name = "GROUP_DN",columnDefinition = "TEXT", length = 1000, nullable = false)
+	private String groupDn;
 	
 	@Transient
 	private List<?> members;
@@ -195,6 +195,14 @@ public class PolicyExceptionImpl implements Serializable {
 
 	public void setDn(String dn) {
 		this.dn = dn;
+	}
+	
+	public String getGroupDn() {
+		return groupDn;
+	}
+
+	public void setGroupDn(String groupDn) {
+		this.groupDn = groupDn;
 	}
 
 	public void setModifyDate(Date modifyDate) {

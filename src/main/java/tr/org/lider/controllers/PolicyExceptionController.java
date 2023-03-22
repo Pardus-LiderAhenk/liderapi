@@ -133,6 +133,18 @@ public class PolicyExceptionController {
 				.status(HttpStatus.OK)
 				.body(policyExceptionService.listByPolicy(policyService.findPolicyByID(id).getId()));
 	}
+	
+	@Operation(summary = "Get policy exception list by policy id and by selected group dn", description = "", tags = { "policy-exception" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns policy exception list successfully"),
+			  @ApiResponse(responseCode = "417", description = "Could not get policy exception list. Unexpected error occurred", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/list/policy/{id}/group-dn/{dn}", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<PolicyExceptionImpl>> policyExceptionListByPolicyByDn(@PathVariable Long id, @PathVariable String dn) {
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(policyExceptionService.findByPolicyAndGroupDn(policyService.findPolicyByID(id), dn));
+	}
 
 	//	return saved policy
 	//@RequestMapping(method=RequestMethod.POST ,value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -166,6 +178,7 @@ public class PolicyExceptionController {
 						policyExceptionImpl.setLabel(params.getLabel());
 						policyExceptionImpl.setDn(dnList.get(j));
 						policyExceptionImpl.setDnType(DNType.GROUP);
+						policyExceptionImpl.setGroupDn(params.getGroupDn());
 						policyExceptionService.add(policyExceptionImpl);
 					}
 				} else {
@@ -176,6 +189,7 @@ public class PolicyExceptionController {
 					policyExceptionImpl.setLabel(params.getLabel());
 					policyExceptionImpl.setDn(params.getMembers().get(i).toString());
 					policyExceptionImpl.setDnType(getLdapEntry(params.getMembers().get(i).toString()).getType());
+					policyExceptionImpl.setGroupDn(params.getGroupDn());
 					policyExceptionService.add(policyExceptionImpl);
 				}
 			}
