@@ -34,6 +34,15 @@ public class ScriptService {
 			String contents = "#!/bin/bash\n" + 
 					"touch /tmp/test.txt";
 			scriptRepository.save(new ScriptTemplate(scriptType, label, contents, new Date(), null, false));
+			
+			scriptType = ScriptType.getType(1);
+			label = "Virüs Taraması Yap";
+			contents = "#!/bin/bash\n" + 
+				"sudo apt install clamav\n" +
+				"sudo freshclam\n" + 
+				"clamscan -r -i /home &";
+			scriptRepository.save(new ScriptTemplate(scriptType, label, contents, new Date(), null, false));
+			
 		}
 	}
 
