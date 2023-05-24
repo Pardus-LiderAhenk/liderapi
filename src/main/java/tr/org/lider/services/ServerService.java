@@ -5,11 +5,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.repositories.ServerRepository;
 
+@Service
 public class ServerService {
 	
 	@Autowired
@@ -42,12 +44,12 @@ public class ServerService {
 		}
 		return savedServer;	}
 	
-	public List<ServerImpl> listAll(){
-		return serverRepository.findAllByDeleted(false);
-	}
+	//public List<ServerImpl> listAll(){
+	//	return serverRepository.findAllByDeleted(false);
+	//}
 	
-	public Page<ServerImpl> list(int pageNumber, int pageSize){
-		PageRequest pageable = PageRequest.of(pageNumber  - 1, pageSize);
-		return serverRepository.findByDeletedOrderByCreateDateDesc(pageable, false);
-	}
+	//public Page<ServerImpl> list(int pageNumber, int pageSize){
+	//	PageRequest pageable = PageRequest.of(pageNumber  - 1, pageSize);
+	//	return serverRepository.findByDeletedOrderByCreateDateDesc(pageable, false);
+	//}
 }
