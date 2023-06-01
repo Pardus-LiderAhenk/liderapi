@@ -10,6 +10,7 @@ import tr.org.lider.entities.RoleImpl;
 public interface RoleRepository extends BaseJpaRepository<RoleImpl, Long>{
 	List<RoleImpl> findAllByName(String name);
 	RoleImpl findByName(String name);
+	List<RoleImpl> findByValue(String value);
 	Long countByName(String name);
 	List<RoleImpl> findAllByOrderByOrderNumberAsc();
 }
