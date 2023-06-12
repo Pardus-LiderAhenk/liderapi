@@ -96,6 +96,7 @@ public class RemoteSshService {
 					if (i < 0)
 						break;
 					commandResult += new String(tmp, 0, i);
+					System.out.println(commandResult);
 				}
 				if (channel.isClosed()) {
 					commandResult += channel.getExitStatus();
