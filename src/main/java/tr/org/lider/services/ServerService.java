@@ -1,10 +1,7 @@
 package tr.org.lider.services;
 
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.OperationType;
@@ -24,13 +21,7 @@ public class ServerService {
 	public ServerImpl add(ServerImpl server) {
 		
 		ServerImpl savedServer = serverRepository.save(server);
-		try {
-			operationLogService.saveOperationLog(OperationType.CREATE, "Sunucu eklendi",null,null,null,savedServer.getId());
-			
-		} catch (Exception e) {
-			e.printStackTrace();		
-		}
-		return savedServer;
+		return serverRepository.save(savedServer);
 	}
 	
 	public ServerImpl delete(Long id,ServerImpl server) {

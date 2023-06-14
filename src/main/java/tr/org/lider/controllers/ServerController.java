@@ -31,7 +31,8 @@ public class ServerController {
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Added server. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not add server. Unexpected error occurred", 
-			    content = @Content(schema = @Schema(implementation = String.class))) })	@PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
+			    content = @Content(schema = @Schema(implementation = String.class))) })	
+	@PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ServerImpl> serverAdd(@RequestBody ServerImpl server){
 		return ResponseEntity
 				.status(HttpStatus.OK)

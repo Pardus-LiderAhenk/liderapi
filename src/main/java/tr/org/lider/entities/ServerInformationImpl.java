@@ -4,8 +4,11 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -16,33 +19,31 @@ public class ServerInformationImpl implements Serializable {
 
 	@Id
 	@GeneratedValue
-	@Column(name = "ID", unique = true, nullable = false)
+	@Column(name = "SERVER_INFORMATION_ID", unique = true, nullable = false)
 	private Long id;
 
-	@Column(name = "IP")
-	private String ip;
-	
-	@Column(name = "HOSTNAME")
-	private String hostname;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "SERVER_ID", nullable = false)
+	private ServerImpl server; // bidirectional
 
-	@Column(name = "TYPE")
-	private String type;
-	
-	@Column(name = "Status")
-	private String status;
+	@Column(name = "PROPERTY_NAME", nullable = false)
+	private String propertyName;
 
-	@Column(name = "CPU")
-	private int cpu;
+	@Column(name = "PROPERTY_VALUE", columnDefinition = "TEXT", nullable = false, length = 65535)
+	private String propertyValue;
 	
-	@Column(name = "RAM")
-	private int ram;
-
-	@Column(name = "DISK")
-	private int disk;
+	public ServerInformationImpl() {
+		// TODO Auto-generated constructor stub
+	}
 	
-	@Column(name = "USERS")
-	private String users;
+	public ServerInformationImpl(Long id, ServerImpl server, String propertyName, String propertyValue) {
+		this.id = id;
+		this.server = server;
+		this.propertyName = propertyName;
+		this.propertyValue = propertyValue;
+	}
 
+	
 	public Long getId() {
 		return id;
 	}
@@ -51,68 +52,32 @@ public class ServerInformationImpl implements Serializable {
 		this.id = id;
 	}
 
-	public String getType() {
-		return type;
+	public ServerImpl getServer() {
+		return server;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setServer(ServerImpl server) {
+		this.server = server;
 	}
 
-	public int getCpu() {
-		return cpu;
+	public String getPropertyName() {
+		return propertyName;
 	}
 
-	public void setCpu(int cpu) {
-		this.cpu = cpu;
+	public void setPropertyName(String propertyName) {
+		this.propertyName = propertyName;
 	}
 
-	public int getRam() {
-		return ram;
+	public String getPropertyValue() {
+		return propertyValue;
 	}
 
-	public void setRam(int ram) {
-		this.ram = ram;
-	}
-
-	public int getDisk() {
-		return disk;
-	}
-
-	public void setDisk(int disk) {
-		this.disk = disk;
-	}
-
-	public String getUsers() {
-		return users;
-	}
-
-	public void setUsers(String users) {
-		this.users = users;
+	public void setPropertyValue(String propertyValue) {
+		this.propertyValue = propertyValue;
 	}
 	
-	public String getStatus() {
-		return status;
+	public String toString() {
+		return "ServerImpl [id=" + id + ", propertyName=" + propertyName + ", propertyValue=" + propertyValue +"]";
+		
 	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-	
-	public String getIp() {
-		return ip;
-	}
-
-	public void setIp(String ip) {
-		this.ip = ip;
-	}
-	
-	public String getHostname() {
-		return hostname;
-	}
-
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
-	}
-
 }

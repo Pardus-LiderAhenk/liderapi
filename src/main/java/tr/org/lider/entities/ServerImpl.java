@@ -1,11 +1,17 @@
 package tr.org.lider.entities;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 @Entity
@@ -16,7 +22,7 @@ public class ServerImpl implements Serializable {
 
 	@Id
 	@GeneratedValue
-	@Column(name = "ID", unique = true, nullable = false)
+	@Column(name = "SERVER_ID", unique = true,nullable = false)
 	private Long id;
 	
 	@Column(name = "IP")
@@ -34,8 +40,14 @@ public class ServerImpl implements Serializable {
 	@Column(name = "STATUS")
 	private String status;
 	
-	@Column(name = "PASSWORD", nullable = false)
+	@Column(name = "PASSWORD")
 	private String password;
+	
+	@OneToMany(mappedBy = "server", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+	private Set<ServerInformationImpl> properties = new HashSet<ServerInformationImpl>(0); // bidirectional
+
+	@OneToMany(mappedBy = "server", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
+	@OrderBy("createDate DESC")
 
 	public String getPassword() {
 		return password;
@@ -92,5 +104,35 @@ public class ServerImpl implements Serializable {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	
+	public ServerImpl() {
+		
+	}
+	
+	public ServerImpl(Long id, String description, String hostname, String ip, 
+			String password, String status, String user) {
+		
+		this.id = id;
+		this.description = description;
+		this.hostname = hostname;
+		this.ip = ip;
+		this.password = password;
+		this.status = status;
+		this.user = user;
+	}
+	
+	public ServerImpl(ServerImpl server) {
+		this.id = server.id;
+		this.description = server.description;
+		this.hostname = server.hostname;
+		this.ip = server.ip;
+		this.password = server.password;
+		this.status = server.status;
+		this.user = server.user;
+	}
 
+	public String toString() {
+		return "ServerImpl [id=" + id + ", description=" + description + ", hostname=" + hostname + ", ip=" + ip + " , "
+				+ "password=" + password + ", status=" + status + ", user=" + user + "]";
+				}
 }
