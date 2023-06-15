@@ -32,7 +32,6 @@ import tr.org.lider.services.RemoteSshService;
  */
 @RestController
 @RequestMapping("/api/remote-ssh")
-//@RequestMapping("/remoteSsh")
 @Tag(name = "", description = "" )
 public class RemoteSshController {
 	

@@ -6,7 +6,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -37,5 +41,35 @@ public class ServerController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(serverService.add(server));
+	}
+	
+	
+	@Operation(summary = "Check server connection", description = "", tags = { "connection" })
+    @ApiResponses(value = { 
+              @ApiResponse(responseCode = "200", description = "Server is available"),
+              @ApiResponse(responseCode = "417", description = "Can not reach server. Unexpected error occurred", 
+                content = @Content(schema = @Schema(implementation = String.class))) })
+    @PostMapping(value = "/check-connection")
+    public ResponseEntity<Boolean> isServerReachable(
+    		@RequestParam (value = "hostname", required = true) String hostname,
+            @RequestParam (value = "password", required = true) String password,
+            @RequestParam (value = "username", required = true) String username) {
+
+        try {
+        JSch jsch = new JSch();
+
+        Session session = jsch.getSession(username, hostname, 22);
+        session.setPassword(password);
+        session.setConfig("StrictHostKeyChecking", "no");
+        session.connect();
+        session.disconnect();
+        return ResponseEntity
+              .status(HttpStatus.OK)
+              .body(true); // Connection successful
+        } catch (Exception e) {
+            return ResponseEntity
+                  .status(HttpStatus.BAD_REQUEST)
+                  .body(false); 
+        }
 	}
 }
