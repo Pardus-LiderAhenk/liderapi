@@ -1,5 +1,7 @@
 package tr.org.lider.controllers;
 
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
@@ -19,7 +22,13 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.LiderConstants;
+import tr.org.lider.constant.LiderConstants.Pages;
 import tr.org.lider.entities.ServerImpl;
+import tr.org.lider.models.SshUserInfo;
+import tr.org.lider.repositories.ServerInformationRepository;
+import tr.org.lider.services.RemoteSshService;
+import tr.org.lider.services.ServerInformationService;
 import tr.org.lider.services.ServerService;
 
 @RestController
@@ -30,6 +39,15 @@ public class ServerController {
 	@Autowired
 	private ServerService serverService;
 	
+	@Autowired
+	private RemoteSshService sshService;
+	
+	@Autowired
+	private ServerInformationService serverInformationService;
+	
+	@Autowired
+	private  ServerInformationRepository serverInformationRepository;
+	
 	
 	@Operation()
 	@ApiResponses(value = { 
@@ -38,9 +56,26 @@ public class ServerController {
 			    content = @Content(schema = @Schema(implementation = String.class))) })	
 	@PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ServerImpl> serverAdd(@RequestBody ServerImpl server){
-		return ResponseEntity
-				.status(HttpStatus.OK)
-				.body(serverService.add(server));
+		sshService.setHost(server.getHostname());
+		sshService.setUser(server.getUser());
+		sshService.setPassword(server.getPassword());
+		try {
+			serverService.add(server);
+			String result = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);
+			
+			serverInformationService.save(result);
+			
+			return null;
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+		
+
+				
+//		return ResponseEntity
+//				.status(HttpStatus.OK)
+//				.body(serverService.add(server));
 	}
 	
 	
@@ -58,7 +93,7 @@ public class ServerController {
         try {
         JSch jsch = new JSch();
 
-        Session session = jsch.getSession(username, hostname, 22);
+        Session session = jsch.getSession(username, hostname, LiderConstants.ServerInformation.SSH_PORT);
         session.setPassword(password);
         session.setConfig("StrictHostKeyChecking", "no");
         session.connect();
