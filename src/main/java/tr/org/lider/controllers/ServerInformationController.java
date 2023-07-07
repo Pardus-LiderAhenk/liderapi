@@ -44,16 +44,6 @@ public class ServerInformationController {
             @RequestParam (value = "password", required = true) String password,
             @RequestParam (value = "username", required = true) String username){
 		
-//		String command = "echo 'select name as os_name , version as os_version, null as machine_disk, null as disk_total, "
-//				+ "null as  total_disk_empty, null as memory_total, null as memory_free, null as  hostname, "
-//				+ "null as  physical_memory, null as  computer_name from os_version union select device as machine_disk, blocks_size as disk_total,  blocks_free as total_disk_empty , "
-//				+ "null as os_name, null as os_version, null as memory_total, null as memory_free, null as  hostname, "
-//				+ "null as  physical_memory, null as  computer_name from mounts union select memory_total, memory_free , "
-//				+ "null as os_name, null as os_version,   null as machine_disk, null as disk_total, null as  total_disk_empty, "
-//				+ "null as  hostname, null as  physical_memory, "
-//				+ "null as  computer_name from memory_info union select hostname, "
-//				+ "physical_memory, computer_name, null as os_name, null as os_version,  "
-//				+ " null as machine_disk, null as disk_total, null as  total_disk_empty, null as memory_total, null as memory_free from system_info;' | osqueryi --json";
 		try {
 			sshService.setHost(hostname);
 	    	sshService.setUser(username);

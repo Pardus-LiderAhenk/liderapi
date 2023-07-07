@@ -62,16 +62,16 @@ public class ServerController {
 		try {
 			serverService.add(server);
 			String result = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);
+			String[] passwordSplit = result.split("\\[");
+			result = "[" + passwordSplit[passwordSplit.length-1];
 			
-			serverInformationService.save(result);
+			serverService.save(result,server);
 			
 			return null;
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		return null;
-		
-
+		return null;		
 				
 //		return ResponseEntity
 //				.status(HttpStatus.OK)
@@ -105,6 +105,27 @@ public class ServerController {
             return ResponseEntity
                   .status(HttpStatus.BAD_REQUEST)
                   .body(false); 
+        }
+	}
+	
+	
+	@Operation(summary = "Server List", description = "", tags = { "" })
+    @ApiResponses(value = { 
+              @ApiResponse(responseCode = "200", description = "Retrieved  server list"),
+              @ApiResponse(responseCode = "417", description = "Can not get server list. Unexpected error occurred", 
+                content = @Content(schema = @Schema(implementation = String.class))) })
+    @PostMapping(value = "/list")
+    public ResponseEntity<HashMap<String, Object>> getServerList() {
+		HashMap<String, Object> resultMap = new HashMap<>();
+        try {
+        
+        return ResponseEntity
+              .status(HttpStatus.OK)
+              .body(resultMap); // Connection successful
+        } catch (Exception e) {
+            return ResponseEntity
+                  .status(HttpStatus.BAD_REQUEST)
+                  .body(null); 
         }
 	}
 }

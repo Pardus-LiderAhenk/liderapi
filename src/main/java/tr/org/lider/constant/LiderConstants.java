@@ -14,17 +14,18 @@ public class LiderConstants {
 	
 	public static class ServerInformation{
 		public static final int SSH_PORT = 22;
-		public static String OSQUERY_QUERY = "echo 'select name as os_name, version as os_version, 'empty' as machine_disk, 'empty' as disk_total,\n" + 
-				"    'empty' as total_disk_empty, 'empty' as memory_total, 'empty' as memory_free, 'empty' as hostname,'empty' as physical_memory,\n" + 
-				"    'empty' as computer_name, 'empty' as mac_addr from os_version union select  'empty' as os_name, 'empty' as os_version, 'empty' as machine_disk,\n" + 
-				"    'empty' as disk_total, 'empty' as total_disk_empty, memory_total as memory_total, memory_free as memory_free, 'empty' as hostname, 'empty' as physical_memory,\n" + 
-				"    'empty' as computer_name, 'empty' as mac_addr from memory_info union select  'empty' as os_name, 'empty' as os_version, 'empty' as machine_disk,\n" + 
-				"    'empty' as disk_total, 'empty' as total_disk_empty, 'empty' as memory_total, 'empty' as memory_free, hostname as hostname, physical_memory as physical_memory,\n" + 
-				"    computer_name as computer_name, 'empty' as mac_addr from  system_info union select 'empty' as os_name, 'empty' as os_version,  device as machine_disk,\n" + 
-				"    blocks_size as disk_total, blocks_free as total_disk_empty, 'empty' as memory_total, 'empty' as memory_free, 'empty' as hostname, 'empty' as physical_memory,\n" + 
-				"    'empty' as computer_name,'empty' as mac_addr from  mounts union select  'empty' as os_name, 'empty' as os_version, 'empty' as machine_disk,'empty' as disk_total,\n" + 
-				"    'empty' as total_disk_empty, 'empty' as memory_total, 'empty' as memory_free, 'empty' as hostname, 'empty' as physical_memory, 'empty' as computer_name,\n" + 
-				"    mac as mac_addr from interface_details;' | osqueryi --json";
+		public static String OSQUERY_QUERY = "echo 'select name as os_name, version as os_version, null as machine_disk, null as disk_total,null "
+				+ "as total_disk_empty, null as memory_total, null as memory_free, null as hostname,null as physical_memory,null as computer_name, "
+				+ "null as mac_addr from os_version union select  null as os_name, null as os_version, null as machine_disk,null as disk_total, "
+				+ "null as total_disk_empty, memory_total as memory_total, memory_free as memory_free, null as hostname, null as physical_memory,"
+				+ "null as computer_name, null as mac_addr from memory_info union select  null as os_name, null as os_version, null as machine_disk,"
+				+ "null as disk_total, null as total_disk_empty, null as memory_total, null as memory_free, hostname as hostname, "
+				+ "physical_memory as physical_memory, computer_name as computer_name, null as mac_addr from  system_info union select null as os_name, "
+				+ "null as os_version,  device as machine_disk, blocks_size as disk_total, blocks_free as total_disk_empty, null as memory_total, "
+				+ "null as memory_free, null as hostname, null as physical_memory,null as computer_name,null "
+				+ "as mac_addr from  mounts union select  null as os_name, null as os_version, null as machine_disk,null as disk_total,"
+				+ "null as total_disk_empty, null as memory_total, null as memory_free, null as hostname, null as physical_memory, "
+				+ "null as computer_name, mac as mac_addr from interface_details;' | osqueryi --json";
 	}
 
 }

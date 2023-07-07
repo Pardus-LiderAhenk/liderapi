@@ -42,6 +42,13 @@ public class ServerInformationImpl implements Serializable {
 		this.propertyName = propertyName;
 		this.propertyValue = propertyValue;
 	}
+	
+	public ServerInformationImpl(ServerImpl server, String propertyName, String propertyValue) {
+		this.server = server;
+		this.propertyName = propertyName;
+		this.propertyValue = propertyValue;
+	}
+	
 
 	
 	public Long getId() {

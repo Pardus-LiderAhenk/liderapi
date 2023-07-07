@@ -14,6 +14,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Entity
 @Table(name = "Server")
 public class ServerImpl implements Serializable {
@@ -47,7 +49,7 @@ public class ServerImpl implements Serializable {
 	private Set<ServerInformationImpl> properties = new HashSet<ServerInformationImpl>(0); // bidirectional
 
 	@OneToMany(mappedBy = "server", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
-	@OrderBy("createDate DESC")
+	//@OrderBy("createDate DESC")
 
 	public String getPassword() {
 		return password;
@@ -105,13 +107,22 @@ public class ServerImpl implements Serializable {
 		this.status = status;
 	}
 	
+	public Set<ServerInformationImpl> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Set<ServerInformationImpl> properties) {
+		this.properties = properties;
+	}
+	
 	public ServerImpl() {
 		
 	}
 	
 	public ServerImpl(Long id, String description, String hostname, String ip, 
-			String password, String status, String user) {
+			String password, String status, String user, Set<ServerInformationImpl> properties) {
 		
+		super();
 		this.id = id;
 		this.description = description;
 		this.hostname = hostname;
@@ -119,6 +130,8 @@ public class ServerImpl implements Serializable {
 		this.password = password;
 		this.status = status;
 		this.user = user;
+		this.properties = properties;
+
 	}
 	
 	public ServerImpl(ServerImpl server) {
@@ -129,8 +142,43 @@ public class ServerImpl implements Serializable {
 		this.password = server.password;
 		this.status = server.status;
 		this.user = server.user;
+		this.properties = server.properties;
+
+	}
+	
+	public void addProperty(ServerInformationImpl property) {
+		if(properties == null) {
+			properties = new HashSet<ServerInformationImpl>(0);
+		}
+		
+		if(property.getServer() != this) {
+			property.setServer(this);
+		}
+		boolean found = false;
+		for (ServerInformationImpl tmp : properties) {
+			if(tmp.equals(property)) {
+				tmp.setPropertyValue(property.getPropertyValue());
+				found = true;
+				break;
+			}
+		}
+		
+		if(!found) {
+			properties.add(property);
+		}
 	}
 
+	
+	public String toJson() {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			return mapper.writeValueAsString(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public String toString() {
 		return "ServerImpl [id=" + id + ", description=" + description + ", hostname=" + hostname + ", ip=" + ip + " , "
 				+ "password=" + password + ", status=" + status + ", user=" + user + "]";
