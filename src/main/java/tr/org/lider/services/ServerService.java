@@ -3,6 +3,7 @@ package tr.org.lider.services;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,6 +149,22 @@ public class ServerService {
 		});
 	
 		return null;	
+	}
+	
+	public List<ServerImpl> list(String serverId ){
+		
+		
+		return null;
+		
+		
+	}
+	
+	public Optional<ServerImpl> findServerByID(Long serverId) {
+        return serverRepository.findById(serverId);
+	}
+	
+	public List<ServerImpl> findServerAll() {
+        return serverRepository.findAll();
 	}
 }
 
