@@ -37,6 +37,7 @@ public class ServerService {
 	public ServerImpl add(ServerImpl server) {
 		
 		ServerImpl savedServer = serverRepository.save(server);
+		server.setStatus("true");
 		return serverRepository.save(savedServer);
 	}
 	
@@ -161,6 +162,11 @@ public class ServerService {
 	
 	public Optional<ServerImpl> findServerByID(Long serverId) {
         return serverRepository.findById(serverId);
+	}
+	
+	public void delete(Long id) {
+		serverRepository.deleteById(id);
+//		return true;
 	}
 	
 	public List<ServerImpl> findServerAll() {

@@ -6,10 +6,12 @@ import java.util.Optional;
 import org.slf4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +33,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.constant.LiderConstants;
 import tr.org.lider.constant.LiderConstants.Pages;
 import tr.org.lider.entities.AgentImpl;
+import tr.org.lider.entities.OperationType;
+import tr.org.lider.entities.PolicyExceptionImpl;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.models.SshUserInfo;
 import tr.org.lider.repositories.ServerInformationRepository;
@@ -142,6 +146,41 @@ public class ServerController {
     				.headers(headers)
     				.build();
 		}
+	}
+	
+	@Operation(summary = "Server delete", description = "", tags = {""})
+	@ApiResponses(value= {
+			 @ApiResponse(responseCode = "200", description = "" ),
+			 @ApiResponse(responseCode = "417", description = "",
+			 content = @Content(schema = @Schema(implementation = String.class)))
+	 })
+	@DeleteMapping(value = "/delete/{id}")
+	public ResponseEntity<ServerImpl> deleteServer(@PathVariable Long id){
+				 
+		try {
+			//Optional<ServerImpl> existingPolicyException = policyExceptionService.findPolicyExceptionByID(id);
+			if(!serverService.findServerByID(id).isPresent()) {
+				logger.error("Server to delete {} but id not found!", id);
+	        	HttpHeaders headers = new HttpHeaders();
+	        	headers.add("message", "Server id not found !");
+	    		return ResponseEntity
+	    				.status(HttpStatus.NOT_FOUND)
+	    				.headers(headers)
+	    				.build();
+			}
+			serverService.delete(id);
+					
+		} catch (DataAccessException e) {
+			logger.error("Error delete server: " + e.getCause().getMessage());
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
+		}
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(null);
 	}
 	
 //	@Operation(summary = "Server update list", description = "", tags = { "" })
