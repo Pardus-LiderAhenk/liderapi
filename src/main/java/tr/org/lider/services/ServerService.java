@@ -68,13 +68,13 @@ public class ServerService {
 			
 		});
 		
-		listOfMaps.stream()
-		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("hostname").toString())))
-		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "hostname", nameMap.get("hostname").toString());
-			serverInformationRepository.save(serverInf);
-			
-		});
+//		listOfMaps.stream()
+//		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("machine_name").toString())))
+//		.forEach(nameMap -> {
+//			ServerInformationImpl serverInf = new ServerInformationImpl(server, "machine_name", nameMap.get("machine_name").toString());
+//			serverInformationRepository.save(serverInf);
+//			
+//		});
 	
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("mac_addr").toString())))

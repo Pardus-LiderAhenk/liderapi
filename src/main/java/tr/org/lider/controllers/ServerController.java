@@ -73,7 +73,7 @@ public class ServerController {
 			    content = @Content(schema = @Schema(implementation = String.class))) })	
 	@PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ServerImpl> serverAdd(@RequestBody ServerImpl server){
-		sshService.setHost(server.getHostname());
+		sshService.setHost(server.getIp());
 		sshService.setUser(server.getUser());
 		sshService.setPassword(server.getPassword());
 		try {
@@ -154,7 +154,7 @@ public class ServerController {
 			 @ApiResponse(responseCode = "417", description = "",
 			 content = @Content(schema = @Schema(implementation = String.class)))
 	 })
-	@DeleteMapping(value = "/delete/{id}")
+	@DeleteMapping(value = "/delete/id/{id}")
 	public ResponseEntity<ServerImpl> deleteServer(@PathVariable Long id){
 				 
 		try {
@@ -181,6 +181,28 @@ public class ServerController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(null);
+	}
+	
+	@Operation(summary = "Server detail List", description = "", tags = { "" })
+    @ApiResponses(value = { 
+              @ApiResponse(responseCode = "200", description = ""),
+              @ApiResponse(responseCode = "417", description = "Unexpected error occurred", 
+                content = @Content(schema = @Schema(implementation = String.class))) })
+    @GetMapping(value = "/detail/id/{id}")
+    public  ResponseEntity<ServerImpl> getServerDetailList(@PathVariable Long serverId) {
+		logger.debug("Server id:  {} ", serverId);
+
+		Optional<ServerImpl> serverDetailList = serverService.findServerByID(serverId);
+		HttpHeaders headers = new HttpHeaders();
+		if(serverDetailList.isPresent()) {
+			return new ResponseEntity<ServerImpl>(serverDetailList.get(), HttpStatus.OK);
+		}
+		else {
+			return ResponseEntity
+    				.status(HttpStatus.NOT_FOUND)
+    				.headers(headers)
+    				.build();
+		}
 	}
 	
 //	@Operation(summary = "Server update list", description = "", tags = { "" })

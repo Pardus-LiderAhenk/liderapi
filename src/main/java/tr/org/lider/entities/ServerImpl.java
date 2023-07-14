@@ -30,8 +30,8 @@ public class ServerImpl implements Serializable {
 	@Column(name = "IP")
 	private String ip;
 	
-	@Column(name = "HOSTNAME")
-	private String hostname;
+	@Column(name = "MACHINE_NAME")
+	private String machineName;
 
 	@Column(name = "DESCRIPTION")
 	private String description;
@@ -66,6 +66,14 @@ public class ServerImpl implements Serializable {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public String getMachineName() {
+		return machineName;
+	}
+
+	public void setMachineName(String machineName) {
+		this.machineName = machineName;
+	}
 
 	public String getIp() {
 		return ip;
@@ -75,13 +83,6 @@ public class ServerImpl implements Serializable {
 		this.ip = ip;
 	}
 
-	public String getHostname() {
-		return hostname;
-	}
-
-	public void setHostname(String hostname) {
-		this.hostname = hostname;
-	}
 
 	public String getDescription() {
 		return description;
@@ -119,13 +120,13 @@ public class ServerImpl implements Serializable {
 		
 	}
 	
-	public ServerImpl(Long id, String description, String hostname, String ip, 
+	public ServerImpl(Long id, String description, String machineName, String ip, 
 			String password, String status, String user, Set<ServerInformationImpl> properties) {
 		
 		super();
 		this.id = id;
 		this.description = description;
-		this.hostname = hostname;
+		this.machineName = machineName;
 		this.ip = ip;
 		this.password = password;
 		this.status = status;
@@ -137,7 +138,7 @@ public class ServerImpl implements Serializable {
 	public ServerImpl(ServerImpl server) {
 		this.id = server.id;
 		this.description = server.description;
-		this.hostname = server.hostname;
+		this.machineName = server.machineName;
 		this.ip = server.ip;
 		this.password = server.password;
 		this.status = server.status;
@@ -180,7 +181,7 @@ public class ServerImpl implements Serializable {
 	}
 	
 	public String toString() {
-		return "ServerImpl [id=" + id + ", description=" + description + ", hostname=" + hostname + ", ip=" + ip + " , "
+		return "ServerImpl [id=" + id + ", description=" + description + ", machineName=" + machineName + ", ip=" + ip + " , "
 				+ "password=" + password + ", status=" + status + ", user=" + user + "]";
 				}
 }
