@@ -1,6 +1,7 @@
 package tr.org.lider.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,7 +11,12 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -26,7 +32,12 @@ public class ServerInformationImpl implements Serializable {
 	@Column(name = "SERVER_INFORMATION_ID", unique = true, nullable = false)
 	private Long id;
 
-	
+//	@Temporal(TemporalType.TIMESTAMP)
+//	@Column(name = "CREATE_DATE", nullable = false, updatable = false)
+//	@CreationTimestamp
+//	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone="Europe/Istanbul")
+//	private Date createDate;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "SERVER_ID", nullable = false)
 	private ServerImpl server; // bidirectional
@@ -46,15 +57,15 @@ public class ServerInformationImpl implements Serializable {
 		this.server = server;
 		this.propertyName = propertyName;
 		this.propertyValue = propertyValue;
+		//this.createDate = createDate;
 	}
 	
 	public ServerInformationImpl(ServerImpl server, String propertyName, String propertyValue) {
 		this.server = server;
 		this.propertyName = propertyName;
 		this.propertyValue = propertyValue;
+		//this.createDate = createDate;
 	}
-	
-
 	
 	public Long getId() {
 		return id;
@@ -88,8 +99,18 @@ public class ServerInformationImpl implements Serializable {
 		this.propertyValue = propertyValue;
 	}
 	
+//	public Date getCreateDate() {
+//		return createDate;
+//	}
+//
+//	public void setCreateDate(Date createDate) {
+//		this.createDate = createDate;
+//	}
+	
+	
 	public String toString() {
-		return "ServerImpl [id=" + id + ", propertyName=" + propertyName + ", propertyValue=" + propertyValue +"]";
+		return "ServerInformationImpl [id=" + id + ", propertyName=" + propertyName + ", propertyValue=" + propertyValue + "]";
 		
 	}
+	//", createDate=" + createDate +
 }

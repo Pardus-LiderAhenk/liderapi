@@ -32,8 +32,6 @@ public class ServerService {
 	private OperationLogService operationLogService;
 	
 	
-
-	
 	public ServerImpl add(ServerImpl server) {
 		
 		ServerImpl savedServer = serverRepository.save(server);

@@ -1,6 +1,7 @@
 package tr.org.lider.entities;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,9 +12,13 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Entity
@@ -45,6 +50,17 @@ public class ServerImpl implements Serializable {
 	@Column(name = "PASSWORD")
 	private String password;
 	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATE_DATE", nullable = false, updatable = false)
+	@CreationTimestamp
+	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone="Europe/Istanbul")
+	private Date createDate;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "MODIFY_DATE")
+	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone="Europe/Istanbul")
+	private Date modifyDate;
+
 	@OneToMany(mappedBy = "server", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<ServerInformationImpl> properties = new HashSet<ServerInformationImpl>(0); // bidirectional
 
@@ -116,12 +132,28 @@ public class ServerImpl implements Serializable {
 		this.properties = properties;
 	}
 	
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
+	public Date getModifyDate() {
+		return modifyDate;
+	}
+
+	public void setModifyDate(Date modifyDate) {
+		this.modifyDate = modifyDate;
+	}
+	
 	public ServerImpl() {
 		
 	}
 	
 	public ServerImpl(Long id, String description, String machineName, String ip, 
-			String password, String status, String user, Set<ServerInformationImpl> properties) {
+			String password, String status, Date createDate, Date modifyDate, String user, Set<ServerInformationImpl> properties) {
 		
 		super();
 		this.id = id;
@@ -131,6 +163,8 @@ public class ServerImpl implements Serializable {
 		this.password = password;
 		this.status = status;
 		this.user = user;
+		this.createDate = createDate;
+		this.modifyDate = modifyDate;
 		this.properties = properties;
 
 	}
@@ -143,6 +177,8 @@ public class ServerImpl implements Serializable {
 		this.password = server.password;
 		this.status = server.status;
 		this.user = server.user;
+		this.createDate = server.createDate;
+		this.modifyDate = server.modifyDate;
 		this.properties = server.properties;
 
 	}
@@ -182,6 +218,6 @@ public class ServerImpl implements Serializable {
 	
 	public String toString() {
 		return "ServerImpl [id=" + id + ", description=" + description + ", machineName=" + machineName + ", ip=" + ip + " , "
-				+ "password=" + password + ", status=" + status + ", user=" + user + "]";
+				+ "password=" + password + ", status=" + status + ", user=" + user + " , createDate=" + createDate + ", modifyDate=" + modifyDate + "]";
 				}
 }
