@@ -147,6 +147,27 @@ public class ServerService {
 			
 		});
 	
+		listOfMaps.stream()
+		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("uptime_days").toString())))
+		.forEach(nameMap -> {
+			ServerInformationImpl serverInf = new ServerInformationImpl(server, "uptime_days", nameMap.get("uptime_days").toString());
+			serverInformationRepository.save(serverInf);
+			
+		});
+		listOfMaps.stream()
+		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("uptime_hours").toString())))
+		.forEach(nameMap -> {
+			ServerInformationImpl serverInf = new ServerInformationImpl(server, "uptime_hours", nameMap.get("uptime_hours").toString());
+			serverInformationRepository.save(serverInf);
+			
+		});
+		listOfMaps.stream()
+		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("uptime_minutes").toString())))
+		.forEach(nameMap -> {
+			ServerInformationImpl serverInf = new ServerInformationImpl(server, "uptime_minutes", nameMap.get("uptime_minutes").toString());
+			serverInformationRepository.save(serverInf);
+			
+		});
 		return null;	
 	}
 	
