@@ -27,19 +27,6 @@ public class ServerInformationService<ServerInformationImpl> {
         		//serverInformationRepository.getServer(id);
 	}
 	
-//	public ServerInformationImpl save(String result, ServerImpl server) throws JsonProcessingException {
-//		
-//		
-//		for (ServerInformationImpl serverInformation : server.getProperties()) {
-//			if(serverInformation.getPropertyName().equals(""))
-//				//tek tek kaydettiğimiz dataları server information içine ekleyip veritabanına rerpositorye atmamız gerekiyor.
-//				//server serviste bu işlem yapılması mantıklı olabilir 
-//		}		
-//		
-//		return null;
-//		
-//	}
-	
-	
+
 
 }

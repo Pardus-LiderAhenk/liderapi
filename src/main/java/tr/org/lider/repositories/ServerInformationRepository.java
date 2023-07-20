@@ -1,11 +1,5 @@
 package tr.org.lider.repositories;
 
-import java.util.List;
-
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
 import tr.org.lider.entities.ServerInformationImpl;
 
 public interface ServerInformationRepository extends BaseJpaRepository<ServerInformationImpl, Long>{

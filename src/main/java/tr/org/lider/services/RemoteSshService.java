@@ -74,7 +74,7 @@ public class RemoteSshService {
 		}
 		
 		Channel channel = null;
-		String commandResult="";
+		String commandResult=null;
 		
 		try {
 			channel = session.openChannel("exec");

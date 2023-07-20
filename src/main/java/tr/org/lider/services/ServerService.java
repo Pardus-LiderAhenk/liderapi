@@ -31,11 +31,13 @@ public class ServerService {
 	@Autowired
 	private OperationLogService operationLogService;
 	
+	@Autowired
+	private RemoteSshService sshService;
+	
 	
 	public ServerImpl add(ServerImpl server) {
 		
 		ServerImpl savedServer = serverRepository.save(server);
-		server.setStatus("true");
 		return serverRepository.save(savedServer);
 	}
 	
@@ -51,7 +53,7 @@ public class ServerService {
 		return savedServer;	
 	}
 	
-	public ServerInformationImpl save(String result, ServerImpl server) throws JsonProcessingException {
+	public ServerImpl save(String result, ServerImpl server) throws JsonProcessingException {
 		
 	
 		ObjectMapper mapper = new ObjectMapper();
@@ -61,8 +63,7 @@ public class ServerService {
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("computer_name").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "computer_name", nameMap.get("computer_name").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "computer_name", nameMap.get("computer_name").toString()));
 			
 		});
 		
@@ -77,16 +78,17 @@ public class ServerService {
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("mac_addr").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "mac_addr", nameMap.get("mac_addr").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "mac_addr", nameMap.get("mac_addr").toString()));
+
+
 			
 		});
 		
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("os_name").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "os_name", nameMap.get("os_name").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "os_name", nameMap.get("os_name").toString()));
+
 			
 		});
 		
@@ -94,82 +96,89 @@ public class ServerService {
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("os_version").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "os_version", nameMap.get("os_version").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "os_version", nameMap.get("os_version").toString()));
+
 			
 		});
 		
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("disk_total").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "disk_total", nameMap.get("disk_total").toString());
-			serverInformationRepository.save(serverInf);
+			//disk total ve disk list tek kayıt atmalıyız dbye kaydet
 			
+			server.addProperty(new ServerInformationImpl(server, "disk_total", nameMap.get("disk_total").toString()));
+
 		});
 		
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("machine_disk").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "machine_disk", nameMap.get("machine_disk").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "machine_disk", nameMap.get("machine_disk").toString()));
+
 			
 		});
 		
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("memory_free").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "memory_free", nameMap.get("memory_free").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "memory_free", nameMap.get("memory_free").toString()));
+
 			
 		});
 		
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("memory_total").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "memory_total", nameMap.get("memory_total").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "memory_total", nameMap.get("memory_total").toString()));
+
 			
 		});
 		
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("physical_memory").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "physical_memory", nameMap.get("physical_memory").toString());
-			serverInformationRepository.save(serverInf);
-			
+			server.addProperty(new ServerInformationImpl(server, "physical_memory", nameMap.get("physical_memory").toString()));
+
 		});
 		
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("total_disk_empty").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "total_disk_empty", nameMap.get("total_disk_empty").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "total_disk_empty", nameMap.get("total_disk_empty").toString()));
+
 			
 		});
 	
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("uptime_days").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "uptime_days", nameMap.get("uptime_days").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "uptime_days", nameMap.get("uptime_days").toString()));
+
 			
 		});
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("uptime_hours").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "uptime_hours", nameMap.get("uptime_hours").toString());
-			serverInformationRepository.save(serverInf);
+			server.addProperty(new ServerInformationImpl(server, "uptime_hours", nameMap.get("uptime_hours").toString()));
+
 			
 		});
 		listOfMaps.stream()
 		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("uptime_minutes").toString())))
 		.forEach(nameMap -> {
-			ServerInformationImpl serverInf = new ServerInformationImpl(server, "uptime_minutes", nameMap.get("uptime_minutes").toString());
-			serverInformationRepository.save(serverInf);
-			
+			server.addProperty(new ServerInformationImpl(server, "uptime_minutes", nameMap.get("uptime_minutes").toString()));
 		});
-		return null;	
+		server.setStatus(true);
+		return serverRepository.save(server);
+		
 	}
+	
+//	public List<ServerImpl> updateList(){
+//		
+//
+//		
+//	}
+	
 	
 	public List<ServerImpl> list(String serverId ){
 		
