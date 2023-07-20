@@ -1,8 +1,10 @@
 package tr.org.lider.controllers;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
@@ -31,12 +34,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.constant.LiderConstants;
-import tr.org.lider.constant.LiderConstants.Pages;
-import tr.org.lider.entities.AgentImpl;
-import tr.org.lider.entities.OperationType;
-import tr.org.lider.entities.PolicyExceptionImpl;
 import tr.org.lider.entities.ServerImpl;
-import tr.org.lider.models.SshUserInfo;
+import tr.org.lider.entities.ServerInformationImpl;
 import tr.org.lider.repositories.ServerInformationRepository;
 import tr.org.lider.repositories.ServerRepository;
 import tr.org.lider.services.RemoteSshService;
@@ -131,21 +130,218 @@ public class ServerController {
               @ApiResponse(responseCode = "417", description = "Can not get server list. Unexpected error occurred", 
                 content = @Content(schema = @Schema(implementation = String.class))) })
     @GetMapping(value = "/list")
-    public  ResponseEntity<List<ServerImpl>> getServerList() {
+    public  ResponseEntity<List<ServerImpl>> getServerList() throws Exception {
 		List<ServerImpl> serverList = serverService.findServerAll();
+		String updateResult;
+		int i = 0;
+		for(i = 0 ; i< serverList.size(); i++) {
+			ServerImpl server = serverList.get(i);
+			sshService.setHost(serverList.get(i).getIp());
+			sshService.setUser(serverList.get(i).getUser());
+			sshService.setPassword(serverList.get(i).getPassword());
+			
+			updateResult = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);		
+			if (updateResult != null) {
+				String[] passwordSplit = updateResult.split("\\[");
+				updateResult = "[" + passwordSplit[passwordSplit.length-1];
+				
+				ObjectMapper mapper = new ObjectMapper();
+				
+				List<Map<String, Object>> updateResults = mapper.readValue(updateResult, new TypeReference<List<Map<String, Object>>>() {});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("computer_name").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("computer_name")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("computer_name").toString())) {
+								prop.setPropertyValue(nameMap.get("computer_name").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("mac_addr").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("mac_addr")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("mac_addr").toString())) {
+								prop.setPropertyValue(nameMap.get("mac_addr").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("os_name").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("os_name")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("os_name").toString())) {
+								prop.setPropertyValue(nameMap.get("os_name").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("os_version").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("os_version")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("os_version").toString())) {
+								prop.setPropertyValue(nameMap.get("os_version").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("disk_total").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("disk_total")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("disk_total").toString())) {
+								prop.setPropertyValue(nameMap.get("disk_total").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("machine_disk").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("machine_disk")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("machine_disk").toString())) {
+								prop.setPropertyValue(nameMap.get("machine_disk").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("memory_free").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("memory_free")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("memory_free").toString())) {
+								prop.setPropertyValue(nameMap.get("memory_free").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("memory_total").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("memory_total")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("memory_total").toString())) {
+								prop.setPropertyValue(nameMap.get("memory_total").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("physical_memory").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("physical_memory")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("physical_memory").toString())) {
+								prop.setPropertyValue(nameMap.get("physical_memory").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("total_disk_empty").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("total_disk_empty")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("total_disk_empty").toString())) {
+								prop.setPropertyValue(nameMap.get("total_disk_empty").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("uptime_days").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("uptime_days")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("uptime_days").toString())) {
+								prop.setPropertyValue(nameMap.get("uptime_days").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("uptime_hours").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("uptime_hours")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("uptime_hours").toString())) {
+								prop.setPropertyValue(nameMap.get("uptime_hours").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("uptime_minutes").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("uptime_minutes")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("uptime_minutes").toString())) {
+								prop.setPropertyValue(nameMap.get("uptime_minutes").toString());
+							}
+						}
+					}
+				});
+				
+				server.setStatus(true);
+				serverRepository.save(server);
+			}
+			else {
+				server.setStatus(false);
+				serverRepository.save(server);
+				System.out.println("hata yazılacak");
+			}
+				
+	}
 		HttpHeaders headers = new HttpHeaders();
 		if(!serverList.isEmpty()) {
-//			return new ResponseEntity<ServerImpl>((ServerImpl) serverList, HttpStatus.OK);
 			return ResponseEntity
 					.status(HttpStatus.OK)
 					.body(serverList);
 		}
 		else {
 			return ResponseEntity
-    				.status(HttpStatus.NOT_FOUND)
-    				.headers(headers)
-    				.build();
-		}
+					.status(HttpStatus.NOT_FOUND)
+					.headers(headers)
+					.build();
+	}
+
+	
 	}
 	
 	@Operation(summary = "Server delete", description = "", tags = {""})
