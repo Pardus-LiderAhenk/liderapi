@@ -45,7 +45,7 @@ public class ServerImpl implements Serializable {
 	private String user;
 	
 	@Column(name = "STATUS")
-	private String status;
+	private Boolean status;
 	
 	@Column(name = "PASSWORD")
 	private String password;
@@ -116,11 +116,11 @@ public class ServerImpl implements Serializable {
 		this.user = user;
 	}
 
-	public String getStatus() {
+	public Boolean getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Boolean status) {
 		this.status = status;
 	}
 	
@@ -153,7 +153,7 @@ public class ServerImpl implements Serializable {
 	}
 	
 	public ServerImpl(Long id, String description, String machineName, String ip, 
-			String password, String status, Date createDate, Date modifyDate, String user, Set<ServerInformationImpl> properties) {
+			String password, Boolean status, Date createDate, Date modifyDate, String user, Set<ServerInformationImpl> properties) {
 		
 		super();
 		this.id = id;
@@ -216,6 +216,7 @@ public class ServerImpl implements Serializable {
 		return null;
 	}
 	
+	@Override
 	public String toString() {
 		return "ServerImpl [id=" + id + ", description=" + description + ", machineName=" + machineName + ", ip=" + ip + " , "
 				+ "password=" + password + ", status=" + status + ", user=" + user + " , createDate=" + createDate + ", modifyDate=" + modifyDate + "]";

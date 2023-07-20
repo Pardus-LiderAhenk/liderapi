@@ -17,7 +17,6 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties({ "server" })
@@ -114,6 +113,7 @@ public class ServerInformationImpl implements Serializable {
 	}
 	
 	
+	@Override
 	public String toString() {
 		return "ServerInformationImpl [id=" + id + ", propertyName=" + propertyName + ", propertyValue=" + propertyValue + ", createDate=" + createDate +"]";
 		
