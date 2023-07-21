@@ -173,18 +173,10 @@ public class ServerService {
 		
 	}
 	
-//	public List<ServerImpl> updateList(){
-//		
-//
-//		
-//	}
 	
-	
-	public List<ServerImpl> list(String serverId ){
+	public List<ServerImpl> findServerByIdList(String serverId ){
 		
-		
-		return null;
-		
+		return serverRepository.findById(serverId);
 		
 	}
 	

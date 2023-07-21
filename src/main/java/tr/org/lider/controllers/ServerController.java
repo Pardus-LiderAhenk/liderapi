@@ -34,6 +34,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.constant.LiderConstants;
+import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.entities.ServerInformationImpl;
 import tr.org.lider.repositories.ServerInformationRepository;
@@ -401,25 +402,27 @@ public class ServerController {
 		}
 	}
 	
-//	@Operation(summary = "Server update list", description = "", tags = { "" })
-//    @ApiResponses(value = { 
-//              @ApiResponse(responseCode = "200", description = "Retrieved update server list"),
-//              @ApiResponse(responseCode = "417", description = "Can not update server list. Unexpected error occurred", 
-//                content = @Content(schema = @Schema(implementation = String.class))) })
-//    @PostMapping(value = "/server/update/id/{id}")
-//    public ResponseEntity<ServerImpl> updateServerList(@PathVariable Long serverId) {		
-//		logger.debug("Server id:  {} ", serverId);
-//		Optional<ServerImpl> server = serverService.findServerByID(serverId);
-//		HttpHeaders headers = new HttpHeaders();
-//		if(server.isPresent()) {
-//			return new ResponseEntity<ServerImpl>(server.get(), HttpStatus.OK);
-//		}
-//		else {
-//			return ResponseEntity
-//    				.status(HttpStatus.NOT_FOUND)
-//    				.headers(headers)
-//    				.build();
-//		}
+	@Operation(summary = "Get details server informtaion", description = "", tags = { "script" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Returns details of selected server. Successful"),
+			  @ApiResponse(responseCode = "417", description = "Could not get details of selected server. Unexpected error occurred", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ServerImpl> findServerById(@RequestParam (value = "serverId") String serverId) {
+		List<ServerImpl> server = serverService.findServerByIdList(serverId);
+		if (server != null && server.size() > 0) {
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(server.get(0));
+					
+		} else {
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
+		}
+	}
 	
 	
 }
