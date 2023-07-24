@@ -385,7 +385,7 @@ public class ServerController {
               @ApiResponse(responseCode = "200", description = ""),
               @ApiResponse(responseCode = "417", description = "Unexpected error occurred", 
                 content = @Content(schema = @Schema(implementation = String.class))) })
-    @GetMapping(value = "/detail/id/{id}")
+    @PostMapping(value = "/detail/id/{id}")
     public  ResponseEntity<ServerImpl> getServerDetailList(@PathVariable Long serverId) {
 		logger.debug("Server id:  {} ", serverId);
 
@@ -402,27 +402,27 @@ public class ServerController {
 		}
 	}
 	
-	@Operation(summary = "Get details server informtaion", description = "", tags = { "script" })
-	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Returns details of selected server. Successful"),
-			  @ApiResponse(responseCode = "417", description = "Could not get details of selected server. Unexpected error occurred", 
-			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ServerImpl> findServerById(@RequestParam (value = "serverId") String serverId) {
-		List<ServerImpl> server = serverService.findServerByIdList(serverId);
-		if (server != null && server.size() > 0) {
-			return ResponseEntity
-					.status(HttpStatus.OK)
-					.body(server.get(0));
-					
-		} else {
-			HttpHeaders headers = new HttpHeaders();
-    		return ResponseEntity
-    				.status(HttpStatus.EXPECTATION_FAILED)
-    				.headers(headers)
-    				.build();
-		}
-	}
+//	@Operation(summary = "Get details server informtaion", description = "", tags = { "script" })
+//	@ApiResponses(value = { 
+//			  @ApiResponse(responseCode = "200", description = "Returns details of selected server. Successful"),
+//			  @ApiResponse(responseCode = "417", description = "Could not get details of selected server. Unexpected error occurred", 
+//			    content = @Content(schema = @Schema(implementation = String.class))) })
+//	@PostMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
+//	public ResponseEntity<ServerImpl> findServerById(@RequestParam (value = "serverId") String serverId) {
+//		List<ServerImpl> server = serverService.findServerByIdList(serverId);
+//		if (server != null && server.size() > 0) {
+//			return ResponseEntity
+//					.status(HttpStatus.OK)
+//					.body(server.get(0));
+//					
+//		} else {
+//			HttpHeaders headers = new HttpHeaders();
+//    		return ResponseEntity
+//    				.status(HttpStatus.EXPECTATION_FAILED)
+//    				.headers(headers)
+//    				.build();
+//		}
+//	}
 	
 	
 }
