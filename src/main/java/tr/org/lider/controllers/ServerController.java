@@ -34,7 +34,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.constant.LiderConstants;
-import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.entities.ServerInformationImpl;
 import tr.org.lider.repositories.ServerInformationRepository;
@@ -314,6 +313,45 @@ public class ServerController {
 						if (prop.getPropertyName().equals("uptime_minutes")) {
 							if (!prop.getPropertyValue().equals(nameMap.get("uptime_minutes").toString())) {
 								prop.setPropertyValue(nameMap.get("uptime_minutes").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_user").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("cpu_user")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("cpu_user").toString())) {
+								prop.setPropertyValue(nameMap.get("cpu_user").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_system").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("cpu_system")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("cpu_system").toString())) {
+								prop.setPropertyValue(nameMap.get("cpu_system").toString());
+							}
+						}
+					}
+				});
+				
+				updateResults.stream()
+				.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_idle").toString())))
+				.forEach(nameMap -> {
+
+					for (ServerInformationImpl prop : server.getProperties()) {
+						if (prop.getPropertyName().equals("cpu_idle")) {
+							if (!prop.getPropertyValue().equals(nameMap.get("cpu_idle").toString())) {
+								prop.setPropertyValue(nameMap.get("cpu_idle").toString());
 							}
 						}
 					}

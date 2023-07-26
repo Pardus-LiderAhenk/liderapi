@@ -168,6 +168,21 @@ public class ServerService {
 		.forEach(nameMap -> {
 			server.addProperty(new ServerInformationImpl(server, "uptime_minutes", nameMap.get("uptime_minutes").toString()));
 		});
+		listOfMaps.stream()
+		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_user").toString())))
+		.forEach(nameMap -> {
+			server.addProperty(new ServerInformationImpl(server, "cpu_user", nameMap.get("cpu_user").toString()));
+		});
+		listOfMaps.stream()
+		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_system").toString())))
+		.forEach(nameMap -> {
+			server.addProperty(new ServerInformationImpl(server, "cpu_system", nameMap.get("cpu_system").toString()));
+		});
+		listOfMaps.stream()
+		.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_idle").toString())))
+		.forEach(nameMap -> {
+			server.addProperty(new ServerInformationImpl(server, "cpu_idle", nameMap.get("cpu_idle").toString()));
+		});
 		server.setStatus(true);
 		return serverRepository.save(server);
 		
