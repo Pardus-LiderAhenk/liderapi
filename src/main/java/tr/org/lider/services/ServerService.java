@@ -1,6 +1,7 @@
 package tr.org.lider.services;
 
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,7 +15,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tr.org.lider.entities.OperationType;
-import tr.org.lider.entities.RegistrationTemplateImpl;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.entities.ServerInformationImpl;
 import tr.org.lider.repositories.ServerInformationRepository;
@@ -26,8 +26,6 @@ public class ServerService {
 	@Autowired
 	private ServerRepository serverRepository;
 	
-	@Autowired
-	private ServerInformationRepository serverInformationRepository;
 	
 	@Autowired
 	private OperationLogService operationLogService;
@@ -193,6 +191,17 @@ public class ServerService {
 		
 	}
 	
+	public ServerImpl update(ServerImpl server) {
+		//server.setModifyDate(new Date());
+		ServerImpl savedserver = serverRepository.save(server);
+		try {
+			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return savedserver;
+	}
+	
 	
 	public List<ServerImpl> findServerByIdList(String serverId ){
 		
@@ -206,7 +215,7 @@ public class ServerService {
 	
 	public void delete(Long id) {
 		serverRepository.deleteById(id);
-//		return true;
+
 	}
 	
 	public List<ServerImpl> findServerAll() {

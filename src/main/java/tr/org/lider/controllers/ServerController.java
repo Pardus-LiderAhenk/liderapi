@@ -391,7 +391,7 @@ public class ServerController {
 
 	
 	}
-	
+
 	@Operation(summary = "Server delete", description = "", tags = {""})
 	@ApiResponses(value= {
 			 @ApiResponse(responseCode = "200", description = "" ),
@@ -456,40 +456,10 @@ public class ServerController {
 			  @ApiResponse(responseCode = "400", description = "Template id not found !", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ServerImpl> updateServer(@RequestBody ServerImpl server) {
-		logger.debug("Request to update template : {}", server);
-		Optional<ServerImpl> serverData = serverService.findServerByID(server.getId());
-		if(!serverData.isPresent()) {
-			logger.error("Request to update server {} but server not found!", server);
-        	HttpHeaders headers = new HttpHeaders();
-        	headers.add("message", "Template id not found !");
-    		return ResponseEntity
-    				.status(HttpStatus.NOT_FOUND)
-    				.headers(headers)
-    				.build();
-		}
-		//update allowed fields
-		serverData.get().setMachineName(server.getMachineName());
-		serverData.get().setIp(server.getIp());
-		serverData.get().setUser(server.getUser());
-		serverData.get().setPassword(server.getPassword());
-		ServerImpl result = serverService.save(serverData.get());
-		
-		Map<String, Object> requestData = new HashMap<String, Object>();
-		requestData.put("existingTemplate",serverData.get());
-		ObjectMapper dataMapper = new ObjectMapper();
-		String jsonString = null ; 
-		try {
-			jsonString = dataMapper.writeValueAsString(requestData);
-		} catch (JsonProcessingException e1) {
-			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
-		}
-		String log = serverData.get().getId() + " server has been updated";
-		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
-		return ResponseEntity
-				.status(HttpStatus.OK)
-				.body(result);
+	public ServerImpl updateServer(@RequestBody ServerImpl server) {
+		//return null;
+	
+		return serverService.update(server);
 	}
 	
-	
-}
+}	
