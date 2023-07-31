@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tr.org.lider.entities.OperationType;
+import tr.org.lider.entities.RegistrationTemplateImpl;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.entities.ServerInformationImpl;
 import tr.org.lider.repositories.ServerInformationRepository;
@@ -51,6 +52,10 @@ public class ServerService {
 			e.printStackTrace();		
 		}
 		return savedServer;	
+	}
+	
+	public ServerImpl save(ServerImpl server) {
+		return serverRepository.save(server);
 	}
 	
 	public ServerImpl save(String result, ServerImpl server) throws JsonProcessingException {

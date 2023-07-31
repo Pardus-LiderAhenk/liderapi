@@ -1,5 +1,6 @@
 package tr.org.lider.controllers;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,10 +18,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSch;
@@ -34,10 +37,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.constant.LiderConstants;
+import tr.org.lider.entities.OperationType;
+import tr.org.lider.entities.RegistrationTemplateImpl;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.entities.ServerInformationImpl;
 import tr.org.lider.repositories.ServerInformationRepository;
 import tr.org.lider.repositories.ServerRepository;
+import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.RemoteSshService;
 import tr.org.lider.services.ServerInformationService;
 import tr.org.lider.services.ServerService;
@@ -63,6 +69,9 @@ public class ServerController {
 	
 	@Autowired
 	private  ServerInformationRepository serverInformationRepository;
+	
+	@Autowired
+	private OperationLogService operationLogService;
 	
 	
 	@Operation()
@@ -440,27 +449,47 @@ public class ServerController {
 		}
 	}
 	
-//	@Operation(summary = "Get details server informtaion", description = "", tags = { "script" })
-//	@ApiResponses(value = { 
-//			  @ApiResponse(responseCode = "200", description = "Returns details of selected server. Successful"),
-//			  @ApiResponse(responseCode = "417", description = "Could not get details of selected server. Unexpected error occurred", 
-//			    content = @Content(schema = @Schema(implementation = String.class))) })
-//	@PostMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
-//	public ResponseEntity<ServerImpl> findServerById(@RequestParam (value = "serverId") String serverId) {
-//		List<ServerImpl> server = serverService.findServerByIdList(serverId);
-//		if (server != null && server.size() > 0) {
-//			return ResponseEntity
-//					.status(HttpStatus.OK)
-//					.body(server.get(0));
-//					
-//		} else {
-//			HttpHeaders headers = new HttpHeaders();
-//    		return ResponseEntity
-//    				.status(HttpStatus.EXPECTATION_FAILED)
-//    				.headers(headers)
-//    				.build();
-//		}
-//	}
+	@Operation(summary = "Update server ", description = "", tags = { "" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "", 
+			    content = { @Content(schema = @Schema(implementation = RegistrationTemplateImpl.class)) }),
+			  @ApiResponse(responseCode = "400", description = "Template id not found !", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ServerImpl> updateServer(@RequestBody ServerImpl server) {
+		logger.debug("Request to update template : {}", server);
+		Optional<ServerImpl> serverData = serverService.findServerByID(server.getId());
+		if(!serverData.isPresent()) {
+			logger.error("Request to update server {} but server not found!", server);
+        	HttpHeaders headers = new HttpHeaders();
+        	headers.add("message", "Template id not found !");
+    		return ResponseEntity
+    				.status(HttpStatus.NOT_FOUND)
+    				.headers(headers)
+    				.build();
+		}
+		//update allowed fields
+		serverData.get().setMachineName(server.getMachineName());
+		serverData.get().setIp(server.getIp());
+		serverData.get().setUser(server.getUser());
+		serverData.get().setPassword(server.getPassword());
+		ServerImpl result = serverService.save(serverData.get());
+		
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("existingTemplate",serverData.get());
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null ; 
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+		}
+		String log = serverData.get().getId() + " server has been updated";
+		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(result);
+	}
 	
 	
 }
