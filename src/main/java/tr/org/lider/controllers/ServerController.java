@@ -60,24 +60,23 @@ public class ServerController {
 		sshService.setHost(server.getIp());
 		sshService.setUser(server.getUser());
 		sshService.setPassword(server.getPassword());
+		HttpHeaders headers = new HttpHeaders();
 		try {
 			serverService.add(server);
 			String result = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);
 			String[] passwordSplit = result.split("\\[");
 			result = "[" + passwordSplit[passwordSplit.length-1];
-			
-			//serverService.save(result,server);
-			
+						
 			return ResponseEntity
 					.status(HttpStatus.OK)
 					.body(serverService.save(result,server));
-		} catch (Exception e) {
-			// TODO: handle exception
+		} 
+		catch (Exception e) {
+			return ResponseEntity
+					.status(HttpStatus.NOT_FOUND)
+					.headers(headers)
+					.build();
 		}
-		return null;		
-//		return ResponseEntity
-//				.status(HttpStatus.OK)
-//				.body(serverService.save(result,server));
 	}
 	
 	
@@ -156,7 +155,8 @@ public class ServerController {
 			}
 			serverService.delete(id);
 					
-		} catch (DataAccessException e) {
+		} 
+		catch (DataAccessException e) {
 			logger.error("Error delete server: " + e.getCause().getMessage());
 			HttpHeaders headers = new HttpHeaders();
     		return ResponseEntity
@@ -196,12 +196,24 @@ public class ServerController {
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "", 
 			    content = { @Content(schema = @Schema(implementation = RegistrationTemplateImpl.class)) }),
-			  @ApiResponse(responseCode = "400", description = "Template id not found !", 
+			  @ApiResponse(responseCode = "417", description = "server id not found !", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PutMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ServerImpl updateServer(@RequestBody ServerImpl server) {
+	@PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<ServerImpl> updateServer(@RequestBody ServerImpl server) {
+		try {
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(serverService.update(server));
+		} 
+		catch (DataAccessException e) {
+			logger.error("Error updated server: " + e.getCause().getMessage());
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
+		}		
 	
-		return serverService.update(server);
 	}
 	
 }	

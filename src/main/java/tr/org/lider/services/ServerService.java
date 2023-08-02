@@ -184,14 +184,20 @@ public class ServerService {
 	}
 	
 	public ServerImpl update(ServerImpl server) {
-		//server.setModifyDate(new Date());
-		ServerImpl savedserver = serverRepository.save(server);
+		ServerImpl existServer = findServerID(server.getId());
+		existServer.setModifyDate(new Date());
+		existServer.setMachineName(server.getMachineName());
+		existServer.setIp(server.getIp());
+		existServer.setUser(server.getUser());
+		existServer.setPassword(server.getPassword());
+		
+		//ServerImpl savedserver = serverRepository.save(server);
 		try {
 			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
-		return savedserver;
+		return serverRepository.save(existServer);
 	}
 	
 	
@@ -199,6 +205,10 @@ public class ServerService {
 		
 		return serverRepository.findById(serverId);
 		
+	}
+	
+	public ServerImpl findServerID(Long id) {
+		return serverRepository.findOne(id);
 	}
 	
 	public Optional<ServerImpl> findServerByID(Long serverId) {
