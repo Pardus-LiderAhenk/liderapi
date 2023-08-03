@@ -63,6 +63,7 @@ public class RoleService {
 		roleList.add(new RoleImpl("Politika Yönetimi", "ROLE_POLICY", 50, findRoleTypeByCode("role_policy")));
 		roleList.add(new RoleImpl("Arayüz Erişim Ayarları", "ROLE_CONSOLE_ACCESS_SETTINGS", 60, findRoleTypeByCode("role_settings")));
 		roleList.add(new RoleImpl("Sunucu Ayarları", "ROLE_SERVER_SETTINGS", 62, findRoleTypeByCode("role_settings")));
+		roleList.add(new RoleImpl("Sunucu Bilgileri", "ROLE_SERVER_INFORMATION", 64, findRoleTypeByCode("role_settings")));
 		roleList.add(new RoleImpl("Sistem Gözlemcisi Tanımları", "ROLE_CONKY_DEFINITION", 80, findRoleTypeByCode("role_definition")));
 		roleList.add(new RoleImpl("Betik Tanımları", "ROLE_SCRIPT_DEFINITION", 82, findRoleTypeByCode("role_definition")));
 		roleList.add(new RoleImpl("ETA Mesaj Tanımları", "ROLE_ETA_MESSAGE_DEFINITION", 84, findRoleTypeByCode("role_definition")));
