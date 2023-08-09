@@ -203,11 +203,11 @@ public class ServerService {
 	}
 	
 	
-	public List<ServerImpl> findServerByIdList(String serverId ){
-		
-		return serverRepository.findById(serverId);
-		
-	}
+//	public List<ServerImpl> findServerByIdList(String serverId ){
+//		
+//		return serverRepository.findById(serverId);
+//		
+//	}
 	
 	public ServerImpl findServerID(Long id) {
 		return serverRepository.findOne(id);
@@ -492,4 +492,3 @@ public class ServerService {
 		}
 		
 }
-

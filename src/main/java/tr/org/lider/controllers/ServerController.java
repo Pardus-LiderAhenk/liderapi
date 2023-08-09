@@ -216,4 +216,29 @@ public class ServerController {
 	
 	}
 	
+	@Operation(summary = "Get server data", description = "", tags = { "" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "", 
+			    content = { @Content(schema = @Schema(implementation = RegistrationTemplateImpl.class)) }),
+			  @ApiResponse(responseCode = "417", description = "server id not found !", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/get-data", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<List<ServerImpl>> getServerData() {
+		try {
+			
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(serverService.findServerAll());
+		} 
+		catch (DataAccessException e) {
+			logger.error("Error updated server: " + e.getCause().getMessage());
+			HttpHeaders headers = new HttpHeaders();
+    		return ResponseEntity
+    				.status(HttpStatus.EXPECTATION_FAILED)
+    				.headers(headers)
+    				.build();
+		}		
+	
+	}
+	
 }	
