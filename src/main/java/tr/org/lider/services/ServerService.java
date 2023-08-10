@@ -7,13 +7,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.Count;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,7 +18,6 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
 import tr.org.lider.constant.LiderConstants;
-import tr.org.lider.controllers.ServerController;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.entities.ServerInformationImpl;
@@ -174,6 +169,12 @@ public class ServerService {
 				server.addProperty(new ServerInformationImpl(server, "cpu_idle", nameMap.get("cpu_idle").toString()));
 			});
 			
+			listOfMaps.stream()
+			.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_core").toString())))
+			.forEach(nameMap -> {
+				server.addProperty(new ServerInformationImpl(server, "cpu_core", nameMap.get("cpu_core").toString()));
+			});
+			
 			server.setStatus(true);
 		}
 		else {
@@ -231,6 +232,7 @@ public class ServerService {
 		List<ServerImpl> serverList = findServerAll();
 		String updateResult;
 		int i = 0;
+		int core_count = 0;
 		for(i = 0 ; i< serverList.size(); i++) {
 			ServerImpl server = serverList.get(i);
 			
@@ -455,21 +457,37 @@ public class ServerService {
 							}
 						}
 					});
+					
+					long cpuCount  = updateResults.stream()
+					.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_core").toString())))
+					.peek(nameMap -> {
+						try {
+							for (ServerInformationImpl prop : server.getProperties()) {
+								if (prop.getPropertyName().equals("cpu_core")) {
+									if (!prop.getPropertyValue().equals(nameMap.get("cpu_core").toString())) {
+										prop.setPropertyValue(nameMap.get("cpu_core").toString());
+									}
+								}
+							}
+							
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+							
+					}).count();
+					
+				
 				
 					
 					server.setStatus(true);
 					serverRepository.save(server);
 				}			
-				else {
-					server.setStatus(false);
-					serverRepository.save(server);
-					System.out.println("Sunucuya ssh ile erişim yapılamıyor.");
-				}
 			}
+			
 		else {
 			serverList.get(i).setStatus(false);
-			System.out.println("ne olursa kaydedilecek");
-			//throw new Exap
+			System.out.println("Bu makineye ssh sağlanamadı");
+			
 			}
 		}
 		return serverList;
