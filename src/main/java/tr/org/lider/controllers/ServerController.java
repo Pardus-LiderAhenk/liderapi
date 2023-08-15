@@ -75,7 +75,7 @@ public class ServerController {
 			}
 		
 				return ResponseEntity
-						.status(HttpStatus.EXPECTATION_FAILED)
+						.status(HttpStatus.OK)
 						.body(serverService.add(server));
 	
 		} 

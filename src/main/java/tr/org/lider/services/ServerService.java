@@ -1,14 +1,12 @@
 package tr.org.lider.services;
 
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.Count;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +21,6 @@ import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.entities.ServerInformationImpl;
 import tr.org.lider.repositories.ServerRepository;
-import tr.org.lider.test.CpuMetrics;
 
 @Service
 public class ServerService {
@@ -177,20 +174,6 @@ public class ServerService {
 			.forEach(nameMap -> {
 				server.addProperty(new ServerInformationImpl(server, "cpu_core", nameMap.get("cpu_core").toString()));
 			});
-			
-//			 listOfMaps.stream()
-//			.filter(nameMap -> (!(StringUtils.isEmpty(nameMap.get("cpu_core").toString())))
-//			.map(cpu -> new ServerImpl(cpu.get("cpu_core")>0 ));
-//				
-//					server.addProperty(new ServerInformationImpl(server, "cpu_core", count));
-	
-//			Integer cpuCount = listOfMaps.stream()
-//			.filter(nameMap -> (StringUtils.isNotEmpty(nameMap.get("cpu_core")).toString()).length());
-//			.map(cpu -> Integer.parseInt((nameMap.get(cpu).toString())))
-//			.max((core1,core2) -> nameMap.get )
-			
-				
-			//server.addProperty(new ServerInformationImpl(server, "cpu_core",cpuCount.toString()));
 				
 			
 			
@@ -251,7 +234,6 @@ public class ServerService {
 		List<ServerImpl> serverList = findServerAll();
 		String updateResult;
 		int i = 0;
-		int core_count = 0;
 		for(i = 0 ; i< serverList.size(); i++) {
 			ServerImpl server = serverList.get(i);
 			
