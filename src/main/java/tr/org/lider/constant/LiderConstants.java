@@ -34,7 +34,7 @@ public class LiderConstants {
 				"null mac_addr, days as uptime_days,hours as uptime_hours, minutes as uptime_minutes,null as cpu_user,null as cpu_system,null as cpu_idle,\n" + 
 				"null as cpu_core from uptime union select null as os_name, null as os_version,null as machine_disk, null as disk_total,null as total_disk_empty, \n" + 
 				"null as memory_total,null as memory_free,null as hostname, null as physical_memory, null as computer_name,null mac_addr, null as uptime_days, \n" + 
-				"null as uptime_hours, null as uptime_minutes,user as cpu_user,system as cpu_system,idle as cpu_idle,core as cpu_core from cpu_time;";
+				"null as uptime_hours, null as uptime_minutes,sum(user) as cpu_user,sum(system) as cpu_system,sum(idle) as cpu_idle, count(core) as cpu_core from cpu_time;";
 				
 		public static String OSQUERY_QUERY = "echo \" " + ServerInformation.QUERY1 + " \" | osqueryi --json";
 

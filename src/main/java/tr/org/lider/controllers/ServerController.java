@@ -56,26 +56,34 @@ public class ServerController {
 			  @ApiResponse(responseCode = "417", description = "Could not add server. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })	
 	@PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ServerImpl> serverAdd(@RequestBody ServerImpl server){
+	public ResponseEntity<ServerImpl> serverAdd(@RequestBody ServerImpl server) throws Exception{
 		sshService.setHost(server.getIp());
 		sshService.setUser(server.getUser());
 		sshService.setPassword(server.getPassword());
 		HttpHeaders headers = new HttpHeaders();
+		
 		try {
-			serverService.add(server);
-			String result = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);
-			String[] passwordSplit = result.split("\\[");
-			result = "[" + passwordSplit[passwordSplit.length-1];
-						
-			return ResponseEntity
-					.status(HttpStatus.OK)
-					.body(serverService.save(result,server));
+			
+			if(serverService.isServerReachable(server.getIp(), server.getPassword(), server.getUser())== true) {
+				serverService.add(server);
+				String result = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);
+				String[] passwordSplit = result.split("\\[");
+				result = "[" + passwordSplit[passwordSplit.length-1];
+				return ResponseEntity
+		              .status(HttpStatus.OK)
+		              .body(serverService.save(result,server));	
+			}
+		
+				return ResponseEntity
+						.status(HttpStatus.EXPECTATION_FAILED)
+						.body(serverService.add(server));
+	
 		} 
 		catch (Exception e) {
-			return ResponseEntity
-					.status(HttpStatus.NOT_FOUND)
-					.headers(headers)
-					.build();
+			   e.printStackTrace();
+			   return ResponseEntity
+		                  .status(HttpStatus.BAD_REQUEST)
+		                  .build();
 		}
 	}
 	

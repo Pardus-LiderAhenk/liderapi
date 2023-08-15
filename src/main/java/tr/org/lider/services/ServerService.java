@@ -1,6 +1,7 @@
 package tr.org.lider.services;
 
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.entities.ServerInformationImpl;
 import tr.org.lider.repositories.ServerRepository;
+import tr.org.lider.test.CpuMetrics;
 
 @Service
 public class ServerService {
@@ -154,6 +156,7 @@ public class ServerService {
 			listOfMaps.stream()
 			.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_user").toString())))
 			.forEach(nameMap -> {
+				
 				server.addProperty(new ServerInformationImpl(server, "cpu_user", nameMap.get("cpu_user").toString()));
 			});
 			
@@ -174,6 +177,22 @@ public class ServerService {
 			.forEach(nameMap -> {
 				server.addProperty(new ServerInformationImpl(server, "cpu_core", nameMap.get("cpu_core").toString()));
 			});
+			
+//			 listOfMaps.stream()
+//			.filter(nameMap -> (!(StringUtils.isEmpty(nameMap.get("cpu_core").toString())))
+//			.map(cpu -> new ServerImpl(cpu.get("cpu_core")>0 ));
+//				
+//					server.addProperty(new ServerInformationImpl(server, "cpu_core", count));
+	
+//			Integer cpuCount = listOfMaps.stream()
+//			.filter(nameMap -> (StringUtils.isNotEmpty(nameMap.get("cpu_core")).toString()).length());
+//			.map(cpu -> Integer.parseInt((nameMap.get(cpu).toString())))
+//			.max((core1,core2) -> nameMap.get )
+			
+				
+			//server.addProperty(new ServerInformationImpl(server, "cpu_core",cpuCount.toString()));
+				
+			
 			
 			server.setStatus(true);
 		}
@@ -458,23 +477,18 @@ public class ServerService {
 						}
 					});
 					
-					long cpuCount  = updateResults.stream()
+					updateResults.stream()
 					.filter(nameMap -> !(StringUtils.isEmpty(nameMap.get("cpu_core").toString())))
-					.peek(nameMap -> {
-						try {
-							for (ServerInformationImpl prop : server.getProperties()) {
-								if (prop.getPropertyName().equals("cpu_core")) {
-									if (!prop.getPropertyValue().equals(nameMap.get("cpu_core").toString())) {
-										prop.setPropertyValue(nameMap.get("cpu_core").toString());
-									}
+					.forEach(nameMap -> {
+	
+						for (ServerInformationImpl prop : server.getProperties()) {
+							if (prop.getPropertyName().equals("cpu_core")) {
+								if (!prop.getPropertyValue().equals(nameMap.get("cpu_core").toString())) {
+									prop.setPropertyValue(nameMap.get("cpu_core").toString());
 								}
 							}
-							
-						} catch (Exception e) {
-							e.printStackTrace();
 						}
-							
-					}).count();
+					});
 					
 				
 				
