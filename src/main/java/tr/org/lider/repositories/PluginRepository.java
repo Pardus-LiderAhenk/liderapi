@@ -1,7 +1,6 @@
 package tr.org.lider.repositories;
 
 import java.util.List;
-import java.util.Optional;
 
 import tr.org.lider.entities.PluginImpl;
 

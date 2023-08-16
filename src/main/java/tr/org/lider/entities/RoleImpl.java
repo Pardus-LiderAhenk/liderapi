@@ -5,8 +5,11 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -38,6 +41,10 @@ public class RoleImpl implements Serializable{
 	
 	@Column(name = "value", nullable = false, unique = true)
 	private String value;
+	
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "role_type_id", nullable = false)
+	private RoleTypeImpl roleType; // unidirectional
 
 	@OrderBy
 	@Column(name = "ORDER_NUMBER")
@@ -60,10 +67,11 @@ public class RoleImpl implements Serializable{
 	public RoleImpl() {
 	}
 
-	public RoleImpl(String name, String value, int orderNumber) {
+	public RoleImpl(String name, String value, int orderNumber, RoleTypeImpl roleTypeImpl) {
 		this.name = name;
 		this.value = value;
 		this.orderNumber = orderNumber;
+		this.roleType = roleTypeImpl;
 	}
 	
 	public RoleImpl(Long id, String name, String value) {
@@ -118,6 +126,14 @@ public class RoleImpl implements Serializable{
 
 	public void setOrderNumber(int orderNumber) {
 		this.orderNumber = orderNumber;
+	}
+	
+	public RoleTypeImpl getRoleType() {
+		return roleType;
+	}
+
+	public void setRoleType(RoleTypeImpl roleType) {
+		this.roleType = roleType;
 	}
 
 
