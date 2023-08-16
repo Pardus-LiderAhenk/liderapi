@@ -32,7 +32,6 @@ import tr.org.lider.services.RemoteSshService;
  */
 @RestController
 @RequestMapping("/api/remote-ssh")
-//@RequestMapping("/remoteSsh")
 @Tag(name = "", description = "" )
 public class RemoteSshController {
 	
@@ -61,11 +60,16 @@ public class RemoteSshController {
 	    	sshService.setHost(host);
 	    	sshService.setUser(user);
 	    	sshService.setPassword(password);
+	    	
 	    	try {
 				 String result =sshService.executeCommand(command);
+				 String[] passwordSplit = result.split("\\[");
+				 result = "[" + passwordSplit[passwordSplit.length-1];
+				System.out.println("resultsshhservice");
 				 return ResponseEntity
 						 .status(HttpStatus.OK)
 						 .body(result);
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				HttpHeaders headers = new HttpHeaders();

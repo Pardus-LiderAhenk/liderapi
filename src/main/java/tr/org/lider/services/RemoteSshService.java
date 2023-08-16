@@ -74,7 +74,7 @@ public class RemoteSshService {
 		}
 		
 		Channel channel = null;
-		String commandResult="";
+		String commandResult=null;
 		
 		try {
 			channel = session.openChannel("exec");
@@ -98,7 +98,7 @@ public class RemoteSshService {
 					commandResult += new String(tmp, 0, i);
 				}
 				if (channel.isClosed()) {
-					commandResult += channel.getExitStatus();
+					//commandResult += channel.getExitStatus();
 					break;
 				}
 				try {
@@ -116,6 +116,7 @@ public class RemoteSshService {
 			releaseSession(channel,session);
 		}
 		logger.info("Remote Ssh execution command result {}", commandResult);
+
 		return commandResult;
 	}
 
