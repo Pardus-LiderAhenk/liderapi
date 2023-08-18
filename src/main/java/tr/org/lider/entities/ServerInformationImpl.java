@@ -2,6 +2,7 @@ package tr.org.lider.entities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,10 +20,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import tr.org.lider.utils.IServerInformation;
+
 @JsonIgnoreProperties({ "server" })
 @Entity
 @Table(name = "Server_Information")
-public class ServerInformationImpl implements Serializable {
+public class ServerInformationImpl implements Serializable,IServerInformation {
 	
 	private static final long serialVersionUID = 7634830693350923198L;
 
@@ -117,5 +120,16 @@ public class ServerInformationImpl implements Serializable {
 	public String toString() {
 		return "ServerInformationImpl [id=" + id + ", propertyName=" + propertyName + ", propertyValue=" + propertyValue + ", createDate=" + createDate +"]";
 		
+	}
+
+	@Override
+	public Map<String, Object> applyServer(Map<String, Object> prop, String propName) {
+		if (this.getPropertyName().equals(propName)) {
+			if (!this.getPropertyValue().equals(prop.get(propName).toString())) {
+				this.setPropertyValue(prop.get(propName).toString());
+			}
+		
+		}
+		return prop;
 	}
 }

@@ -135,7 +135,7 @@ public class ServerController {
 		catch (Exception e) {
 	
 			return ResponseEntity
-				.status(HttpStatus.NOT_FOUND)
+				.status(HttpStatus.EXPECTATION_FAILED)
 				.headers(headers)
 				.build();
 			
