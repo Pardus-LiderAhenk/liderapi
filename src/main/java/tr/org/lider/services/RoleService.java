@@ -25,7 +25,7 @@ public class RoleService {
 	@PostConstruct
 	public void init() throws Exception {
 		
-//		roleTypeRepository.deleteAll();
+		roleRepository.deleteAll();
 		List<RoleTypeImpl> roleTypeList = new ArrayList<>();
 		List<RoleTypeImpl> roleTypeList2 = new ArrayList<>();
 		roleTypeList.add(new RoleTypeImpl("Admin Yetkisi", "role_admin"));

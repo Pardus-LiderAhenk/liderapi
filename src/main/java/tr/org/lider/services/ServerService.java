@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
+import net.bytebuddy.asm.Advice.Exit;
 import tr.org.lider.constant.LiderConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ServerImpl;
@@ -199,20 +200,28 @@ public class ServerService {
 	
 	public ServerImpl update(ServerImpl server) {
 		ServerImpl existServer = findServerID(server.getId());
-		existServer.setModifyDate(new Date());
-		existServer.setMachineName(server.getMachineName());
-		existServer.setIp(server.getIp());
-		existServer.setUser(server.getUser());
-		existServer.setPassword(server.getPassword());
 		if(isServerReachable(existServer.getIp(), existServer.getPassword(), existServer.getUser())== true) {
-			serverRepository.save(existServer);
+			existServer.setModifyDate(new Date());
+			existServer.setMachineName(server.getMachineName());
+			existServer.setIp(server.getIp());
+			existServer.setUser(server.getUser());
+			existServer.setPassword(server.getPassword());
+			existServer.setStatus(true);
+			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
+		}
+		else {
+			existServer.setModifyDate(new Date());
+			existServer.setMachineName(server.getMachineName());
+			existServer.setIp(server.getIp());
+			existServer.setUser(server.getUser());
+			existServer.setPassword(server.getPassword());
+			existServer.setStatus(false);
+			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
+			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
+			
+			
 		}
 		
-		try {
-			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
 		return serverRepository.save(existServer);
 	}
 	
@@ -284,7 +293,7 @@ public class ServerService {
 //			for(ServerInformationImpl serverInf: serverInformationRepository.findByServerId(server.getId())){
 //				serverInformationRepository.deleteById(serverInf.getId());
 //			}
-			serverInformationRepository.deleteAll(serverInformationRepository.findByServerId(server.getId()));
+			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
 			
 			System.out.println("Bu makineye ssh sağlanamadı");
 			
