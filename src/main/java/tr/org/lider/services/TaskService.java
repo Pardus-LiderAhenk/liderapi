@@ -198,7 +198,7 @@ public class TaskService {
 				targetEntries.add(ldapEntry); 
 			}
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
-				List <String> dnList= ldapService.getGroupInGroups(ldapEntry);
+				List <String> dnList= ldapService.getGroupInGroupsTask(ldapEntry);
 				ldapEntryGroups = ldapService.getLdapDnStringToEntry(dnList);
 				
 					for(LdapEntry ldapEntryGroup : ldapEntryGroups) {
