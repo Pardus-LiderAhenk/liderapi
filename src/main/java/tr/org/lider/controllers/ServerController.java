@@ -91,7 +91,7 @@ public class ServerController {
 	@Operation(summary = "Check server connection", description = "", tags = { "connection" })
     @ApiResponses(value = { 
               @ApiResponse(responseCode = "200", description = "Server is available"),
-              @ApiResponse(responseCode = "417", description = "Can not reach server. Unexpected error occurred", 
+              @ApiResponse(responseCode = "500", description = "Can not reach server. Unexpected error occurred", 
                 content = @Content(schema = @Schema(implementation = String.class))) })
     @PostMapping(value = "/check-connection")
     public ResponseEntity<Boolean> isServerReachable(
@@ -112,8 +112,8 @@ public class ServerController {
               .body(true); // Connection successful
         } catch (Exception e) {
             return ResponseEntity
-                  .status(HttpStatus.BAD_REQUEST)
-                  .body(false); 
+                  .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                  .body(false);
         }
 	}
 	

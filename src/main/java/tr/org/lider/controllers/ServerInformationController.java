@@ -36,7 +36,7 @@ public class ServerInformationController {
 	@Operation()
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Execute server information. Successful"),
-			  @ApiResponse(responseCode = "417", description = "Could not execute server information. Unexpected error occurred", 
+			  @ApiResponse(responseCode = "400", description = "Could not execute server information. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })	
 	@PostMapping(value = "/execute-command", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> executeSshCommand(
