@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.PolicyImpl;
+import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.models.PolicyExecutionRequestImpl;
 import tr.org.lider.models.PolicyResponse;
 import tr.org.lider.services.PolicyExceptionService;
@@ -206,9 +207,20 @@ public class PolicyController {
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/execute", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> policyExecute(@RequestBody PolicyExecutionRequestImpl request) {
-		policyService.executePolicy(request);
-		//return new RestResponseImpl(RestResponseStatus.OK, new ArrayList<>(), null);
-		return ResponseEntity.status(HttpStatus.OK).body("Task is executed.");
+		try {
+			policyService.executePolicy(request);
+			//return new RestResponseImpl(RestResponseStatus.OK, new ArrayList<>(), null);
+			return ResponseEntity
+				.status(HttpStatus.OK)
+				.body("Task is executed.");
+			
+		} catch (Exception e) {
+			return ResponseEntity
+				.status(HttpStatus.EXPECTATION_FAILED)
+				.body("Task isn't executed.");
+
+		}
+		
 			
 	}
 	
