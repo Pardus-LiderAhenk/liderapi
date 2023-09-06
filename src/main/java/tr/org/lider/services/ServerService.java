@@ -226,12 +226,6 @@ public class ServerService {
 	}
 	
 	
-//	public List<ServerImpl> findServerByIdList(String serverId ){
-//		
-//		return serverRepository.findById(serverId);
-//		
-//	}
-	
 	public ServerImpl findServerID(Long id) {
 		return serverRepository.findOne(id);
 	}
@@ -251,7 +245,7 @@ public class ServerService {
 	
 
 	public List<ServerImpl> serverList() throws Throwable{
-		//PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
+		
 		List<ServerImpl> serverList = findServerAll();
 		String updateResult;
 		boolean success = false;
@@ -266,7 +260,7 @@ public class ServerService {
 			if(isServerReachable(serverList.get(i).getIp(), serverList.get(i).getPassword(), serverList.get(i).getUser())== true){
 			
 				updateResult = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);		
-				if (updateResult != null) {
+				if (updateResult.contains("disk_total")) {
 					String[] passwordSplit = updateResult.split("\\[");
 					updateResult = "[" + passwordSplit[passwordSplit.length-1];
 					ObjectMapper mapper = new ObjectMapper();
@@ -290,9 +284,7 @@ public class ServerService {
 		else {
 		
 			server.setStatus(false);
-//			for(ServerInformationImpl serverInf: serverInformationRepository.findByServerId(server.getId())){
-//				serverInformationRepository.deleteById(serverInf.getId());
-//			}
+
 			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
 			
 			System.out.println("Bu makineye ssh sağlanamadı");

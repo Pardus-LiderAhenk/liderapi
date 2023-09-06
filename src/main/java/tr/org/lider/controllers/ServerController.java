@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,35 +53,52 @@ public class ServerController {
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Added server. Successful"),
 			  @ApiResponse(responseCode = "417", description = "Could not add server. Unexpected error occurred", 
-			    content = @Content(schema = @Schema(implementation = String.class))) })	
+			    content = @Content(schema = @Schema(implementation = String.class))),
+			  @ApiResponse(responseCode = "426", description = "Could not osquery packet", 
+			    content = @Content(schema = @Schema(implementation = String.class)))})	
 	@PostMapping(value = "/add", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ServerImpl> serverAdd(@RequestBody ServerImpl server) throws Exception{
 		sshService.setHost(server.getIp());
 		sshService.setUser(server.getUser());
 		sshService.setPassword(server.getPassword());
 		HttpHeaders headers = new HttpHeaders();
-		
 		try {
 			
 			if(serverService.isServerReachable(server.getIp(), server.getPassword(), server.getUser())== true) {
-				serverService.add(server);
-				String result = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);
-				String[] passwordSplit = result.split("\\[");
-				result = "[" + passwordSplit[passwordSplit.length-1];
-				return ResponseEntity
-		              .status(HttpStatus.OK)
-		              .body(serverService.save(result,server));	
+				server.setStatus(true);
+	            serverService.add(server);
+	            String result = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);
+	            if(!result.contains("disk_total")) {
+	            	
+	            	return ResponseEntity
+							.status(HttpStatus.OK)
+							.body(serverService.add(server));
+	            }
+	            else {
+	            	String[] passwordSplit = result.split("\\[");
+	            	result = "[" + passwordSplit[passwordSplit.length-1];
+					return ResponseEntity
+							.status(HttpStatus.OK)
+							.body(serverService.save(result,server));	
+				
+	            }
 			}
-		
+			else if(serverService.isServerReachable(server.getIp(), server.getPassword(), server.getUser())== false) {
+				server.setStatus(false);
 				return ResponseEntity
 						.status(HttpStatus.OK)
 						.body(serverService.add(server));
+			}
+		
+			return ResponseEntity
+			   	.status(HttpStatus.OK)
+				.body(serverService.add(server));
 	
 		} 
 		catch (Exception e) {
 			   e.printStackTrace();
 			   return ResponseEntity
-		                  .status(HttpStatus.BAD_REQUEST)
+		                  .status(HttpStatus.EXPECTATION_FAILED)
 		                  .build();
 		}
 	}
