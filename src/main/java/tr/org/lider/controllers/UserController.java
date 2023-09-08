@@ -752,24 +752,39 @@ public class UserController {
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/move/entry", produces = MediaType.APPLICATION_JSON_VALUE)
 	//@RequestMapping(method=RequestMethod.POST ,value = "/move/entry", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
-			@RequestParam(value="destinationDN", required=true) String destinationDN) {
+	public ResponseEntity<LdapEntry> moveEntry(@RequestParam(value="sourceDN", required=true) String sourceDN,
+			@RequestParam(value="destinationDN", required=true) String destinationDN,
+			@RequestParam(value="uid", required=true) String uid) {
 		try {
+			String newUserDN = "uid=" + uid + "," + destinationDN;
 			ldapService.moveEntry(sourceDN, destinationDN);
+			
+			List<LdapEntry> subEntries = ldapService.search("member", uid, new String[] {"*"});
+
+			for (LdapEntry ldapEntry : subEntries) {
+				ldapService.updateEntryAddAtribute(ldapEntry.getDistinguishedName(), "member", newUserDN);
+				ldapService.updateEntryRemoveAttributeWithValue(ldapEntry.getDistinguishedName(), "member", sourceDN);
+
+			}
+			
 			
 			String log = sourceDN + " has been moved to " + destinationDN;
 			operationLogService.saveOperationLog(OperationType.MOVE, log, null, null, null, null);
+			
+			LdapEntry ldapEntry = ldapService.getEntryDetail(newUserDN);
+			
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(ldapEntry);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 			return ResponseEntity
 					.status(HttpStatus.EXPECTATION_FAILED)
-					.body(false);
+					.body(null);
 					
 		}
-		return ResponseEntity
-				.status(HttpStatus.OK)
-				.body(true);
+		
 	}
 	
 	/**
