@@ -758,19 +758,8 @@ public class UserController {
 		try {
 			String newUserDN = "uid=" + uid + "," + destinationDN;
 			ldapService.moveEntry(sourceDN, destinationDN);
-			
-			List<LdapEntry> subEntries = ldapService.search("member", uid, new String[] {"*"});
-
-			for (LdapEntry ldapEntry : subEntries) {
-				ldapService.updateEntryAddAtribute(ldapEntry.getDistinguishedName(), "member", newUserDN);
-				ldapService.updateEntryRemoveAttributeWithValue(ldapEntry.getDistinguishedName(), "member", sourceDN);
-
-			}
-			
-			
 			String log = sourceDN + " has been moved to " + destinationDN;
 			operationLogService.saveOperationLog(OperationType.MOVE, log, null, null, null, null);
-			
 			LdapEntry ldapEntry = ldapService.getEntryDetail(newUserDN);
 			
 			return ResponseEntity
@@ -782,9 +771,7 @@ public class UserController {
 			return ResponseEntity
 					.status(HttpStatus.EXPECTATION_FAILED)
 					.body(null);
-					
 		}
-		
 	}
 	
 	/**
