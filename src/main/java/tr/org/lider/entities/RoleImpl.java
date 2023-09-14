@@ -43,7 +43,7 @@ public class RoleImpl implements Serializable{
 	private String value;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "role_type_id", nullable = false)
+	@JoinColumn(name = "role_type_id", nullable = true)
 	private RoleTypeImpl roleType; // unidirectional
 
 	@OrderBy
