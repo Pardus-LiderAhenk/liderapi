@@ -67,17 +67,18 @@ public class RoleImpl implements Serializable{
 	public RoleImpl() {
 	}
 
-	public RoleImpl(String name, String value, int orderNumber, RoleTypeImpl roleTypeImpl) {
+	public RoleImpl(String name, String value, int orderNumber, RoleTypeImpl roleType) {
 		this.name = name;
 		this.value = value;
 		this.orderNumber = orderNumber;
-		this.roleType = roleTypeImpl;
+		this.roleType = roleType;
 	}
 	
-	public RoleImpl(Long id, String name, String value) {
+	public RoleImpl(Long id, String name, String value, RoleTypeImpl roleType) {
 		this.id = id;
 		this.name = name;
 		this.value = value;
+		this.roleType = roleType;
 	}
 
 	public Long getId() {
