@@ -7,11 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.transaction.Transactional;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -19,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
-import net.bytebuddy.asm.Advice.Exit;
 import tr.org.lider.constant.LiderConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ServerImpl;
@@ -28,8 +32,9 @@ import tr.org.lider.repositories.ServerInformationRepository;
 import tr.org.lider.repositories.ServerRepository;
 import tr.org.lider.utils.IServerInformationProcessor;
 
+
 @Service
-public class ServerService {
+public class ServerService{
 	
 	@Autowired
 	private ServerRepository serverRepository;
@@ -44,10 +49,31 @@ public class ServerService {
 	@Autowired
 	private RemoteSshService sshService;	
 	
+	@Value("${jwt.secret}")
+	private String jwtSecret;
+
 	
-	public ServerImpl add(ServerImpl server) {
+//	public ServerImpl add(ServerImpl server) {
+//		
+//		ServerImpl savedServer = serverRepository.save(server);
+//		return serverRepository.save(savedServer);
+//	}
+	
+	public ServerImpl add(ServerImpl server) throws Exception {
 		
-		ServerImpl savedServer = serverRepository.save(server);
+		//SecretKey secretKey = generateAESKey();
+//		String key = jwtSecret;
+//	    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
+		String key = "MySecretKey12345";
+	    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
+		
+		ServerImpl savedServer = new ServerImpl();
+		savedServer.setIp(server.getIp());
+		savedServer.setMachineName(server.getMachineName());
+		savedServer.setDescription(server.getDescription());
+		savedServer.setUser(server.getUser());
+		savedServer.setStatus(server.getStatus());
+		savedServer.setPassword(encryptAES(server.getPassword(),secretKey));
 		return serverRepository.save(savedServer);
 	}
 	
@@ -63,12 +89,15 @@ public class ServerService {
 		return savedServer;	
 	}
 	
-	public ServerImpl save(ServerImpl server) {
+	public ServerImpl save(ServerImpl server) throws Exception {
+
 		return serverRepository.save(server);
 	}
 	
-	public ServerImpl save(String result, ServerImpl server) throws JsonProcessingException {
-		
+	public ServerImpl save(String result, ServerImpl server) throws Exception {
+		String key = "MySecretKey12345";
+	    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
+	    
 		if(!result.isEmpty()) {
 	
 			ObjectMapper mapper = new ObjectMapper();
@@ -187,12 +216,21 @@ public class ServerService {
 			
 			
 			server.setStatus(true);
+			server.setPassword(encryptAES(server.getPassword(),secretKey));
 		}
 		else {
 			
 			server.setStatus(false);
+			server.setIp(server.getIp());
+			server.setMachineName(server.getMachineName());
+			server.setDescription(server.getDescription());
+			server.setUser(server.getUser());
+			server.setStatus(server.getStatus());
+			server.setPassword(encryptAES(server.getPassword(),secretKey));
+
 			
 		}
+		
 		
 		return serverRepository.save(server);
 		
@@ -218,7 +256,6 @@ public class ServerService {
 			existServer.setStatus(false);
 			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
 			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
-			
 			
 		}
 		
@@ -248,6 +285,9 @@ public class ServerService {
 		
 		List<ServerImpl> serverList = findServerAll();
 		String updateResult;
+		//SecretKey secretKey = generateAESKey();
+		String key = "MySecretKey12345";
+	    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
 		boolean success = false;
 		int i = 0;
 		for(i = 0 ; i< serverList.size(); i++) {
@@ -255,10 +295,13 @@ public class ServerService {
 			
 			sshService.setHost(serverList.get(i).getIp());
 			sshService.setUser(serverList.get(i).getUser());
-			sshService.setPassword(serverList.get(i).getPassword());
+			sshService.setPassword(decryptAES(serverList.get(i).getPassword(), secretKey));	
+			System.out.println(serverList.get(i).getPassword()+"281 satır");
+			System.out.println(decryptAES(serverList.get(i).getPassword(),secretKey)+"282 satır");
+
 			
-			if(isServerReachable(serverList.get(i).getIp(), serverList.get(i).getPassword(), serverList.get(i).getUser())== true){
-			
+			if(isServerReachable(serverList.get(i).getIp(), decryptAES(serverList.get(i).getPassword(),secretKey), serverList.get(i).getUser())== true){
+			System.out.println(decryptAES(serverList.get(i).getPassword(),secretKey)+"285 satu");
 				updateResult = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);		
 				if (updateResult.contains("disk_total")) {
 					String[] passwordSplit = updateResult.split("\\[");
@@ -284,7 +327,6 @@ public class ServerService {
 		else {
 		
 			server.setStatus(false);
-
 			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
 			
 			System.out.println("Bu makineye ssh sağlanamadı");
@@ -311,5 +353,26 @@ public class ServerService {
 	            return false; 
 	        }
 		}
-		
+//	 public SecretKey generateAESKey() throws Exception {
+//		 
+//	     KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+//	     keyGenerator.init(256);
+//	     return keyGenerator.generateKey();
+//	 }
+
+	  public String encryptAES(String plainText, SecretKey secretKey) throws Exception {
+	        Cipher cipher = Cipher.getInstance("AES");
+	        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+	        byte[] encryptedBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+	        return Base64.getEncoder().encodeToString(encryptedBytes);
+	  }
+
+	  public String decryptAES(String encryptedText, SecretKey secretKey) throws Exception {
+	        Cipher cipher = Cipher.getInstance("AES");
+	        cipher.init(Cipher.DECRYPT_MODE, secretKey);
+	        byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText);
+	        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+	        return new String(decryptedBytes, StandardCharsets.UTF_8);
+	  }
+	 
 }

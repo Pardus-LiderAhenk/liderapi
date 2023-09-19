@@ -66,7 +66,7 @@ public class ServerController {
 			
 			if(serverService.isServerReachable(server.getIp(), server.getPassword(), server.getUser())== true) {
 				server.setStatus(true);
-	            serverService.add(server);
+	            //serverService.add(server);
 	            String result = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);
 	            if(!result.contains("disk_total")) {
 	            	
