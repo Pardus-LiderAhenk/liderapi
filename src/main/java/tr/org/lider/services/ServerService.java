@@ -49,10 +49,6 @@ public class ServerService{
 	
 	@Value("${jwt.secret}")
 	private String jwtSecret;
-
-	
-	//String key = "MySecretKey12345";
-    //SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
 	
 	public ServerImpl add(ServerImpl server) throws Exception {
 			
