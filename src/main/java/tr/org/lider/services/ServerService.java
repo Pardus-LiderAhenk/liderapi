@@ -51,8 +51,8 @@ public class ServerService{
 	private String jwtSecret;
 
 	
-	String key = "MySecretKey12345";
-    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
+	//String key = "MySecretKey12345";
+    //SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
 	
 	public ServerImpl add(ServerImpl server) throws Exception {
 			
@@ -62,7 +62,7 @@ public class ServerService{
 		savedServer.setDescription(server.getDescription());
 		savedServer.setUser(server.getUser());
 		savedServer.setStatus(server.getStatus());
-		savedServer.setPassword(encryptAES(server.getPassword(),secretKey));
+		savedServer.setPassword(encryptAES(server.getPassword()));
 		return serverRepository.save(savedServer);
 	}
 	
@@ -203,7 +203,7 @@ public class ServerService{
 			
 			
 			server.setStatus(true);
-			server.setPassword(encryptAES(server.getPassword(),secretKey));
+			server.setPassword(encryptAES(server.getPassword()));
 		}
 		else {
 			
@@ -213,7 +213,7 @@ public class ServerService{
 			server.setDescription(server.getDescription());
 			server.setUser(server.getUser());
 			server.setStatus(server.getStatus());
-			server.setPassword(encryptAES(server.getPassword(),secretKey));
+			server.setPassword(encryptAES(server.getPassword()));
 
 			
 		}
@@ -225,12 +225,12 @@ public class ServerService{
 	
 	public ServerImpl update(ServerImpl server) throws Exception {
 		ServerImpl existServer = findServerID(server.getId());
-		if(isServerReachable(existServer.getIp(), decryptAES(existServer.getPassword(),secretKey), existServer.getUser())== true) {
+		if(isServerReachable(existServer.getIp(), decryptAES(existServer.getPassword()), existServer.getUser())== true) {
 			existServer.setModifyDate(new Date());
 			existServer.setMachineName(server.getMachineName());
 			existServer.setIp(server.getIp());
 			existServer.setUser(server.getUser());
-			existServer.setPassword(encryptAES(server.getPassword(),secretKey));
+			existServer.setPassword(encryptAES(server.getPassword()));
 			existServer.setStatus(true);
 			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
 		}
@@ -239,7 +239,7 @@ public class ServerService{
 			existServer.setMachineName(server.getMachineName());
 			existServer.setIp(server.getIp());
 			existServer.setUser(server.getUser());
-			existServer.setPassword(encryptAES(server.getPassword(),secretKey));
+			existServer.setPassword(encryptAES(server.getPassword()));
 			existServer.setStatus(false);
 			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
 			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
@@ -279,9 +279,9 @@ public class ServerService{
 			
 			sshService.setHost(serverList.get(i).getIp());
 			sshService.setUser(serverList.get(i).getUser());
-			sshService.setPassword(decryptAES(serverList.get(i).getPassword(), secretKey));	
+			sshService.setPassword(decryptAES(serverList.get(i).getPassword()));	
 			
-			if(isServerReachable(serverList.get(i).getIp(), decryptAES(serverList.get(i).getPassword(),secretKey), serverList.get(i).getUser())== true){
+			if(isServerReachable(serverList.get(i).getIp(), decryptAES(serverList.get(i).getPassword()), serverList.get(i).getUser())== true){
 				updateResult = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);		
 				if (updateResult.contains("disk_total")) {
 					String[] passwordSplit = updateResult.split("\\[");
@@ -335,14 +335,18 @@ public class ServerService{
 		}
 
 
-	  public String encryptAES(String plainText, SecretKey secretKey) throws Exception {
+	  public String encryptAES(String plainText) throws Exception {
+		    String key = jwtSecret;
+		    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
 	        Cipher cipher = Cipher.getInstance("AES");
 	        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 	        byte[] encryptedBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
 	        return Base64.getEncoder().encodeToString(encryptedBytes);
 	  }
 
-	  public String decryptAES(String encryptedText, SecretKey secretKey) throws Exception {
+	  public String decryptAES(String encryptedText) throws Exception {
+		    String key = jwtSecret;
+		    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
 	        Cipher cipher = Cipher.getInstance("AES");
 	        cipher.init(Cipher.DECRYPT_MODE, secretKey);
 	        byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText);

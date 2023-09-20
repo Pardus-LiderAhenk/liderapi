@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,6 @@ public class ServerController {
 	
 	@Autowired
 	private RemoteSshService sshService;
-		
 	
 	@Operation()
 	@ApiResponses(value = { 
