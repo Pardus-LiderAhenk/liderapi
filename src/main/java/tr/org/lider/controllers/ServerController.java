@@ -223,7 +223,7 @@ public class ServerController {
 			  @ApiResponse(responseCode = "417", description = "server id not found !", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ServerImpl> updateServer(@RequestBody ServerImpl server) {
+	public ResponseEntity<ServerImpl> updateServer(@RequestBody ServerImpl server) throws Exception {
 		try {
 			return ResponseEntity
 					.status(HttpStatus.OK)

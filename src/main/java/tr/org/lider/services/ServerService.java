@@ -12,13 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSch;
@@ -53,20 +51,11 @@ public class ServerService{
 	private String jwtSecret;
 
 	
-//	public ServerImpl add(ServerImpl server) {
-//		
-//		ServerImpl savedServer = serverRepository.save(server);
-//		return serverRepository.save(savedServer);
-//	}
+	String key = "MySecretKey12345";
+    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
 	
 	public ServerImpl add(ServerImpl server) throws Exception {
-		
-		//SecretKey secretKey = generateAESKey();
-//		String key = jwtSecret;
-//	    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
-		String key = "MySecretKey12345";
-	    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
-		
+			
 		ServerImpl savedServer = new ServerImpl();
 		savedServer.setIp(server.getIp());
 		savedServer.setMachineName(server.getMachineName());
@@ -95,8 +84,6 @@ public class ServerService{
 	}
 	
 	public ServerImpl save(String result, ServerImpl server) throws Exception {
-		String key = "MySecretKey12345";
-	    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
 	    
 		if(!result.isEmpty()) {
 	
@@ -236,14 +223,14 @@ public class ServerService{
 		
 	}
 	
-	public ServerImpl update(ServerImpl server) {
+	public ServerImpl update(ServerImpl server) throws Exception {
 		ServerImpl existServer = findServerID(server.getId());
-		if(isServerReachable(existServer.getIp(), existServer.getPassword(), existServer.getUser())== true) {
+		if(isServerReachable(existServer.getIp(), decryptAES(existServer.getPassword(),secretKey), existServer.getUser())== true) {
 			existServer.setModifyDate(new Date());
 			existServer.setMachineName(server.getMachineName());
 			existServer.setIp(server.getIp());
 			existServer.setUser(server.getUser());
-			existServer.setPassword(server.getPassword());
+			existServer.setPassword(encryptAES(server.getPassword(),secretKey));
 			existServer.setStatus(true);
 			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
 		}
@@ -252,7 +239,7 @@ public class ServerService{
 			existServer.setMachineName(server.getMachineName());
 			existServer.setIp(server.getIp());
 			existServer.setUser(server.getUser());
-			existServer.setPassword(server.getPassword());
+			existServer.setPassword(encryptAES(server.getPassword(),secretKey));
 			existServer.setStatus(false);
 			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
 			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
@@ -285,9 +272,6 @@ public class ServerService{
 		
 		List<ServerImpl> serverList = findServerAll();
 		String updateResult;
-		//SecretKey secretKey = generateAESKey();
-		String key = "MySecretKey12345";
-	    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
 		boolean success = false;
 		int i = 0;
 		for(i = 0 ; i< serverList.size(); i++) {
@@ -296,12 +280,8 @@ public class ServerService{
 			sshService.setHost(serverList.get(i).getIp());
 			sshService.setUser(serverList.get(i).getUser());
 			sshService.setPassword(decryptAES(serverList.get(i).getPassword(), secretKey));	
-			System.out.println(serverList.get(i).getPassword()+"281 satır");
-			System.out.println(decryptAES(serverList.get(i).getPassword(),secretKey)+"282 satır");
-
 			
 			if(isServerReachable(serverList.get(i).getIp(), decryptAES(serverList.get(i).getPassword(),secretKey), serverList.get(i).getUser())== true){
-			System.out.println(decryptAES(serverList.get(i).getPassword(),secretKey)+"285 satu");
 				updateResult = sshService.executeCommand(LiderConstants.ServerInformation.OSQUERY_QUERY);		
 				if (updateResult.contains("disk_total")) {
 					String[] passwordSplit = updateResult.split("\\[");
@@ -353,12 +333,7 @@ public class ServerService{
 	            return false; 
 	        }
 		}
-//	 public SecretKey generateAESKey() throws Exception {
-//		 
-//	     KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-//	     keyGenerator.init(256);
-//	     return keyGenerator.generateKey();
-//	 }
+
 
 	  public String encryptAES(String plainText, SecretKey secretKey) throws Exception {
 	        Cipher cipher = Cipher.getInstance("AES");
