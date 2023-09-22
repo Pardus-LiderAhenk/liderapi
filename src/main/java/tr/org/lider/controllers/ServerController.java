@@ -61,7 +61,7 @@ public class ServerController {
 		sshService.setUser(server.getUser());
 		sshService.setPassword(server.getPassword());
 		HttpHeaders headers = new HttpHeaders();
-		try {
+	
 			
 			if(serverService.isServerReachable(server.getIp(), server.getPassword(), server.getUser())== true) {
 				server.setStatus(true);
@@ -92,14 +92,6 @@ public class ServerController {
 			return ResponseEntity
 			   	.status(HttpStatus.OK)
 				.body(serverService.add(server));
-	
-		} 
-		catch (Exception e) {
-			   e.printStackTrace();
-			   return ResponseEntity
-		                  .status(HttpStatus.EXPECTATION_FAILED)
-		                  .build();
-		}
 	}
 	
 	

@@ -324,6 +324,7 @@ public class ServerService{
 
 	        Session session = jsch.getSession(username, hostname, LiderConstants.ServerInformation.SSH_PORT);
 	        session.setPassword(password);
+	        session.setTimeout(1000);
 	        session.setConfig("StrictHostKeyChecking", "no");
 	        session.connect();
 	        session.disconnect();
