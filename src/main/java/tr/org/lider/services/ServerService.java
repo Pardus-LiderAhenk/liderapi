@@ -11,10 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -29,6 +25,13 @@ import tr.org.lider.entities.ServerInformationImpl;
 import tr.org.lider.repositories.ServerInformationRepository;
 import tr.org.lider.repositories.ServerRepository;
 import tr.org.lider.utils.IServerInformationProcessor;
+
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.engines.TwofishEngine;
+import org.bouncycastle.crypto.modes.CFBBlockCipher;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 
 
 @Service
@@ -332,22 +335,33 @@ public class ServerService{
 
 
 	  public String encryptAES(String plainText) throws Exception {
-		    String key = jwtSecret;
-		    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
-	        Cipher cipher = Cipher.getInstance("AES");
-	        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-	        byte[] encryptedBytes = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
-	        return Base64.getEncoder().encodeToString(encryptedBytes);
+		  
+			byte[] keyBytes = jwtSecret.getBytes("UTF-8");
+	        KeyParameter key = new KeyParameter(keyBytes);
+	        byte[] iv = new byte[16];
+	        byte[] plaintextByte = plainText.getBytes("UTF-8");
+	        BlockCipher engine = new TwofishEngine();
+	        BufferedBlockCipher cipher = new BufferedBlockCipher(new CFBBlockCipher(engine, 128));
+	        cipher.init(true, new ParametersWithIV(key, iv));
+	        byte[] outputBuffer = new byte[cipher.getOutputSize(plaintextByte.length)];
+	        int bytesProcessed = cipher.processBytes(plaintextByte, 0, plaintextByte.length, outputBuffer, 0);
+	        cipher.doFinal(outputBuffer, bytesProcessed);
+	        return new String(Base64.getEncoder().encode(outputBuffer), "UTF-8");
 	  }
 
 	  public String decryptAES(String encryptedText) throws Exception {
-		    String key = jwtSecret;
-		    SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
-	        Cipher cipher = Cipher.getInstance("AES");
-	        cipher.init(Cipher.DECRYPT_MODE, secretKey);
-	        byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText);
-	        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
-	        return new String(decryptedBytes, StandardCharsets.UTF_8);
+		  
+		    byte[] keyBytes = jwtSecret.getBytes("UTF-8");
+	        KeyParameter key = new KeyParameter(keyBytes);
+	        byte[] iv = new byte[16];
+	        byte[] encryptedBytes = Base64.getDecoder().decode(encryptedText.getBytes("UTF-8"));
+	        BlockCipher engine = new TwofishEngine();
+	        BufferedBlockCipher cipher = new BufferedBlockCipher(new CFBBlockCipher(engine, 128));
+	        cipher.init(false, new ParametersWithIV(key, iv));
+	        byte[] outputBuffer = new byte[cipher.getOutputSize(encryptedBytes.length)];
+	        int bytesProcessed = cipher.processBytes(encryptedBytes, 0, encryptedBytes.length, outputBuffer, 0);
+	        cipher.doFinal(outputBuffer, bytesProcessed);
+	        return new String(outputBuffer, "UTF-8");
 	  }
 	 
 }
