@@ -289,32 +289,25 @@ public class ServerService{
 				
 					List<Map<String, Object>> updateResults = mapper.readValue(updateResult, new TypeReference<List<Map<String, Object>>>() {});
 					
-					
 					server = IServerInformationProcessor.applyName(
 							server, 
 							updateResults,
 							"computer_name","mac_addr","os_name","os_version","disk_total","machine_disk","memory_free","memory_total",
 							"physical_memory","total_disk_empty","uptime_days","uptime_hours","uptime_minutes","cpu_user","cpu_system","cpu_idle","cpu_core"); 
 								
-				
 					success = true;
 					server.setStatus(true);
 					serverRepository.save(server);
 				}			
 			}
-			
 		else {
-		
 			server.setStatus(false);
-			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
-			
+//			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
 			System.out.println("Bu makineye ssh sağlanamadı");
-			
 			}
-			
 		}
 		
-		   return  success ? findServerAll():new ArrayList<>();
+		   return findServerAll();
 	}
 	
 	 public boolean isServerReachable(String hostname, String password, String username) {
