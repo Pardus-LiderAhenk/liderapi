@@ -1,17 +1,22 @@
 package tr.org.lider.services;
 
 
-import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.crypto.BlockCipher;
+import org.bouncycastle.crypto.BufferedBlockCipher;
+import org.bouncycastle.crypto.engines.TwofishEngine;
+import org.bouncycastle.crypto.modes.CFBBlockCipher;
+import org.bouncycastle.crypto.params.KeyParameter;
+import org.bouncycastle.crypto.params.ParametersWithIV;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.util.Base64;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,19 +24,10 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
 
 import tr.org.lider.constant.LiderConstants;
-import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.ServerImpl;
 import tr.org.lider.entities.ServerInformationImpl;
-import tr.org.lider.repositories.ServerInformationRepository;
 import tr.org.lider.repositories.ServerRepository;
 import tr.org.lider.utils.IServerInformationProcessor;
-
-import org.bouncycastle.crypto.params.KeyParameter;
-import org.bouncycastle.crypto.BlockCipher;
-import org.bouncycastle.crypto.BufferedBlockCipher;
-import org.bouncycastle.crypto.engines.TwofishEngine;
-import org.bouncycastle.crypto.modes.CFBBlockCipher;
-import org.bouncycastle.crypto.params.ParametersWithIV;
 
 
 @Service
@@ -39,13 +35,6 @@ public class ServerService{
 	
 	@Autowired
 	private ServerRepository serverRepository;
-	
-	@Autowired
-	private ServerInformationRepository serverInformationRepository;
-	
-	
-	@Autowired
-	private OperationLogService operationLogService;
 	
 	@Autowired
 	private RemoteSshService sshService;	
@@ -63,18 +52,6 @@ public class ServerService{
 		savedServer.setStatus(server.getStatus());
 		savedServer.setPassword(encryptAES(server.getPassword()));
 		return serverRepository.save(savedServer);
-	}
-	
-	public ServerImpl delete(Long id,ServerImpl server) {
-		
-		ServerImpl savedServer = serverRepository.save(server);
-		try {
-			operationLogService.saveOperationLog(OperationType.DELETE, "Sunucu silindi",null,null,null,savedServer.getId());
-			
-		} catch (Exception e) {
-			e.printStackTrace();		
-		}
-		return savedServer;	
 	}
 	
 	public ServerImpl save(ServerImpl server) throws Exception {
@@ -199,13 +176,10 @@ public class ServerService{
 				server.addProperty(new ServerInformationImpl(server, "cpu_core", nameMap.get("cpu_core").toString()));
 			});
 				
-			
-			
 			server.setStatus(true);
 			server.setPassword(encryptAES(server.getPassword()));
 		}
 		else {
-			
 			server.setStatus(false);
 			server.setIp(server.getIp());
 			server.setMachineName(server.getMachineName());
@@ -213,10 +187,7 @@ public class ServerService{
 			server.setUser(server.getUser());
 			server.setStatus(server.getStatus());
 			server.setPassword(encryptAES(server.getPassword()));
-
-			
 		}
-		
 		
 		return serverRepository.save(server);
 		
@@ -231,7 +202,6 @@ public class ServerService{
 			existServer.setUser(server.getUser());
 			existServer.setPassword(encryptAES(server.getPassword()));
 			existServer.setStatus(true);
-			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
 		}
 		else {
 			existServer.setModifyDate(new Date());
@@ -240,9 +210,6 @@ public class ServerService{
 			existServer.setUser(server.getUser());
 			existServer.setPassword(encryptAES(server.getPassword()));
 			existServer.setStatus(false);
-			serverInformationRepository.deleteInBatch(serverInformationRepository.findByServerId(server.getId()));
-			operationLogService.saveOperationLog(OperationType.UPDATE, "Server  güncellendi.", null);
-			
 		}
 		
 		return serverRepository.save(existServer);

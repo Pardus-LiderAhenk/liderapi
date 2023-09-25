@@ -30,8 +30,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.constant.LiderConstants;
+import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.RegistrationTemplateImpl;
 import tr.org.lider.entities.ServerImpl;
+import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.RemoteSshService;
 import tr.org.lider.services.ServerService;
 
@@ -48,6 +50,9 @@ public class ServerController {
 	@Autowired
 	private RemoteSshService sshService;
 	
+	@Autowired
+	private OperationLogService operationLogService;
+	
 	@Operation()
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Added server. Successful"),
@@ -61,7 +66,9 @@ public class ServerController {
 		sshService.setUser(server.getUser());
 		sshService.setPassword(server.getPassword());
 		HttpHeaders headers = new HttpHeaders();
-	
+		
+		String log =  "Server with IP "+ server.getIp() + " has been added";
+		operationLogService.saveOperationLog(OperationType.CREATE, log,null,null,null,null);
 			
 			if(serverService.isServerReachable(server.getIp(), server.getPassword(), server.getUser())== true) {
 				server.setStatus(true);
@@ -85,7 +92,7 @@ public class ServerController {
 			else if(serverService.isServerReachable(server.getIp(), server.getPassword(), server.getUser())== false) {
 				server.setStatus(false);
 				return ResponseEntity
-						.status(HttpStatus.OK)
+						.status(HttpStatus.NOT_FOUND)
 						.body(serverService.add(server));
 			}
 		
@@ -168,6 +175,9 @@ public class ServerController {
 	    				.headers(headers)
 	    				.build();
 			}
+			Optional<ServerImpl> deletedServer = serverService.findServerByID(id);
+			String log =  "Server with IP "+ deletedServer.get().getIp() + " was deleted";
+			operationLogService.saveOperationLog(OperationType.DELETE, log,null,null,null,null);
 			serverService.delete(id);
 					
 		} 
@@ -216,6 +226,8 @@ public class ServerController {
 	@PostMapping(value = "/update", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ServerImpl> updateServer(@RequestBody ServerImpl server) throws Exception {
 		try {
+			String log =  "Server with IP "+ server.getIp() + " has been updated";
+			operationLogService.saveOperationLog(OperationType.CREATE, log,null,null,null,null);
 			return ResponseEntity
 					.status(HttpStatus.OK)
 					.body(serverService.update(server));
