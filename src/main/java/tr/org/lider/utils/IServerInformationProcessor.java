@@ -1,5 +1,6 @@
 package tr.org.lider.utils;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ public interface IServerInformationProcessor {
 			.forEach(nameMap -> {
 				for(ServerInformationImpl prop : server.getProperties()) {
 					prop.applyServer(nameMap, propName);
+					prop.setModifyDate(new Date());
 				}
 		
 			});		

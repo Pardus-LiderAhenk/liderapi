@@ -50,6 +50,11 @@ public class ServerInformationImpl implements Serializable,IServerInformation {
 	@Column(name = "PROPERTY_VALUE", columnDefinition = "TEXT", nullable = false, length = 65535)
 	private String propertyValue;
 	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "MODIFY_DATE")
+	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone="Europe/Istanbul")
+	private Date modifyDate;
+
 	public ServerInformationImpl() {
 		// TODO Auto-generated constructor stub
 	}
@@ -67,12 +72,13 @@ public class ServerInformationImpl implements Serializable,IServerInformation {
 		this.propertyValue = propertyValue;
 	}
 	
-	public ServerInformationImpl(Long id,ServerImpl server, String propertyName, String propertyValue,Date createDate) {
+	public ServerInformationImpl(Long id,ServerImpl server, String propertyName, String propertyValue,Date createDate, Date modifyDate) {
 		this.id = id;
 		this.server = server;
 		this.propertyName = propertyName;
 		this.propertyValue = propertyValue;
 		this.createDate = createDate;
+		this.modifyDate = modifyDate;
 	}
 	
 	public Long getId() {
@@ -116,9 +122,18 @@ public class ServerInformationImpl implements Serializable,IServerInformation {
 	}
 	
 	
+	public Date getModifyDate() {
+		return modifyDate;
+	}
+
+	public void setModifyDate(Date modifyDate) {
+		this.modifyDate = modifyDate;
+	}
+	
+	
 	@Override
 	public String toString() {
-		return "ServerInformationImpl [id=" + id + ", propertyName=" + propertyName + ", propertyValue=" + propertyValue + ", createDate=" + createDate +"]";
+		return "ServerInformationImpl [id=" + id + ", propertyName=" + propertyName + ", propertyValue=" + propertyValue + ", createDate=" + createDate +" , modifyDate=" + modifyDate +"]";
 		
 	}
 
