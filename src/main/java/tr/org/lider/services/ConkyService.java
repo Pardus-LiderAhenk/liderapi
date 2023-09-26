@@ -108,7 +108,7 @@ public class ConkyService {
 		conky.add(template.getContents());
 		ConkyTemplate savedTemplate = conkyRepository.save(template);
 		try {
-			operationLogService.saveOperationLog(OperationType.CREATE, "Sistem Gözlemcisi Tanımı oluşturuldu.", conky.toString().getBytes());
+			operationLogService.saveOperationLog(OperationType.CREATE, "Created system monitoring definition", conky.toString().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -123,7 +123,7 @@ public class ConkyService {
 		conky.add(existTemplate.getContents());
 		ConkyTemplate savedTemplate = conkyRepository.save(existTemplate);
 		try {
-			operationLogService.saveOperationLog(OperationType.DELETE, "Sistem Gözlemcisi Tanımı silindi.", conky.toString().getBytes());
+			operationLogService.saveOperationLog(OperationType.DELETE, "Deleted system monitoring definition", conky.toString().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -138,7 +138,7 @@ public class ConkyService {
 		conky.add(template.getContents());
 		ConkyTemplate savedTemplate = conkyRepository.save(template);
 		try {
-			operationLogService.saveOperationLog(OperationType.UPDATE, "Sistem Gözlemcisi Tanımı güncellendi.", conky.toString().getBytes());
+			operationLogService.saveOperationLog(OperationType.UPDATE, "Updated system monitoring definition", conky.toString().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -54,7 +54,7 @@ public class ScriptService {
 		script.setDeleted(false);
 		ScriptTemplate savedScript = scriptRepository.save(script);
 		try {
-			operationLogService.saveOperationLog(OperationType.CREATE, "Betik Tanımı oluşturuldu.", script.getContents().getBytes());
+			operationLogService.saveOperationLog(OperationType.CREATE, "Created script.", script.getContents().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -66,7 +66,7 @@ public class ScriptService {
 		existingScript.setDeleted(true);
 		ScriptTemplate savedScript = scriptRepository.save(existingScript);
 		try {
-			operationLogService.saveOperationLog(OperationType.DELETE, "Betik Tanımı silindi.", existingScript.getContents().getBytes());
+			operationLogService.saveOperationLog(OperationType.DELETE, "Deleted script", existingScript.getContents().getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -78,7 +78,7 @@ public class ScriptService {
 		script.setDeleted(false);
 		ScriptTemplate savedScript = scriptRepository.save(script);
 		try {
-			operationLogService.saveOperationLog(OperationType.UPDATE, "Betik Tanımı güncellendi.", script.getContents().getBytes());
+			operationLogService.saveOperationLog(OperationType.UPDATE, "Updated script.", script.getContents().getBytes());
 		}catch (Exception e) {
 			e.printStackTrace();
 		}
