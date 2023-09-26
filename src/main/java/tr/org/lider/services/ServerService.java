@@ -200,6 +200,7 @@ public class ServerService{
 			existServer.setMachineName(server.getMachineName());
 			existServer.setIp(server.getIp());
 			existServer.setUser(server.getUser());
+			existServer.setDescription(server.getDescription());
 			existServer.setPassword(encryptAES(server.getPassword()));
 			existServer.setStatus(true);
 			existServer.setDescription(server.getDescription());
@@ -209,6 +210,7 @@ public class ServerService{
 			existServer.setMachineName(server.getMachineName());
 			existServer.setIp(server.getIp());
 			existServer.setUser(server.getUser());
+			existServer.setDescription(server.getDescription());
 			existServer.setPassword(encryptAES(server.getPassword()));
 			existServer.setStatus(false);
 			existServer.setDescription(server.getDescription());
