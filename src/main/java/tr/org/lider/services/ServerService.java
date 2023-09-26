@@ -202,6 +202,7 @@ public class ServerService{
 			existServer.setUser(server.getUser());
 			existServer.setPassword(encryptAES(server.getPassword()));
 			existServer.setStatus(true);
+			existServer.setDescription(server.getDescription());
 		}
 		else {
 			existServer.setModifyDate(new Date());
@@ -210,6 +211,8 @@ public class ServerService{
 			existServer.setUser(server.getUser());
 			existServer.setPassword(encryptAES(server.getPassword()));
 			existServer.setStatus(false);
+			existServer.setDescription(server.getDescription());
+
 		}
 		
 		return serverRepository.save(existServer);
