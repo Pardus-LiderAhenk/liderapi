@@ -142,10 +142,15 @@ public class ServerController {
     public  ResponseEntity<List<ServerImpl>> getServerList() throws Throwable {
 		
 		HttpHeaders headers = new HttpHeaders();
+		List<ServerImpl> serverList = serverService.serverList();
+		
+		for (ServerImpl server : serverList) {
+	        server.setPassword(null);
+	    }
 		try {
 			return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(serverService.serverList());
+				.body(serverList);
 		}
 		catch (Exception e) {
 	
@@ -253,10 +258,13 @@ public class ServerController {
 	@GetMapping(value = "/get-data", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<List<ServerImpl>> getServerData() {
 		try {
-			
+			List<ServerImpl> serverList = serverService.findServerAll();
+			for (ServerImpl server : serverList) {
+		        server.setPassword(null);
+		    }
 			return ResponseEntity
 					.status(HttpStatus.OK)
-					.body(serverService.findServerAll());
+					.body(serverList);
 		} 
 		catch (DataAccessException e) {
 			logger.error("Error updated server: " + e.getCause().getMessage());
@@ -266,7 +274,6 @@ public class ServerController {
     				.headers(headers)
     				.build();
 		}		
-	
 	}
 	
 }	

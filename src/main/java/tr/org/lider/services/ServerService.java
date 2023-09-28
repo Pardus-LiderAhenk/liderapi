@@ -214,8 +214,10 @@ public class ServerService{
 			existServer.setDescription(server.getDescription());
 
 		}
-		
-		return serverRepository.save(existServer);
+		serverRepository.save(existServer);
+		ServerImpl existServer2 = findServerID(server.getId());
+		existServer2.setPassword(null);
+		return existServer2;
 	}
 	
 	
