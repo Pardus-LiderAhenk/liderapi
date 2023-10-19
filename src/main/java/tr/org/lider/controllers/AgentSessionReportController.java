@@ -31,7 +31,7 @@ import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.services.AgentSessionReportService;
 import tr.org.lider.services.ExcelExportService;
 
-@Secured({"ROLE_ADMIN", "ROLE_AGENT_INFO" })
+@Secured({"ROLE_ADMIN", "ROLE_USER_SESSION_REPORT" })
 @RestController
 @RequestMapping("/api/lider/agent-session")
 @Tag(name = "Agent session service", description = "Agent Sesion Report controller")
@@ -85,20 +85,21 @@ public class AgentSessionReportController {
 		Page<AgentImpl> listOfAgents = agentSessionReportService.findAllAgents(
 				pageNumber, 
 				pageSize, 
-				sessionReportType,
-				registrationStartDate, 
-				registrationEndDate, 
-				status, 
-				dn,
-				hostname, 
-				macAddress, 
-				ipAddress, 
-				brand, 
-				model, 
-				processor, 
-				osVersion,
-				agentVersion,
-				diskType);
+//				sessionReportType,
+//				registrationStartDate, 
+//				registrationEndDate, 
+//				status, 
+//				dn,
+				hostname 
+//				macAddress, 
+//				ipAddress, 
+//				brand, 
+//				model, 
+//				processor, 
+//				osVersion,
+//				agentVersion,
+//				diskType
+				);
 				
 		resultMap.put("agents", listOfAgents);
 		return ResponseEntity
@@ -137,44 +138,46 @@ public class AgentSessionReportController {
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> export(
-			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
-			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
-			@RequestParam (value = "status") Optional<String> status,
-			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
-			@RequestParam (value = "dn") Optional<String> dn,
-			@RequestParam (value = "hostname") Optional<String> hostname,
-			@RequestParam (value = "macAddress") Optional<String> macAddress,
-			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
-			@RequestParam (value = "brand") Optional<String> brand,
-			@RequestParam (value = "model") Optional<String> model,
-			@RequestParam (value = "processor") Optional<String> processor,
-			@RequestParam (value = "osVersion") Optional<String> osVersion,
-			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-			@RequestParam (value = "diskType") Optional<String> diskType){
+//			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
+//			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
+//			@RequestParam (value = "status") Optional<String> status,
+//			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
+//			@RequestParam (value = "dn") Optional<String> dn,
+			@RequestParam (value = "hostname") Optional<String> hostname
+//			@RequestParam (value = "macAddress") Optional<String> macAddress,
+//			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
+//			@RequestParam (value = "brand") Optional<String> brand,
+//			@RequestParam (value = "model") Optional<String> model,
+//			@RequestParam (value = "processor") Optional<String> processor,
+//			@RequestParam (value = "osVersion") Optional<String> osVersion,
+//			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
+//			@RequestParam (value = "diskType") Optional<String> diskType
+			){
 		Page<AgentImpl> listOfAgents = agentSessionReportService.findAllAgents(
 				1, 
 				agentSessionReportService.count().intValue(), 
-				sessionReportType,
-				registrationStartDate, 
-				registrationEndDate, 
-				status, 
-				dn,
-				hostname, 
-				macAddress, 
-				ipAddress, 
-				brand, 
-				model, 
-				processor, 
-				osVersion, 
-				agentVersion,
-				diskType);
+//				sessionReportType,
+//				registrationStartDate, 
+//				registrationEndDate, 
+//				status, 
+//				dn,
+				hostname 
+//				macAddress, 
+//				ipAddress, 
+//				brand, 
+//				model, 
+//				processor, 
+//				osVersion, 
+//				agentVersion,
+//				diskType
+				);
 		
 		try {
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("fileName", "Istemci Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
+			headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
 			headers.setContentType(MediaType.parseMediaType("application/csv"));
 			headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-			byte[] excelContent = excelService.generateAgentReport(listOfAgents.getContent());
+			byte[] excelContent = excelService.generateSessionReport(listOfAgents.getContent());
 			return new ResponseEntity<byte[]>(excelContent, headers,  HttpStatus.OK);
 		} catch (Exception e) {
         	logger.error("Error occured while creating excel report Error: ." + e.getMessage());

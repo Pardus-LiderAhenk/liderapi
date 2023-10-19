@@ -83,77 +83,78 @@ public class AgentSessionReportService {
 	public Page<AgentImpl> findAllAgents(
 			int pageNumber,
 			int pageSize,
-			Optional<String> sessionReportType,
-			Optional<Date> registrationStartDate,
-			Optional<Date> registrationEndDate,
-			Optional<String> status,
-			Optional<String> dn,
-			Optional<String> hostname,
-			Optional<String> macAddress,
-			Optional<String> ipAddress,
-			Optional<String> brand,
-			Optional<String> model,
-			Optional<String> processor,
-			Optional<String> osVersion,
-			Optional<String> agentVersion,
-			Optional<String> diskType) {
+//			Optional<String> sessionReportType,
+//			Optional<Date> registrationStartDate,
+//			Optional<Date> registrationEndDate,
+//			Optional<String> status,
+//			Optional<String> dn,
+			Optional<String> hostname
+//			Optional<String> macAddress,
+//			Optional<String> ipAddress,
+//			Optional<String> brand,
+//			Optional<String> model,
+//			Optional<String> processor,
+//			Optional<String> osVersion,
+//			Optional<String> agentVersion,
+//			Optional<String> diskType
+			) {
 		
 		List<String> listOfOnlineUsers = new ArrayList<String>();
-		if(!status.get().equals("ALL")) {
-			
-			List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
-			try {
-	
-				listOfAgents = ldapService.findSubEntries(
-						configurationService.getAgentLdapBaseDn(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
-	
-				for (LdapEntry ldapEntry : listOfAgents) {
-					if(ldapEntry.isOnline()) {
-						listOfOnlineUsers.add(ldapEntry.getUid());
-					}
-				}
-			} catch (LdapException e) {
-				e.printStackTrace();
-			}
-		}
-		if(sessionReportType.isPresent()) {
-			if(sessionReportType.get().equals("LAST_ONE_MONTH_NO_SESSIONS") 
-					|| sessionReportType.get().equals("LAST_TWO_MONTHS_NO_SESSIONS") 
-					|| sessionReportType.get().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
-				List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
-				try {
-		
-					listOfAgents = ldapService.findSubEntries(
-							configurationService.getAgentLdapBaseDn(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
-		
-					for (LdapEntry ldapEntry : listOfAgents) {
-						if(ldapEntry.isOnline()) {
-							listOfOnlineUsers.add(ldapEntry.getUid());
-						}
-					}
-				} catch (LdapException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents(
+//		if(!status.get().equals("ALL")) {
+//			
+//			List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
+//			try {
+//	
+//				listOfAgents = ldapService.findSubEntries(
+//						configurationService.getAgentLdapBaseDn(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
+//	
+//				for (LdapEntry ldapEntry : listOfAgents) {
+//					if(ldapEntry.isOnline()) {
+//						listOfOnlineUsers.add(ldapEntry.getUid());
+//					}
+//				}
+//			} catch (LdapException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		if(sessionReportType.isPresent()) {
+//			if(sessionReportType.get().equals("LAST_ONE_MONTH_NO_SESSIONS") 
+//					|| sessionReportType.get().equals("LAST_TWO_MONTHS_NO_SESSIONS") 
+//					|| sessionReportType.get().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
+//				List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
+//				try {
+//		
+//					listOfAgents = ldapService.findSubEntries(
+//							configurationService.getAgentLdapBaseDn(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
+//		
+//					for (LdapEntry ldapEntry : listOfAgents) {
+//						if(ldapEntry.isOnline()) {
+//							listOfOnlineUsers.add(ldapEntry.getUid());
+//						}
+//					}
+//				} catch (LdapException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents1(
 				pageNumber, 
 				pageSize, 
-				sessionReportType,
-				registrationStartDate, 
-				registrationEndDate, 
-				status,
-				dn,
-				hostname, 
-				macAddress, 
-				ipAddress, 
-				brand, 
-				model, 
-				processor, 
-				osVersion, 
-				agentVersion, 
-				diskType,
-				listOfOnlineUsers
+//				sessionReportType,
+//				registrationStartDate, 
+//				registrationEndDate, 
+//				status,
+//				dn,
+				hostname
+//				macAddress, 
+//				ipAddress, 
+//				brand, 
+//				model, 
+//				processor, 
+//				osVersion, 
+//				agentVersion, 
+//				diskType,
+//				listOfOnlineUsers
 				);
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {
 			if(messagingService.isRecipientOnline(listOfAgentsCB.getContent().get(i).getJid())) {
