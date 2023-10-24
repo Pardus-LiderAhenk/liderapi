@@ -85,20 +85,20 @@ public class AgentSessionReportController {
 		Page<AgentImpl> listOfAgents = agentSessionReportService.findAllAgents(
 				pageNumber, 
 				pageSize, 
-//				sessionReportType,
-//				registrationStartDate, 
-//				registrationEndDate, 
-//				status, 
-//				dn,
-				hostname 
-//				macAddress, 
-//				ipAddress, 
-//				brand, 
-//				model, 
-//				processor, 
-//				osVersion,
-//				agentVersion,
-//				diskType
+				sessionReportType,
+				registrationStartDate, 
+				registrationEndDate, 
+				status, 
+				dn,
+				hostname, 
+				macAddress, 
+				ipAddress, 
+				brand, 
+				model, 
+				processor, 
+				osVersion,
+				agentVersion,
+				diskType
 				);
 				
 		resultMap.put("agents", listOfAgents);
@@ -108,7 +108,7 @@ public class AgentSessionReportController {
 	}
 
 	//get agent detail by ID
-	@Operation(summary = "Find agent detail by id.", description = "", tags = { "agent-service" })
+	@Operation(summary = "Find agent session detail by id.", description = "", tags = { "agent-service" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Find agent detail by id.", 
 			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
@@ -130,7 +130,7 @@ public class AgentSessionReportController {
 		}
 	}
 
-	@Operation(summary = "Exports filtered agent list to excel", description = "", tags = { "agent-service" })
+	@Operation(summary = "Exports filtered agent session list to excel", description = "", tags = { "agent-service" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Created excel file successfully", 
 			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
@@ -138,38 +138,38 @@ public class AgentSessionReportController {
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> export(
-//			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
-//			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
-//			@RequestParam (value = "status") Optional<String> status,
-//			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
-//			@RequestParam (value = "dn") Optional<String> dn,
-			@RequestParam (value = "hostname") Optional<String> hostname
-//			@RequestParam (value = "macAddress") Optional<String> macAddress,
-//			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
-//			@RequestParam (value = "brand") Optional<String> brand,
-//			@RequestParam (value = "model") Optional<String> model,
-//			@RequestParam (value = "processor") Optional<String> processor,
-//			@RequestParam (value = "osVersion") Optional<String> osVersion,
-//			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-//			@RequestParam (value = "diskType") Optional<String> diskType
+			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
+			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
+			@RequestParam (value = "status") Optional<String> status,
+			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
+			@RequestParam (value = "dn") Optional<String> dn,
+			@RequestParam (value = "hostname") Optional<String> hostname,
+			@RequestParam (value = "macAddress") Optional<String> macAddress,
+			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
+			@RequestParam (value = "brand") Optional<String> brand,
+			@RequestParam (value = "model") Optional<String> model,
+			@RequestParam (value = "processor") Optional<String> processor,
+			@RequestParam (value = "osVersion") Optional<String> osVersion,
+			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
+			@RequestParam (value = "diskType") Optional<String> diskType
 			){
 		Page<AgentImpl> listOfAgents = agentSessionReportService.findAllAgents(
 				1, 
 				agentSessionReportService.count().intValue(), 
-//				sessionReportType,
-//				registrationStartDate, 
-//				registrationEndDate, 
-//				status, 
-//				dn,
-				hostname 
-//				macAddress, 
-//				ipAddress, 
-//				brand, 
-//				model, 
-//				processor, 
-//				osVersion, 
-//				agentVersion,
-//				diskType
+				sessionReportType,
+				registrationStartDate, 
+				registrationEndDate, 
+				status, 
+				dn,
+				hostname, 
+				macAddress, 
+				ipAddress, 
+				brand, 
+				model, 
+				processor, 
+				osVersion, 
+				agentVersion,
+				diskType
 				);
 		
 		try {
