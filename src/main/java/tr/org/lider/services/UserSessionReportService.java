@@ -19,13 +19,15 @@ public class UserSessionReportService {
 	public Page<UserSessionImpl> findAllUserFiltered(
 			int pageNumber, 
 			int pageSize,
-			Integer sessionType, 
-			String username,
+			String sessionType, 
+			Optional<String> username,
+			Optional<String> clientName,
 			Optional<Date> startDate, 
 			Optional<Date> endDate){
 		
+		
 		Page<UserSessionImpl> users = userSessionCB.filterUserSession(
-				pageNumber, pageSize,sessionType, username, startDate, endDate);
+				pageNumber, pageSize,sessionType, username,clientName, startDate, endDate);
 		
 		return users;
 		

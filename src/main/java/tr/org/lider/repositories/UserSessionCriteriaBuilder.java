@@ -8,6 +8,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import tr.org.lider.entities.SessionEvent;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -29,8 +30,9 @@ public class UserSessionCriteriaBuilder {
 	public Page<UserSessionImpl> filterUserSession(
 			int pageNumber,
 			int pageSize,
-			Integer sessionType,
-			String username,
+			String sessionType,
+			Optional<String> username,
+			Optional<String> clientName,
 			Optional<Date> startDate,
 			Optional<Date> endDate
 			){
@@ -51,20 +53,27 @@ public class UserSessionCriteriaBuilder {
 		List<Predicate> predicates = new ArrayList<>();
 		//for filtered result count
 		List<Predicate> predicatesCount = new ArrayList<>();
-		
-//		if(username.isPresent() && !username.get().equals("")) {
-//			predicates.add(cb.like(from.get("username").as(String.class), "%" + username.get() + "%"));
-//			predicatesCount.add(cbCount.like(fromCount.get("username").as(String.class), "%" + username.get() + "%"));
-//		}
 
-		if (startDate.isPresent()) {
-			predicates.add(cb.greaterThanOrEqualTo(from.get("createDate"), startDate.get()));
-			predicatesCount.add(cbCount.greaterThanOrEqualTo(fromCount.get("createDate"), startDate.get()));
+		SessionEvent typeOfValue = SessionEvent.getType(Integer.parseInt(sessionType));
+		int typeId = typeOfValue.getId();
+		if (sessionType.equals("LOGIN")) {
+			if (startDate.isPresent()) {
+				predicates.add(cb.greaterThanOrEqualTo(from.get("createDate"), startDate.get()));
+				predicatesCount.add(cbCount.greaterThanOrEqualTo(fromCount.get("createDate"), startDate.get()));
+			}
+			
+			if (endDate.isPresent()) {
+				predicates.add(cb.lessThanOrEqualTo(from.get("createDate"), endDate.get()));
+				predicatesCount.add(cbCount.lessThanOrEqualTo(fromCount.get("createDate"), endDate.get()));
+			}
+			
+			if(username.isPresent()) {
+				predicates.add(cb.like(from.get("username").as(String.class), "%" + username.get() + "%"));
+				predicatesCount.add(cbCount.like(fromCount.get("username").as(String.class), "%" + username.get() + "%"));
+			}
+			
 		}
-		if (endDate.isPresent()) {
-			predicates.add(cb.lessThanOrEqualTo(from.get("createDate"), endDate.get()));
-			predicatesCount.add(cbCount.lessThanOrEqualTo(fromCount.get("createDate"), endDate.get()));
-		}
+		
 		
 		
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
