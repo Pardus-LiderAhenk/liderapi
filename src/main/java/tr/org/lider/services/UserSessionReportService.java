@@ -21,13 +21,13 @@ public class UserSessionReportService {
 			int pageSize,
 			String sessionType, 
 			Optional<String> username,
-			Optional<String> clientName,
+			Optional<String> dn,
 			Optional<Date> startDate, 
 			Optional<Date> endDate){
 		
 		
 		Page<UserSessionImpl> users = userSessionCB.filterUserSession(
-				pageNumber, pageSize,sessionType, username,clientName, startDate, endDate);
+				pageNumber, pageSize,sessionType, username,dn, startDate, endDate);
 		
 		return users;
 		
