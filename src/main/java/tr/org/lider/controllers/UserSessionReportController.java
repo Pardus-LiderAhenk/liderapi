@@ -1,7 +1,10 @@
 package tr.org.lider.controllers;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -37,7 +40,7 @@ import tr.org.lider.services.UserSessionReportService;
 @Tag(name = "User Session", description = "User Session Rest Service")
 public class UserSessionReportController {
 	
-	Logger logger = LoggerFactory.getLogger(UserController.class);
+	Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private UserSessionReportService userSessionReportService;
@@ -52,16 +55,18 @@ public class UserSessionReportController {
 		  @ApiResponse(responseCode = "417",description = "Coul not retrieve user session. Unexpected error occured.",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/list")
-	public ResponseEntity<?> operationLogs(
+	public ResponseEntity<?> getUserSessions(
 			@RequestParam (value = "pageNumber") int pageNumber,
 			@RequestParam (value = "pageSize") int pageSize,
 			@RequestParam (value = "sessionType") String sessionType,
-			@RequestParam (value = "username", required = false) Optional<String> username,
-			@RequestParam( value = "dn") Optional<String> dn,
+			@RequestParam (value = "username", required = false) String username,
+			@RequestParam( value = "dn") String dn,
 			@RequestParam (value="startDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> startDate,
 			@RequestParam (value="endDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> endDate) {
 		
-		Page<UserSessionImpl> users = userSessionReportService.findAllUserFiltered(pageNumber, pageSize, sessionType,username, dn, startDate, endDate);
+		Page<Map<String, Object>> users = userSessionReportService.getUserSessionByFilter(pageNumber, pageSize, sessionType,username, dn, startDate, endDate);
+		
+		
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(users);
@@ -78,13 +83,12 @@ public class UserSessionReportController {
 			@RequestParam (value = "pageNumber") int pageNumber,
 			@RequestParam (value = "pageSize") int pageSize,
 			@RequestParam (value = "sessionType") String sessionType,
-			@RequestParam (value = "username", required = false) Optional<String> username,
-			@RequestParam( value = "dn") Optional<String> dn,
+			@RequestParam (value = "username", required = false) String username,
+			@RequestParam( value = "dn") String dn,
 			@RequestParam (value="startDate", required = false) @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> startDate,
 			@RequestParam (value="endDate", required = false) @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> endDate) {
 		
-		Page<UserSessionImpl> users = userSessionReportService.findAllUserFiltered(pageNumber, pageSize, sessionType,username, dn, startDate, endDate);
-	
+		Page<Map<String, Object>> users = userSessionReportService.getUserSessionByFilter(1, userSessionReportService.count().intValue(), sessionType,username, dn, startDate, endDate);
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");

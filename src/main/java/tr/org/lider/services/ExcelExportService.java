@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -568,28 +569,15 @@ public class ExcelExportService {
 		Row row = null; 
 		Cell cell = null;
 
-		int maxCountOfMacAddresses = 0;
 		int maxCountOfIPAddresses = 0;
 		
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers, "", "Durumu");
-		Collections.addAll(colWidthList, 3500, 4500);
-		for (AgentImpl agent : agents) {
-			if(maxCountOfIPAddresses < agent.getIpAddresses().split(",").length) {
-				maxCountOfIPAddresses = agent.getIpAddresses().split(",").length;
-			}
-
-		}
-
-		for (int i = 0; i < maxCountOfIPAddresses; i++) {
-			headers.add("IP Adresi " + String.valueOf(i+1));
-			colWidthList.add(5000);
-		}
-
-		Collections.addAll(headers, "Oluşturulma Tarihi","Kullanıcı adı","Oturum");
-		Collections.addAll(colWidthList, 5500,6000,6500);
+		Collections.addAll(headers, "", "Kullanıcı Adı","Oluşturulma Tarihi","Oturum Tipi","Makine Adı");
+		Collections.addAll(colWidthList, 3500, 4500,6000,6000,6000);
+		
+		
 		row = sheet.createRow(rowCount++);
 		for (int i = 0; i < headers.size(); i++) {
 			sheet.setColumnWidth(i, colWidthList.get(i));
@@ -598,17 +586,31 @@ public class ExcelExportService {
 			cell.setCellStyle(csBoldAndBordered);
 		}
 		int counter = 1;
-		int colCount = 0;
+		String  sessionType = "";
+		String username = "";		
+		
 		for (AgentImpl agent : agents) {
 			
+			for (UserSessionImpl session: agent.getSessions()) {
+				username = session.getUsername();
+			}
+			
+			int colCount = 0;
 			row = sheet.createRow(rowCount++);  
 			cell = row.createCell(colCount++);
 			cell.setCellValue(String.valueOf(counter++));
 			cell.setCellStyle(csBordered);
 			
-			String  sessionType = "";
-			String username = "";
-
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(username);
+			cell.setCellStyle(csBordered);
+			
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(agent.getCreateDate()));
+			cell.setCellStyle(csBordered);
+			
 			for (UserSessionImpl session: agent.getSessions()) {
 				if(session.getSessionEvent().getId() == 1) {
 					sessionType = "Login";
@@ -617,24 +619,15 @@ public class ExcelExportService {
 					sessionType = "Logout";
 				}
 			}
-			System.out.println(sessionType);
-			
-			for (UserSessionImpl session: agent.getSessions()) {
-				username = session.getUsername();
-			}
-			
-			
 			
 			cell = row.createCell(colCount++);
-			if(agent.getIsOnline()) {
-				cell.setCellValue("Çevrimiçi");
-				cell.setCellStyle(csBordered);
-			} else {
-				cell.setCellValue("Çevrimdışı");
-				cell.setCellStyle(csBordered);
-			}
-
-
+			cell.setCellValue(sessionType);
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(agent.getHostname());
+			cell.setCellStyle(csBordered);
+			
 			for (int i = 0; i < maxCountOfIPAddresses; i++) {
 				try {
 					cell = row.createCell(colCount++);
@@ -645,19 +638,6 @@ public class ExcelExportService {
 					cell.setCellStyle(csBordered);
 				}
 			}
-			
-			cell = row.createCell(colCount++);
-			cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(agent.getCreateDate()));
-			cell.setCellStyle(csBordered);
-			
-			cell = row.createCell(colCount++);
-			cell.setCellValue(username);
-			cell.setCellStyle(csBordered);
-			
-			cell = row.createCell(colCount++);
-			cell.setCellValue(sessionType);
-			cell.setCellStyle(csBordered);
-			
 			colCount = 0;
 		}
 
@@ -673,7 +653,7 @@ public class ExcelExportService {
 		return fileToByteCode(exportFile);
 	}
 	
-	public byte[] generateUserSessionReport(List<UserSessionImpl> users) {
+	public byte[] generateUserSessionReport(List<Map<String, Object>> users) {
 		int rowCount = 0;
 		String exportFile = getFileWriteLocation() 
 				+ "Oturum Raporu_" 
@@ -715,33 +695,21 @@ public class ExcelExportService {
 		csCenter.setAlignment(HorizontalAlignment.CENTER);
 		csCenter.setFont(ftArial);
 
-		XSSFSheet sheet = wb.createSheet("Oturum Raporu");
+		XSSFSheet sheet = wb.createSheet("Kullanıcı Oturum Raporu");
 
 		//Add header
 		Row row = null; 
 		Cell cell = null;
 
-		int maxCountOfMacAddresses = 0;
-		int maxCountOfIPAddresses = 0;
 		
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers, "", "Durumu");
+		Collections.addAll(headers, "", "Kullanıcı Adı");
 		Collections.addAll(colWidthList, 3500, 4500);
-//		for (AgentImpl agent : users) {
-//			if(maxCountOfIPAddresses < agent.getIpAddresses().split(",").length) {
-//				maxCountOfIPAddresses = agent.getIpAddresses().split(",").length;
-//			}
-//
-//		}
 
-		for (int i = 0; i < maxCountOfIPAddresses; i++) {
-			headers.add("IP Adresi " + String.valueOf(i+1));
-			colWidthList.add(5000);
-		}
 
-		Collections.addAll(headers, "Oluşturulma Tarihi","Kullanıcı adı","Oturum");
+		Collections.addAll(headers, "Oluşturulma Tarihi","Oturum Tipi","Makine Adı");
 		Collections.addAll(colWidthList, 5500,6000,6500);
 		row = sheet.createRow(rowCount++);
 		for (int i = 0; i < headers.size(); i++) {
@@ -752,67 +720,21 @@ public class ExcelExportService {
 		}
 		int counter = 1;
 		int colCount = 0;
-		for (UserSessionImpl user : users) {
-			
-			row = sheet.createRow(rowCount++);  
-			cell = row.createCell(colCount++);
-			cell.setCellValue(String.valueOf(counter++));
-			cell.setCellStyle(csBordered);
-//			
-//			String  sessionType = "";
-//			String username = "";
-//
-//			for (UserSessionImpl session: agent.getSessions()) {
-//				if(session.getSessionEvent().getId() == 1) {
-//					sessionType = "Login";
-//				}
-//				else {
-//					sessionType = "Logout";
-//				}
-//			}
-//			System.out.println(sessionType);
-//			
-//			for (UserSessionImpl session: agent.getSessions()) {
-//				username = session.getUsername();
-//			}
-//			
-//			
-//			
-//			cell = row.createCell(colCount++);
-//			if(agent.getIsOnline()) {
-//				cell.setCellValue("Çevrimiçi");
-//				cell.setCellStyle(csBordered);
-//			} else {
-//				cell.setCellValue("Çevrimdışı");
-//				cell.setCellStyle(csBordered);
-//			}
-//
-//
-//			for (int i = 0; i < maxCountOfIPAddresses; i++) {
-//				try {
-//					cell = row.createCell(colCount++);
-//					cell.setCellValue(agent.getIpAddresses().split(",")[i].replace("'", "").trim());
-//					cell.setCellStyle(csBordered);
-//				} catch (Exception e) {
-//					cell.setCellValue("");			
-//					cell.setCellStyle(csBordered);
-//				}
-//			}
-//			
-			cell = row.createCell(colCount++);
-			cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getCreateDate()));
-			cell.setCellStyle(csBordered);
-			
-//			cell = row.createCell(colCount++);
-//			cell.setCellValue(username);
-//			cell.setCellStyle(csBordered);
-//			
-//			cell = row.createCell(colCount++);
-//			cell.setCellValue(sessionType);
-//			cell.setCellStyle(csBordered);
-			
-			colCount = 0;
+		
+		
+		for (Map<String, Object> user : users) {
+		    for (Map.Entry<String, Object> entry : user.entrySet()) {
+		        String key = entry.getKey();
+		        Object value = entry.getValue();
+		        
+		        System.out.println("Key: " + key + ", Value: " + value);
+		        
+		        cell = row.createCell(colCount++);
+				cell.setCellValue(entry.getValue().equals("username"));
+				cell.setCellStyle(csBordered);
+		    }
 		}
+	
 
 		try {
 			FileOutputStream outputStream = new FileOutputStream(exportFile);

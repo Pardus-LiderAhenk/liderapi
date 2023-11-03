@@ -52,7 +52,7 @@ public class UserSessionImpl implements Serializable{
 	@Column(name = "USER_SESSION_ID", unique = true, nullable = false)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "AGENT_ID", nullable = false)
 	private AgentImpl agent; // bidirectional
 
@@ -86,8 +86,6 @@ public class UserSessionImpl implements Serializable{
 		this.createDate = createDate;
 	}
 
-
-	
 	public Long getId() {
 		return id;
 	}
@@ -104,7 +102,6 @@ public class UserSessionImpl implements Serializable{
 	public void setAgent(AgentImpl agent) {
 		this.agent = agent;
 	}
-
 	
 	public String getUsername() {
 		return username;
