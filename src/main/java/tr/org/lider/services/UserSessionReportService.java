@@ -35,11 +35,12 @@ public class UserSessionReportService {
 			if(username != null && !username.isEmpty()) {
 				result = userSessionRepository.findByUserSessionAndCreateDateGreaterThanAndCreateDateLessThan(username,startDate,endDate, pageable);
 			}
-			
+			result = userSessionRepository.findByUserSessionLoginAll(pageable);
 		
 		}
 		else if(sessionType.equals("LOGOUT")) {
 			
+			result = userSessionRepository.findByUserSessionLogoutAll(pageable);
 		}
 		else {
 		  if (startDate.isPresent() && endDate.isPresent()) {

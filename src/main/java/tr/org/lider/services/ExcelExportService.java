@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -705,11 +706,11 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers, "", "Kullanıcı Adı");
+		Collections.addAll(headers, "Makine Adı", "MAC Adresi");
 		Collections.addAll(colWidthList, 3500, 4500);
 
 
-		Collections.addAll(headers, "Oluşturulma Tarihi","Oturum Tipi","Makine Adı");
+		Collections.addAll(headers, "Oluşturulma Tarihi","Kullanıcı Adı","Oturum Tipi");
 		Collections.addAll(colWidthList, 5500,6000,6500);
 		row = sheet.createRow(rowCount++);
 		for (int i = 0; i < headers.size(); i++) {
@@ -719,19 +720,25 @@ public class ExcelExportService {
 			cell.setCellStyle(csBoldAndBordered);
 		}
 		int counter = 1;
-		int colCount = 0;
-		
-		
+
 		for (Map<String, Object> user : users) {
+		    int colCount = 0;
+
+		    row = sheet.createRow(rowCount++);
+
 		    for (Map.Entry<String, Object> entry : user.entrySet()) {
 		        String key = entry.getKey();
 		        Object value = entry.getValue();
-		        
-		        System.out.println("Key: " + key + ", Value: " + value);
-		        
-		        cell = row.createCell(colCount++);
-				cell.setCellValue(entry.getValue().equals("username"));
-				cell.setCellStyle(csBordered);
+
+		        if (value instanceof String) {
+		            cell = row.createCell(colCount++);
+		            cell.setCellValue((String) value);
+		            cell.setCellStyle(csBordered);
+		        } else if (value instanceof Integer) {
+		            cell = row.createCell(colCount++);
+		            cell.setCellValue((Integer) value);
+		            cell.setCellStyle(csBordered);
+		        }
 		    }
 		}
 	
