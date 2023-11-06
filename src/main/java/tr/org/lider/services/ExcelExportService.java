@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -710,8 +711,8 @@ public class ExcelExportService {
 		Collections.addAll(colWidthList, 3500, 4500);
 
 
-		Collections.addAll(headers, "Oluşturulma Tarihi","Kullanıcı Adı","Oturum Tipi");
-		Collections.addAll(colWidthList, 5500,6000,6500);
+		Collections.addAll(headers, "IP Adresi","Kullanıcı Adı","Oturum Tipi","Tarih");
+		Collections.addAll(colWidthList, 5500,6000,6500,6000);
 		row = sheet.createRow(rowCount++);
 		for (int i = 0; i < headers.size(); i++) {
 			sheet.setColumnWidth(i, colWidthList.get(i));
@@ -731,13 +732,49 @@ public class ExcelExportService {
 		        Object value = entry.getValue();
 
 		        if (value instanceof String) {
-		            cell = row.createCell(colCount++);
-		            cell.setCellValue((String) value);
-		            cell.setCellStyle(csBordered);
-		        } else if (value instanceof Integer) {
-		            cell = row.createCell(colCount++);
-		            cell.setCellValue((Integer) value);
-		            cell.setCellStyle(csBordered);
+		        	String strValue = (String) value;
+		        	if(strValue.contains("\'")) {
+		        		 strValue = strValue.replace("\'", "");
+		        		 cell = row.createCell(colCount++);
+				         cell.setCellValue((String) strValue);
+				         cell.setCellStyle(csBordered);
+		        	}	
+		        	else {
+		        		 cell = row.createCell(colCount++);
+				         cell.setCellValue((String) value);
+				         cell.setCellStyle(csBordered);
+		        	}
+		        	
+		           
+		        } 
+		        else if (value instanceof Integer) {
+		        	Integer intValue = (Integer) value;
+		        	
+		        	if(intValue == 1) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Oturum Açıldı");
+			            cell.setCellStyle(csBordered);
+		        	}
+		        	else if(intValue == 2) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Oturum 	Kapatıldı");
+			            cell.setCellStyle(csBordered);
+		        	}
+		        	else {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue((double) value);
+			            cell.setCellStyle(csBordered);
+		        	}
+		            
+		        }
+		       else if (value instanceof Timestamp) {
+		          Timestamp timestampValue = (Timestamp) value;
+		          Date dateValue = new Date(timestampValue.getTime());
+		            
+		          cell = row.createCell(colCount++);
+		          cell.setCellValue(timestampValue); 
+		          cell.setCellStyle(csBordered);
+		        
 		        }
 		    }
 		}

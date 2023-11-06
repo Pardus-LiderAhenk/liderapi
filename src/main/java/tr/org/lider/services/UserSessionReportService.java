@@ -33,8 +33,15 @@ public class UserSessionReportService {
 
 		if (sessionType.equals("LOGIN")) {
 			if(username != null && !username.isEmpty()) {
-				result = userSessionRepository.findByUserSessionAndCreateDateGreaterThanAndCreateDateLessThan(username,startDate,endDate, pageable);
+				if(dn != null && dn.isEmpty()){
+					result = userSessionRepository.findByUserSessionUsernameAndDn(username,dn,startDate,endDate, pageable);
+				}
+				else {
+					result = userSessionRepository.findByUserSessionAndCreateDateGreaterThanAndCreateDateLessThan(username,startDate,endDate, pageable);
+				}
+				
 			}
+			
 			result = userSessionRepository.findByUserSessionLoginAll(pageable);
 		
 		}
@@ -46,9 +53,14 @@ public class UserSessionReportService {
 		  if (startDate.isPresent() && endDate.isPresent()) {
 				result = userSessionRepository.findByUserSessionIdAndCreateDateGreaterThanAndCreateDateLessThan(startDate, endDate, pageable);
 		  } 
-		  else {
+		  else if(username != null && !username.isEmpty()) {
 			result = userSessionRepository.findByUserSession(username, pageable);
 				}
+		  else if(dn != null && !dn.isEmpty()) {
+			  result = userSessionRepository.findByUserSessionByDn(dn, pageable);
+		  }else {
+			  result = userSessionRepository.findByUserSessionAll(pageable);
+		  }
 		}
 				
 		
@@ -56,10 +68,10 @@ public class UserSessionReportService {
 		return result;
 	}
 	
-	public Page<UserSessionImpl> getLastActivityByUserIdDescLimitTen(String username) {
+	public Page<Map<String, Object>> getLastActivityByUserIdDescLimitTen(String username) {
 		PageRequest pageable = PageRequest.of(1 - 1, 10, Sort.by("createDate").descending());
-		//return userSessionRepository.findOrderByCreateDateDesc10ByUserId(username, pageable);
-		return null;
+		return userSessionRepository.findOrderByCreateDateDesc10ByUserId(username, pageable);
+		
 	}
 	
 
