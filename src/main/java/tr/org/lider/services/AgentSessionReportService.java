@@ -3,12 +3,15 @@ package tr.org.lider.services;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.AgentImpl;
@@ -215,4 +218,19 @@ public class AgentSessionReportService {
 	public List<String> getDiskType() {
 		return agentRepository.getPropertyValueByName("diskType");
 	}
+	
+	public Page<Map<String, Object>> getSessionList(int pageNumber, int pageSize,Long agentID){
+		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+		return agentRepository.findByUserSessionAll(agentID,pageable);
+	}
+	public Page<Map<String, Object>> getSessionLoginExportList(int pageNumber, int pageSize){
+		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+		return agentRepository.findByUserSessionLoginExport(pageable);
+	}
+	public Page<Map<String, Object>> getSessionAllExportList(int pageNumber, int pageSize){
+		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+		return agentRepository.findByUserSessionExport(pageable);
+	}
+	
+	
 }

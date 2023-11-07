@@ -3,6 +3,7 @@ package tr.org.lider.controllers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -107,27 +109,24 @@ public class AgentSessionReportController {
 				.body(resultMap);
 	}
 
-	//get agent detail by ID
 	@Operation(summary = "Find agent session detail by id.", description = "", tags = { "agent-service" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Find agent detail by id.", 
 			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
 			  @ApiResponse(responseCode = "404", description = "Agent id not found.Not found.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/detail/id/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<AgentImpl>  findAgentByIDRest(@PathVariable Long agentID) {
+	@PostMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?>  findAgentByIDRest(
+			@RequestParam (value = "pageNumber") int pageNumber,
+			@RequestParam (value = "pageSize") int pageSize,
+			@RequestParam (value = "agentID") Long agentID) {
 		logger.debug("Agent id:  {} ", agentID);
-		Optional<AgentImpl> agent = agentSessionReportService.findAgentByID(agentID);
-		HttpHeaders headers = new HttpHeaders();
-		if(agent.isPresent()) {
-			return new ResponseEntity<AgentImpl>(agent.get(), HttpStatus.OK);
-		}
-		else {
-			return ResponseEntity
-    				.status(HttpStatus.NOT_FOUND)
-    				.headers(headers)
-    				.build();
-		}
+		Page<Map<String, Object>> agent = agentSessionReportService.getSessionList(pageNumber,pageSize, agentID);
+		
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(agent);
+		
 	}
 
 	@Operation(summary = "Exports filtered agent session list to excel", description = "", tags = { "agent-service" })
@@ -138,46 +137,26 @@ public class AgentSessionReportController {
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> export(
-			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
-			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
-			@RequestParam (value = "status") Optional<String> status,
-			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
-			@RequestParam (value = "dn") Optional<String> dn,
-			@RequestParam (value = "hostname") Optional<String> hostname,
-			@RequestParam (value = "macAddress") Optional<String> macAddress,
-			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
-			@RequestParam (value = "brand") Optional<String> brand,
-			@RequestParam (value = "model") Optional<String> model,
-			@RequestParam (value = "processor") Optional<String> processor,
-			@RequestParam (value = "osVersion") Optional<String> osVersion,
-			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-			@RequestParam (value = "diskType") Optional<String> diskType
-			){
-		Page<AgentImpl> listOfAgents = agentSessionReportService.findAllAgents(
-				1, 
-				agentSessionReportService.count().intValue(), 
-				sessionReportType,
-				registrationStartDate, 
-				registrationEndDate, 
-				status, 
-				dn,
-				hostname, 
-				macAddress, 
-				ipAddress, 
-				brand, 
-				model, 
-				processor, 
-				osVersion, 
-				agentVersion,
-				diskType
-				);
+			@RequestParam (value = "pageNumber") int pageNumber,
+			@RequestParam (value = "pageSize") int pageSize,
+			@RequestParam (value = "sessionType") String sessionType){
+		if(sessionType.equals("LOGIN")) {
+			Page<Map<String, Object>> agentSessionList = agentSessionReportService.getSessionLoginExportList(1,1);
+
+		}
+		else if(sessionType.equals("LOGOUT")) {
+			//Page<Map<String, Object>> agent = agentSessionReportService.getSessionLoginList(pageNumber,pageSize);
+		}
+		else 
+			Page<Map<String, Object>> agentSessionList = agentSessionReportService.getSessionAllExportList(1,1);
+
 		
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
 			headers.setContentType(MediaType.parseMediaType("application/csv"));
 			headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-			byte[] excelContent = excelService.generateSessionReport(listOfAgents.getContent());
+			byte[] excelContent = excelService.generateUserSessionReport(agentSessionList.);
 			return new ResponseEntity<byte[]>(excelContent, headers,  HttpStatus.OK);
 		} catch (Exception e) {
         	logger.error("Error occured while creating excel report Error: ." + e.getMessage());

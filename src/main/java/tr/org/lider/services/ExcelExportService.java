@@ -772,7 +772,7 @@ public class ExcelExportService {
 		          Date dateValue = new Date(timestampValue.getTime());
 		            
 		          cell = row.createCell(colCount++);
-		          cell.setCellValue(timestampValue); 
+		          cell.setCellValue(dateValue); 
 		          cell.setCellStyle(csBordered);
 		        
 		        }

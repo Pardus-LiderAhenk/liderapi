@@ -19,12 +19,14 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Entity class for agent.
  * 
  */
+@JsonIgnoreProperties({ "sessions" })
 @Entity
 @Table(name = "C_AGENT")
 public class AgentImpl implements Serializable{
@@ -85,7 +87,7 @@ public class AgentImpl implements Serializable{
 	@OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<AgentPropertyImpl> properties = new HashSet<AgentPropertyImpl>(0); // bidirectional
 
-	@OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = false)
+	@OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OrderBy("createDate DESC")
 	private Set<UserSessionImpl> sessions = new HashSet<UserSessionImpl>(0); // bidirectional
 
