@@ -32,6 +32,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.services.AgentSessionReportService;
 import tr.org.lider.services.ExcelExportService;
+import tr.org.lider.services.UserSessionReportService;
 
 @Secured({"ROLE_ADMIN", "ROLE_USER_SESSION_REPORT" })
 @RestController
@@ -43,6 +44,9 @@ public class AgentSessionReportController {
 
 	@Autowired
 	private AgentSessionReportService agentSessionReportService;
+	
+	@Autowired
+	private UserSessionReportService userSessionReportService;
 	
 	@Autowired
 	private ExcelExportService excelService;
@@ -121,11 +125,41 @@ public class AgentSessionReportController {
 			@RequestParam (value = "pageSize") int pageSize,
 			@RequestParam (value = "agentID") Long agentID) {
 		logger.debug("Agent id:  {} ", agentID);
-		Page<Map<String, Object>> agent = agentSessionReportService.getSessionList(pageNumber,pageSize, agentID);
+		Page<Map<String, Object>> agentSessionList = agentSessionReportService.getSessionList(pageNumber,pageSize, agentID);
 		
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(agent);
+				.body(agentSessionList);
+		
+	}
+	
+	@Operation(summary = "Find agent session list.", description = "", tags = { "agent-service" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Find agent detail by id.", 
+			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
+			  @ApiResponse(responseCode = "404", description = "Agent id not found.Not found.", 
+			    content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/sessions", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?>  findAgentBySessions(
+			@RequestParam (value = "pageNumber") int pageNumber,
+			@RequestParam (value = "pageSize") int pageSize,
+			@RequestParam (value = "agentID") Long agentID,
+			@RequestParam (value = "sessionType") String sessionType) {
+		logger.debug("Agent id:  {} ", agentID);
+		 Page<Map<String, Object>> agentSessionList = null;
+
+			if(sessionType.equals("LOGIN")) {
+				agentSessionList = agentSessionReportService.getSessionLoginExportList(1,userSessionReportService.count().intValue(),agentID);
+			}
+			else if(sessionType.equals("LOGOUT")) {
+				agentSessionList = agentSessionReportService.getSessionLogoutExportList(1,userSessionReportService.count().intValue(),agentID);
+			}
+			else {
+				agentSessionList = agentSessionReportService.getSessionAllExportList(1, userSessionReportService.count().intValue(), agentID);
+			}		
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(agentSessionList);
 		
 	}
 
@@ -139,25 +173,38 @@ public class AgentSessionReportController {
 	public ResponseEntity<?> export(
 			@RequestParam (value = "pageNumber") int pageNumber,
 			@RequestParam (value = "pageSize") int pageSize,
+			@RequestParam (value = "agentID") Long agentID,
 			@RequestParam (value = "sessionType") String sessionType){
-		if(sessionType.equals("LOGIN")) {
-			Page<Map<String, Object>> agentSessionList = agentSessionReportService.getSessionLoginExportList(1,1);
+		
+	    Page<Map<String, Object>> agentSessionList = null;
 
+		if(sessionType.equals("LOGIN")) {
+			agentSessionList = agentSessionReportService.getSessionLoginExportList(1,userSessionReportService.count().intValue(),agentID);
 		}
 		else if(sessionType.equals("LOGOUT")) {
-			//Page<Map<String, Object>> agent = agentSessionReportService.getSessionLoginList(pageNumber,pageSize);
+			agentSessionList = agentSessionReportService.getSessionLogoutExportList(1,userSessionReportService.count().intValue(),agentID);
 		}
-		else 
-			Page<Map<String, Object>> agentSessionList = agentSessionReportService.getSessionAllExportList(1,1);
-
+		else {
+			agentSessionList = agentSessionReportService.getSessionAllExportList(1, userSessionReportService.count().intValue(), agentID);
+		}
 		
 		try {
-			HttpHeaders headers = new HttpHeaders();
-			headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
-			headers.setContentType(MediaType.parseMediaType("application/csv"));
-			headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-			byte[] excelContent = excelService.generateUserSessionReport(agentSessionList.);
-			return new ResponseEntity<byte[]>(excelContent, headers,  HttpStatus.OK);
+			if (agentSessionList != null) {
+				HttpHeaders headers = new HttpHeaders();
+				headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
+				headers.setContentType(MediaType.parseMediaType("application/csv"));
+				headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+				byte[] excelContent = excelService.generateUserSessionReport(agentSessionList.getContent());
+				return new ResponseEntity<byte[]>(excelContent, headers,  HttpStatus.OK);
+			}
+			else {
+				HttpHeaders headers = new HttpHeaders();
+	            headers.add("message", "Invalid session type: " + sessionType);
+	            return ResponseEntity
+	                .status(HttpStatus.BAD_REQUEST)
+	                .headers(headers)
+	                .build();
+			}
 		} catch (Exception e) {
         	logger.error("Error occured while creating excel report Error: ." + e.getMessage());
         	HttpHeaders headers = new HttpHeaders();

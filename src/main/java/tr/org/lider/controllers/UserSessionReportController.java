@@ -1,9 +1,7 @@
 package tr.org.lider.controllers;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,7 +28,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.OperationLogImpl;
-import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.services.ExcelExportService;
 import tr.org.lider.services.UserSessionReportService;
 

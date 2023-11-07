@@ -83,14 +83,17 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 			+ "where a.last_login_date >:startDate", nativeQuery = true)
 	int getCountByLastLoginToday(@Param("startDate") Date startDate);
 	
-	@Query(value= "SELECT NEW map(s.username as username, a.hostname as hostname, s.sessionEvent as sessionEvent, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses, s.createDate as createDate) FROM UserSessionImpl s JOIN AgentImpl a ON s.agent=a.id WHERE a.id=?1")
+	@Query(value= "SELECT NEW map(s.username as username, a.hostname as hostname, s.sessionEvent as sessionEvent, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses, s.createDate as createDate) FROM UserSessionImpl s LEFT JOIN AgentImpl a ON s.agent=a.id WHERE a.id=?1")
 	Page<Map<String, Object>> findByUserSessionAll(Long agentID,Pageable pageable);
 	
-	@Query(value= "SELECT NEW map(s.username as username, a.hostname as hostname, s.sessionEvent as sessionEvent, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses, s.createDate as createDate) FROM UserSessionImpl s JOIN AgentImpl a ON s.agent=a.id WHERE s.sessionEvent=1")
-	Page<Map<String, Object>> findByUserSessionLoginExport(Pageable pageable);
+	@Query(value= "SELECT NEW map(s.username as username,  s.sessionEvent as sessionEvent,s.createDate as createDate, a.hostname as hostname, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses) FROM UserSessionImpl s JOIN AgentImpl a ON s.agent=a.id WHERE s.sessionEvent = 1 AND a.id=?1")
+	Page<Map<String, Object>> findByUserSessionLoginExport(Long agentID,Pageable pageable);
 	
-	@Query(value= "SELECT NEW map(s.username as username, a.hostname as hostname, s.sessionEvent as sessionEvent, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses, s.createDate as createDate) FROM UserSessionImpl s JOIN AgentImpl a ON s.agent=a.id")
-	Page<Map<String, Object>> findByUserSessionExport(Pageable pageable);
+	@Query(value= "SELECT NEW map(s.username as username, s.sessionEvent as sessionEvent,  a.macAddresses as macAddresses, s.createDate as createDate,a.hostname as hostname,a.ipAddresses as ipAddresses) FROM UserSessionImpl s LEFT JOIN AgentImpl a ON s.agent=a.id WHERE s.sessionEvent =2  AND a.id=?1")
+	Page<Map<String, Object>> findByUserSessionLogoutExport(Long agentID,Pageable pageable);
+	
+	@Query(value= "SELECT NEW map(s.username as username, a.hostname as hostname, s.sessionEvent as sessionEvent, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses, s.createDate as createDate) FROM UserSessionImpl s LEFT JOIN AgentImpl a ON s.agent=a.id WHERE a.id=?1")
+	Page<Map<String, Object>> findByUserSessionExport(Long agentID,Pageable pageable);
 	
 }
 

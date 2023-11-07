@@ -523,138 +523,6 @@ public class ExcelExportService {
 
 	}
 	
-	public byte[] generateSessionReport(List<AgentImpl> agents) {
-		int rowCount = 0;
-		String exportFile = getFileWriteLocation() 
-				+ "Oturum Raporu_" 
-				+ new SimpleDateFormat("ddMMyyyyHH:mm:ss.SSS").format(new Date())
-				+ ".xlsx";
-		XSSFWorkbook wb = new XSSFWorkbook();
-
-		Font fontTextColourRed = wb.createFont();
-		fontTextColourRed.setColor(IndexedColors.RED.getIndex());
-
-		Font ftArial = wb.createFont();
-		ftArial.setFontName("Arial");
-
-		Font fontTextBold = wb.createFont();
-		fontTextBold.setBold(true);
-		fontTextBold.setFontName("Arial");
-		fontTextBold.setFontHeightInPoints((short) 10);
-
-		CellStyle csBoldAndBordered = wb.createCellStyle();
-		csBoldAndBordered.setFont(fontTextBold);
-		csBoldAndBordered.setBorderBottom(BorderStyle.THIN);
-		csBoldAndBordered.setBorderTop(BorderStyle.THIN);
-		csBoldAndBordered.setBorderLeft(BorderStyle.THIN);
-		csBoldAndBordered.setBorderRight(BorderStyle.THIN);
-		
-		CellStyle csBordered = wb.createCellStyle();
-		csBordered.setBorderBottom(BorderStyle.THIN);
-		csBordered.setBorderTop(BorderStyle.THIN);
-		csBordered.setBorderLeft(BorderStyle.THIN);
-		csBordered.setBorderRight(BorderStyle.THIN);
-
-		CellStyle csTextColourRed = wb.createCellStyle();
-		csTextColourRed.setFont(fontTextColourRed);
-
-		CellStyle csTextBold= wb.createCellStyle();
-		csTextBold.setFont(fontTextBold);
-
-		CellStyle csCenter = wb.createCellStyle();
-		csCenter.setAlignment(HorizontalAlignment.CENTER);
-		csCenter.setFont(ftArial);
-
-		XSSFSheet sheet = wb.createSheet("Oturum Raporu");
-
-		//Add header
-		Row row = null; 
-		Cell cell = null;
-
-		int maxCountOfIPAddresses = 0;
-		
-		List<Integer> colWidthList = new ArrayList<Integer>();
-		List<String> headers = new ArrayList<String>();
-		
-		Collections.addAll(headers, "", "Kullanıcı Adı","Oluşturulma Tarihi","Oturum Tipi","Makine Adı");
-		Collections.addAll(colWidthList, 3500, 4500,6000,6000,6000);
-		
-		
-		row = sheet.createRow(rowCount++);
-		for (int i = 0; i < headers.size(); i++) {
-			sheet.setColumnWidth(i, colWidthList.get(i));
-			cell = row.createCell(i);
-			cell.setCellValue(headers.get(i));
-			cell.setCellStyle(csBoldAndBordered);
-		}
-		int counter = 1;
-		String  sessionType = "";
-		String username = "";		
-		
-		for (AgentImpl agent : agents) {
-			
-			for (UserSessionImpl session: agent.getSessions()) {
-				username = session.getUsername();
-			}
-			
-			int colCount = 0;
-			row = sheet.createRow(rowCount++);  
-			cell = row.createCell(colCount++);
-			cell.setCellValue(String.valueOf(counter++));
-			cell.setCellStyle(csBordered);
-			
-			
-			cell = row.createCell(colCount++);
-			cell.setCellValue(username);
-			cell.setCellStyle(csBordered);
-			
-			
-			cell = row.createCell(colCount++);
-			cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(agent.getCreateDate()));
-			cell.setCellStyle(csBordered);
-			
-			for (UserSessionImpl session: agent.getSessions()) {
-				if(session.getSessionEvent().getId() == 1) {
-					sessionType = "Login";
-				}
-				else {
-					sessionType = "Logout";
-				}
-			}
-			
-			cell = row.createCell(colCount++);
-			cell.setCellValue(sessionType);
-			cell.setCellStyle(csBordered);
-			
-			cell = row.createCell(colCount++);
-			cell.setCellValue(agent.getHostname());
-			cell.setCellStyle(csBordered);
-			
-			for (int i = 0; i < maxCountOfIPAddresses; i++) {
-				try {
-					cell = row.createCell(colCount++);
-					cell.setCellValue(agent.getIpAddresses().split(",")[i].replace("'", "").trim());
-					cell.setCellStyle(csBordered);
-				} catch (Exception e) {
-					cell.setCellValue("");			
-					cell.setCellStyle(csBordered);
-				}
-			}
-			colCount = 0;
-		}
-
-		try {
-			FileOutputStream outputStream = new FileOutputStream(exportFile);
-			wb.write(outputStream);
-			wb.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return fileToByteCode(exportFile);
-	}
-	
 	public byte[] generateUserSessionReport(List<Map<String, Object>> users) {
 		int rowCount = 0;
 		String exportFile = getFileWriteLocation() 
@@ -706,13 +574,9 @@ public class ExcelExportService {
 		
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
-		
-		Collections.addAll(headers, "Makine Adı", "MAC Adresi");
-		Collections.addAll(colWidthList, 3500, 4500);
 
-
-		Collections.addAll(headers, "IP Adresi","Kullanıcı Adı","Oturum Tipi","Tarih");
-		Collections.addAll(colWidthList, 5500,6000,6500,6000);
+		Collections.addAll(headers,"", "Kullanıcı Adı","Oturum Tipi","Tarih","Makine Adı","IP Adresi","MAC Adresi");
+		Collections.addAll(colWidthList, 1500,6000,5000,6000,6000,6000,6000);
 		row = sheet.createRow(rowCount++);
 		for (int i = 0; i < headers.size(); i++) {
 			sheet.setColumnWidth(i, colWidthList.get(i));
@@ -724,8 +588,10 @@ public class ExcelExportService {
 
 		for (Map<String, Object> user : users) {
 		    int colCount = 0;
-
-		    row = sheet.createRow(rowCount++);
+			row = sheet.createRow(rowCount++);  
+			cell = row.createCell(colCount++);
+			cell.setCellValue(String.valueOf(counter++));
+			cell.setCellStyle(csBordered);
 
 		    for (Map.Entry<String, Object> entry : user.entrySet()) {
 		        String key = entry.getKey();
@@ -772,7 +638,7 @@ public class ExcelExportService {
 		          Date dateValue = new Date(timestampValue.getTime());
 		            
 		          cell = row.createCell(colCount++);
-		          cell.setCellValue(dateValue); 
+		          cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(dateValue)); 
 		          cell.setCellStyle(csBordered);
 		        
 		        }

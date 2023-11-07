@@ -223,13 +223,17 @@ public class AgentSessionReportService {
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
 		return agentRepository.findByUserSessionAll(agentID,pageable);
 	}
-	public Page<Map<String, Object>> getSessionLoginExportList(int pageNumber, int pageSize){
+	public Page<Map<String, Object>> getSessionLoginExportList(int pageNumber, int pageSize, Long agentID){
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		return agentRepository.findByUserSessionLoginExport(pageable);
+		return agentRepository.findByUserSessionLoginExport(agentID,pageable);
 	}
-	public Page<Map<String, Object>> getSessionAllExportList(int pageNumber, int pageSize){
+	public Page<Map<String, Object>> getSessionLogoutExportList(int pageNumber, int pageSize, Long agentID){
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		return agentRepository.findByUserSessionExport(pageable);
+		return agentRepository.findByUserSessionLogoutExport(agentID,pageable);
+	}
+	public Page<Map<String, Object>> getSessionAllExportList(int pageNumber, int pageSize, Long agentID){
+		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+		return agentRepository.findByUserSessionExport(agentID,pageable);
 	}
 	
 	
