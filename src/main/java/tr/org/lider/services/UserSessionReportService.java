@@ -32,37 +32,61 @@ public class UserSessionReportService {
 		if (sessionType.equals("LOGIN")) {
 			if(username != null && !username.isEmpty()) {
 				if(dn != null && dn.isEmpty()){
-					result = userSessionRepository.findByUserSessionUsernameAndDn(username,dn,startDate,endDate, pageable);
+					if(startDate != null && startDate.isPresent()) {
+						result = userSessionRepository.findByUserSessionLoginUsernameAndDnAndDate(username,dn,startDate,endDate, pageable);
+					}
+					result = userSessionRepository.findByUserSessionLoginUsernameAndDn(username,dn,pageable);
 				}
 				else {
-					result = userSessionRepository.findByUserSessionAndCreateDateGreaterThanAndCreateDateLessThan(username,startDate,endDate, pageable);
+					result = userSessionRepository.findByUserSessionLoginUsernameAndCreateDateGreaterThan(username,startDate,endDate, pageable);
 				}
-				
 			}
 			
 			result = userSessionRepository.findByUserSessionLoginAll(pageable);
-		
 		}
 		else if(sessionType.equals("LOGOUT")) {
+			if(username != null && !username.isEmpty()) {
+				if(dn != null && dn.isEmpty()){
+					if(startDate != null && startDate.isPresent()) {
+						result = userSessionRepository.findByUserSessionLogoutUsernameAndDn(username,dn,startDate,endDate, pageable);
+					}
+					result = userSessionRepository.findByUserSessionLogoutDnAndCreateDateGreaterThan(username,dn,pageable);
+				}
+				else {
+					result = userSessionRepository.findByUserSessionLogoutUsername(username,pageable);
+					
+				}				
+			}
 			
 			result = userSessionRepository.findByUserSessionLogoutAll(pageable);
 		}
 		else {
 		  if (startDate.isPresent() && endDate.isPresent()) {
-				result = userSessionRepository.findByUserSessionIdAndCreateDateGreaterThanAndCreateDateLessThan(startDate, endDate, pageable);
+			  if(username != null && !username.isEmpty()) {
+				  
+				  if(dn != null && !dn.isEmpty()) {
+					  
+					  result = userSessionRepository.findByUserSessionUserAndDnAndDate(username,dn,startDate,endDate, pageable);
+				  }
+				  else {
+						result = userSessionRepository.findByUserSessionAndDate(username,startDate,endDate, pageable);
+
+				  }
+			  }
+			  else {
+				  result = userSessionRepository.findByUserSessionIdAndCreateDateGreaterThanAndCreateDateLessThan(startDate, endDate, pageable);
+			  }
+			  
 		  } 
-		  else if(username != null && !username.isEmpty()) {
-			result = userSessionRepository.findByUserSession(username, pageable);
-				}
+		 
 		  else if(dn != null && !dn.isEmpty()) {
-			  result = userSessionRepository.findByUserSessionByDn(dn, pageable);
-		  }else {
+			  result = userSessionRepository.findByUserSessionUserAndDn(dn, pageable);
+		  }
+		  else {
 			  result = userSessionRepository.findByUserSessionAll(pageable);
 		  }
 		}
 				
-		
-		
 		return result;
 	}
 	

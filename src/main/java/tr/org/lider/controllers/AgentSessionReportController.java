@@ -120,7 +120,7 @@ public class AgentSessionReportController {
 			  @ApiResponse(responseCode = "404", description = "Agent id not found.Not found.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?>  findAgentByIDRest(
+	public ResponseEntity<?>  getAgentSessionsDetail(
 			@RequestParam (value = "pageNumber") int pageNumber,
 			@RequestParam (value = "pageSize") int pageSize,
 			@RequestParam (value = "agentID") Long agentID) {
@@ -135,7 +135,7 @@ public class AgentSessionReportController {
 	
 	@Operation(summary = "Find agent session list.", description = "", tags = { "agent-service" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Find agent detail by id.", 
+			  @ApiResponse(responseCode = "200", description = "Get agent session detail by id.", 
 			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
 			  @ApiResponse(responseCode = "404", description = "Agent id not found.Not found.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })

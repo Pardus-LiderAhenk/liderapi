@@ -575,7 +575,7 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 
-		Collections.addAll(headers,"", "Kullanıcı Adı","Oturum Tipi","Tarih","Makine Adı","IP Adresi","MAC Adresi");
+		Collections.addAll(headers,"", "İstemci Adı","IP Adresi","Kullanıcı Adı","Oturum Tipi","MAC Adresi","Tarih");
 		Collections.addAll(colWidthList, 1500,6000,5000,6000,6000,6000,6000);
 		row = sheet.createRow(rowCount++);
 		for (int i = 0; i < headers.size(); i++) {
