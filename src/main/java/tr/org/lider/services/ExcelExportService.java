@@ -95,7 +95,7 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers, "", "MAC", "Durumu");
+		Collections.addAll(headers, "", "Bilgisayar Adı", "Durumu");
 		Collections.addAll(colWidthList, 2500, 3500, 4500);
 		for (AgentImpl agent : agents) {
 			if(maxCountOfIPAddresses < agent.getIpAddresses().split(",").length) {
@@ -574,9 +574,62 @@ public class ExcelExportService {
 		
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
+		
+		Collections.addAll(headers,"", "Bilgisayar Adı");
+		Collections.addAll(colWidthList, 1000,4000);
+		
+		
+		int counter = 1;
+		int maxCountOfMacAddresses = 0;
+		int maxCountOfIPAddresses = 0;
+		
+		for (Map<String, Object> user : users) {
 
-		Collections.addAll(headers,"", "İstemci Adı","IP Adresi","Kullanıcı Adı","Oturum Tipi","MAC Adresi","Tarih");
-		Collections.addAll(colWidthList, 1500,6000,5000,6000,6000,6000,6000);
+		    for (Map.Entry<String, Object> entry : user.entrySet()) {
+		        String key = entry.getKey();
+		        Object value = entry.getValue();
+		        
+		        if("macAddresses".equals(key)) {
+		        	
+		        	String strValue = (String) value;
+		
+		        	if(maxCountOfMacAddresses < strValue.split(",").length) {
+		        		maxCountOfMacAddresses = strValue.split(",").length;
+		        	}
+		        	
+		        }
+		        
+		        if("ipAddresses".equals(key)) {
+		        	
+		        	String strValue = (String) value;
+		
+		        	if(maxCountOfIPAddresses < strValue.split(",").length) {
+		        		maxCountOfIPAddresses = strValue.split(",").length;
+		        	}
+		        	
+		        }
+		    }
+		        
+		}
+		
+		for (int i = 0; i < maxCountOfIPAddresses; i++) {
+			headers.add("IP Adresi " + String.valueOf(i+1));
+			colWidthList.add(3500);
+		}
+		
+		Collections.addAll(headers, "Kullanıcı", "Oturum Tipi" );
+		Collections.addAll(colWidthList, 3500,4000);
+		
+		
+		for (int i = 0; i < maxCountOfMacAddresses; i++) {
+			headers.add("MAC Adresi " + String.valueOf(i+1));
+			colWidthList.add(4000);
+		}
+		
+		Collections.addAll(headers, "Tarih");
+		Collections.addAll(colWidthList, 4500);
+		
+		
 		row = sheet.createRow(rowCount++);
 		for (int i = 0; i < headers.size(); i++) {
 			sheet.setColumnWidth(i, colWidthList.get(i));
@@ -584,8 +637,7 @@ public class ExcelExportService {
 			cell.setCellValue(headers.get(i));
 			cell.setCellStyle(csBoldAndBordered);
 		}
-		int counter = 1;
-
+				
 		for (Map<String, Object> user : users) {
 		    int colCount = 0;
 			row = sheet.createRow(rowCount++);  
@@ -596,24 +648,34 @@ public class ExcelExportService {
 		    for (Map.Entry<String, Object> entry : user.entrySet()) {
 		        String key = entry.getKey();
 		        Object value = entry.getValue();
-
-		        if (value instanceof String) {
+		        		        
+		        if("username".equals(key)) {
+		        	cell = row.createCell(colCount++);
+			        cell.setCellValue((String) value);
+			        cell.setCellStyle(csBordered);
+		        }
+		        
+		        if("ipAddresses".equals(key)) {
 		        	String strValue = (String) value;
-		        	if(strValue.contains("\'")) {
-		        		 strValue = strValue.replace("\'", "");
-		        		 cell = row.createCell(colCount++);
-				         cell.setCellValue((String) strValue);
-				         cell.setCellStyle(csBordered);
-		        	}	
-		        	else {
-		        		 cell = row.createCell(colCount++);
-				         cell.setCellValue((String) value);
-				         cell.setCellStyle(csBordered);
-		        	}
-		        	
-		           
-		        } 
-		        else if (value instanceof Integer) {
+		        	for (int i = 0; i < maxCountOfIPAddresses; i++) {
+						try {
+							cell = row.createCell(colCount++);
+							cell.setCellValue(strValue.split(",")[i].replace("'", "").trim());
+							cell.setCellStyle(csBordered);
+						} catch (Exception e) {
+							cell.setCellValue("");
+							cell.setCellStyle(csBordered);
+						}
+					}
+		        }
+		        
+		        if("hostname".equals(key)) {
+		        	cell = row.createCell(colCount++);
+			        cell.setCellValue((String) value);
+			        cell.setCellStyle(csBordered);
+		        }
+		        
+		        if("sessionEvent".equals(key)) {
 		        	Integer intValue = (Integer) value;
 		        	
 		        	if(intValue == 1) {
@@ -631,16 +693,36 @@ public class ExcelExportService {
 			            cell.setCellValue((double) value);
 			            cell.setCellStyle(csBordered);
 		        	}
-		            
 		        }
-		       else if (value instanceof Timestamp) {
-		          Timestamp timestampValue = (Timestamp) value;
-		          Date dateValue = new Date(timestampValue.getTime());
-		            
-		          cell = row.createCell(colCount++);
-		          cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(dateValue)); 
-		          cell.setCellStyle(csBordered);
 		        
+		        if("macAddresses".equals(key)) {
+		        	
+		        	String strValue = (String) value;        	
+		        	
+		        	for (int i = 0; i < maxCountOfMacAddresses; i++) {
+						try {
+							cell = row.createCell(colCount++);
+							cell.setCellValue(strValue.split(",")[i].replace("'", "").trim());
+							cell.setCellStyle(csBordered);
+						} catch (Exception e) {
+							cell.setCellValue("");
+							cell.setCellStyle(csBordered);
+						}
+					}
+		        	
+//		        	strValue = strValue.replace("\'", "");
+//	        		cell = row.createCell(colCount++);
+//			        cell.setCellValue((String) strValue);
+//			        cell.setCellStyle(csBordered);
+		        }
+		        
+		        if("createDate".equals(key)) {
+			          Timestamp timestampValue = (Timestamp) value;
+			          Date dateValue = new Date(timestampValue.getTime());
+			            
+			          cell = row.createCell(colCount++);
+			          cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(dateValue)); 
+			          cell.setCellStyle(csBordered);
 		        }
 		    }
 		}
