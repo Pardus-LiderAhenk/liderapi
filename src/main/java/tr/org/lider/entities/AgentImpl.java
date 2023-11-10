@@ -281,14 +281,14 @@ public class AgentImpl implements Serializable{
 
 	
 	public void addUserSession(UserSessionImpl userSession) {
-		if (sessions == null) {
-			sessions = new HashSet<UserSessionImpl>(0);
-		}
-		
-		if (userSession.getAgent() != this) {
-			userSession.setAgent(this);
-		}
-		sessions.add(userSession);
+//		if (sessions == null) {
+//			sessions = new HashSet<UserSessionImpl>(0);
+//		}
+//		
+//		if (userSession.getAgent() != this) {
+//			userSession.setAgent(this);
+//		}
+		//sessions.add(userSession);
 	}
 
 	
