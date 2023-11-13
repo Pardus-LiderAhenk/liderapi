@@ -617,7 +617,7 @@ public class ExcelExportService {
 			colWidthList.add(3500);
 		}
 		
-		Collections.addAll(headers, "Kullanıcı", "Oturum Tipi" );
+		Collections.addAll(headers, "Kullanıcı Adı", "Oturum Tipi" );
 		Collections.addAll(colWidthList, 3500,4000);
 		
 		
