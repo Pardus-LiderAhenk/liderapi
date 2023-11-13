@@ -60,6 +60,8 @@ public class RoleService {
 		roleList.add(new RoleImpl("Çalıştırılan Görevler Raporu", "ROLE_EXECUTED_TASK", 42, findRoleTypeByCode("role_report")));
 		roleList.add(new RoleImpl("Sistem Güncesi Raporu", "ROLE_OPERATION_LOG", 44, findRoleTypeByCode("role_report")));
 		roleList.add(new RoleImpl("Zamanlanmış Görev Raporu", "ROLE_SCHEDULE_TASK", 46, findRoleTypeByCode("role_report")));
+		roleList.add(new RoleImpl("Kullanıcı Oturum Raporu", "ROLE_USER_SESSION_REPORT", 48, findRoleTypeByCode("role_report")));
+
 		roleList.add(new RoleImpl("Politika Yönetimi", "ROLE_POLICY", 50, findRoleTypeByCode("role_policy")));
 		roleList.add(new RoleImpl("Arayüz Erişim Ayarları", "ROLE_CONSOLE_ACCESS_SETTINGS", 60, findRoleTypeByCode("role_settings")));
 		roleList.add(new RoleImpl("Sunucu Ayarları", "ROLE_SERVER_SETTINGS", 62, findRoleTypeByCode("role_settings")));

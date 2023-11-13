@@ -2,9 +2,12 @@ package tr.org.lider.repositories;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -79,6 +82,18 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	@Query(value = "SELECT count(*) FROM c_agent as a "
 			+ "where a.last_login_date >:startDate", nativeQuery = true)
 	int getCountByLastLoginToday(@Param("startDate") Date startDate);
+	
+	@Query(value= "SELECT NEW map(s.username as username, a.hostname as hostname, s.sessionEvent as sessionEvent, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses, s.createDate as createDate) FROM UserSessionImpl s LEFT JOIN AgentImpl a ON s.agent=a.id WHERE a.id=?1")
+	Page<Map<String, Object>> findByUserSessionAll(Long agentID,Pageable pageable);
+	
+	@Query(value= "SELECT NEW map(s.username as username, a.hostname as hostname, s.sessionEvent as sessionEvent, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses, s.createDate as createDate) FROM UserSessionImpl s LEFT JOIN AgentImpl a ON s.agent=a.id WHERE s.sessionEvent = 1 AND a.id=?1")
+	Page<Map<String, Object>> findByUserSessionLoginExport(Long agentID,Pageable pageable);
+	
+	@Query(value= "SELECT NEW map(s.username as username, a.hostname as hostname, s.sessionEvent as sessionEvent, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses, s.createDate as createDate) FROM UserSessionImpl s LEFT JOIN AgentImpl a ON s.agent=a.id WHERE s.sessionEvent =2  AND a.id=?1")
+	Page<Map<String, Object>> findByUserSessionLogoutExport(Long agentID,Pageable pageable);
+	
+	@Query(value= "SELECT NEW map(s.username as username, a.hostname as hostname, s.sessionEvent as sessionEvent, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses, s.createDate as createDate) FROM UserSessionImpl s LEFT JOIN AgentImpl a ON s.agent=a.id WHERE a.id=?1")
+	Page<Map<String, Object>> findByUserSessionExport(Long agentID,Pageable pageable);
 	
 }
 

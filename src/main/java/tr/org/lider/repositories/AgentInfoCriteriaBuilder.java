@@ -38,7 +38,6 @@ public class AgentInfoCriteriaBuilder {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-
 	public Page<AgentImpl> filterAgents(
 			int pageNumber,
 			int pageSize,
