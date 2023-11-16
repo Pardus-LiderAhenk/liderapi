@@ -219,9 +219,16 @@ public class AgentSessionReportService {
 		return agentRepository.getPropertyValueByName("diskType");
 	}
 	
-	public Page<Map<String, Object>> getSessionList(int pageNumber, int pageSize,Long agentID){
+	public Page<Map<String, Object>> getSessionList(int pageNumber, int pageSize,Long agentID, String sessionType){
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		return agentRepository.findByUserSessionAll(agentID,pageable);
+		
+		if(sessionType.equals("LOGIN")) {
+			return agentRepository.findUserLoginSessionAllByAgent(agentID, pageable);
+		} else if(sessionType.equals("LOGOUT")) {
+			return agentRepository.findUserLogoutSessionAllByAgent(agentID, pageable);
+		} else {
+			return agentRepository.findUserSessionAllByAgent(agentID,pageable);
+		}
 	}
 	public Page<Map<String, Object>> getSessionLoginExportList(int pageNumber, int pageSize, Long agentID){
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());

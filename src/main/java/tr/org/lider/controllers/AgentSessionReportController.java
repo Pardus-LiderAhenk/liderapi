@@ -123,9 +123,10 @@ public class AgentSessionReportController {
 	public ResponseEntity<?>  getAgentSessionsDetail(
 			@RequestParam (value = "pageNumber") int pageNumber,
 			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "agentID") Long agentID) {
+			@RequestParam (value = "agentID") Long agentID,
+			@RequestParam (value = "sessionType") String sessionType) {
 		logger.debug("Agent id:  {} ", agentID);
-		Page<Map<String, Object>> agentSessionList = agentSessionReportService.getSessionList(pageNumber,pageSize, agentID);
+		Page<Map<String, Object>> agentSessionList = agentSessionReportService.getSessionList(pageNumber,pageSize, agentID, sessionType);
 		
 		return ResponseEntity
 				.status(HttpStatus.OK)
