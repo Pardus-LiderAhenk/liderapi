@@ -156,6 +156,7 @@ public class AgentImpl implements Serializable{
 	}
 
 	
+	
 	public String getJid() {
 		return jid;
 	}
