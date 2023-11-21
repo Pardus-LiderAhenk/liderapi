@@ -83,6 +83,14 @@ public class AgentImpl implements Serializable{
 	
 	@Transient
 	private Boolean isOnline = false;
+	
+	@Column(name="AGENT_STATUS_DATE")
+	@Temporal(TemporalType.TIMESTAMP)
+	@JsonFormat(pattern="dd/MM/yyyy HH:mm:ss", timezone = "Europe/Istanbul")
+	private Date agentStatusDate;
+	
+	@Column(name = "AGENT_STATUS", nullable = false, length = 1)
+	private Integer agentStatus;
 
 	@OneToMany(mappedBy = "agent", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
 	private Set<AgentPropertyImpl> properties = new HashSet<AgentPropertyImpl>(0); // bidirectional
@@ -96,7 +104,7 @@ public class AgentImpl implements Serializable{
 
 	public AgentImpl(Long id, String jid, Boolean deleted, String dn, String password, String hostname,
 			String ipAddresses, String macAddresses, Date createDate, Date modifyDate, Boolean isOnline,
-			Set<AgentPropertyImpl> properties, Set<UserSessionImpl> sessions) {
+			Date agentStatusDate, AgentStatus agentStatus,Set<AgentPropertyImpl> properties, Set<UserSessionImpl> sessions) {
 		super();
 		this.id = id;
 		this.jid = jid;
@@ -109,8 +117,11 @@ public class AgentImpl implements Serializable{
 		this.createDate = createDate;
 		this.modifyDate = modifyDate;
 		this.isOnline = isOnline;
+		this.agentStatusDate = agentStatusDate;
+		setAgentStatus(agentStatus);
 		this.properties = properties;
 		this.sessions = sessions;
+		
 	}
 	
 	public AgentImpl(Long id, String jid, Boolean deleted, String dn, String password, String hostname,
@@ -128,6 +139,8 @@ public class AgentImpl implements Serializable{
 		this.createDate = createDate;
 		this.modifyDate = modifyDate;
 		this.isOnline = isOnline;
+		//this.agentStatusDate = agentStatusDate;
+		//setAgentStatus(agentStatus);
 		this.properties = properties;
 		this.sessions = sessions;
 		this.userDirectoryDomain = userDirectoryDomain;
@@ -269,6 +282,16 @@ public class AgentImpl implements Serializable{
 			properties.add(property);
 		}
 	}
+	
+	
+	
+	public Date getAgentStatusDate() {
+		return agentStatusDate;
+	}
+
+	public void setAgentStatusDate(Date agentStatusDate) {
+		this.agentStatusDate = agentStatusDate;
+	}
 
 	
 	public Set<UserSessionImpl> getSessions() {
@@ -277,6 +300,18 @@ public class AgentImpl implements Serializable{
 
 	public void setSessions(Set<UserSessionImpl> sessions) {
 		this.sessions = sessions;
+	}
+	
+	public AgentStatus getAgentStatus() {
+		return AgentStatus.getType(agentStatus);
+	}
+
+	public void setAgentStatus(AgentStatus agentStatus) {
+		if (agentStatus == null) {
+			this.agentStatus = null;
+		} else {
+			this.agentStatus = agentStatus.getId();
+		}
 	}
 
 	
@@ -306,7 +341,7 @@ public class AgentImpl implements Serializable{
 	public String toString() {
 		return "AgentImpl [id=" + id + ", jid=" + jid + ", deleted=" + deleted + ", dn=" + dn + ", password=" + password
 				+ ", hostname=" + hostname + ", ipAddresses=" + ipAddresses + ", macAddresses=" + macAddresses
-				+ ", createDate=" + createDate + ", modifyDate=" + modifyDate + ", properties=" + properties
+				+ ", createDate=" + createDate + ", modifyDate=" + modifyDate + " agentStatusDate=" + agentStatusDate +  ", agentStatus=" + agentStatus +", properties=" + properties
 				+ ", sessions=" + sessions + "]";
 	}
 

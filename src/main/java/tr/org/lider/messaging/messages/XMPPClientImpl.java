@@ -926,6 +926,7 @@ public class XMPPClientImpl {
 	public void addClientToRoster(String jid) {
 
 		Roster roster = Roster.getInstanceFor(connection);
+		System.out.println("xmpp clientt" + roster);
 		if (!roster.isLoaded())
 			try {
 				roster.reloadAndWait();
