@@ -2,7 +2,7 @@ package tr.org.lider.entities;
 
 public enum AgentStatus {
 	
-	Active(1), Passive(2);
+	Active(1), Passive(0), Suspend(2);
 	
 	private  int  id;
 	
