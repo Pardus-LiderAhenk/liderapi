@@ -126,7 +126,7 @@ public class AgentImpl implements Serializable{
 	
 	public AgentImpl(Long id, String jid, Boolean deleted, String dn, String password, String hostname,
 			String ipAddresses, String macAddresses, Date createDate, Date modifyDate, Boolean isOnline,
-			Set<AgentPropertyImpl> properties, Set<UserSessionImpl> sessions, String userDirectoryDomain) {
+			Date agentStatusDate, AgentStatus agentStatus,Set<AgentPropertyImpl> properties, Set<UserSessionImpl> sessions, String userDirectoryDomain) {
 		super();
 		this.id = id;
 		this.jid = jid;
@@ -139,8 +139,8 @@ public class AgentImpl implements Serializable{
 		this.createDate = createDate;
 		this.modifyDate = modifyDate;
 		this.isOnline = isOnline;
-		//this.agentStatusDate = agentStatusDate;
-		//setAgentStatus(agentStatus);
+		this.agentStatusDate = agentStatusDate;
+		setAgentStatus(agentStatus);
 		this.properties = properties;
 		this.sessions = sessions;
 		this.userDirectoryDomain = userDirectoryDomain;

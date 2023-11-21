@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @EnableScheduling
 public class LiderCronJob {
 	
-	@Scheduled(cron = "0 8 16 * * ?")
+	@Scheduled(cron = "0 6 17 * * ?")
     public void dailyCronJob() {
         System.out.println("Her akşam çalışan cron job çalıştı!");
     }
