@@ -35,4 +35,14 @@ public interface IPresenceSubscriber {
 	 * @param jid of user got offline
 	 */
 	void onAgentOffline( String jid );
+	
+	/**
+	 * @param jid of agent active
+	 */
+	void onAgentActive(String jid);
+	
+	/**
+	 * @param jid of agent passive
+	 */
+	void onAgentPassive(String jid);
 }
