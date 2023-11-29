@@ -42,7 +42,6 @@ public class AgentStatusListener implements IPresenceSubscriber {
 			//agent.setAgentStatus(AgentStatus.Active);
 			agentRepository.save(agent);
 		}
-		System.out.println("GELDIIIIIII - AgentStatusListener ");
 		
 	}
 

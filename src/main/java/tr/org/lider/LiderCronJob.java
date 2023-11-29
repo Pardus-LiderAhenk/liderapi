@@ -6,9 +6,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
-import org.jivesoftware.smack.packet.Presence;
-import org.jivesoftware.smack.roster.Roster;
-import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +13,9 @@ import org.springframework.stereotype.Component;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentStatus;
+import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
+import tr.org.lider.services.ConfigurationService;
 
 @Component
 @EnableScheduling
@@ -25,20 +24,22 @@ public class LiderCronJob {
 	@Autowired
 	private  AgentRepository agentRepository;
 	
-	private XMPPTCPConnection connection;
+	@Autowired
+	private XMPPClientImpl xmppClientImpl;
+	
+	@Autowired
+	private ConfigurationService configurationService;
 
 	
-	@Scheduled(cron = "0 19 23 * * ?")
+	@Scheduled(cron = "0 12 17 * * ?")
     public void dailyCronJob() {
+		if(configurationService.getMachineEventStatus() == true) {
+			Date today = new Date();
+			List<AgentImpl> agentsEventDate =  agentRepository.findAll();
 		
-		Date today = new Date();
-
-		List<AgentImpl> agentsEventDate =  agentRepository.findAll();
-		//Roster roster = Roster.getInstanceFor(connection);
-		
-		for(AgentImpl agent : agentsEventDate) {
-			//Presence presence = roster.getPresence(agent.getJid());
-			//System.out.println(presence);
+			for(AgentImpl agent : agentsEventDate) {
+			
+				if(!(xmppClientImpl.isRecipientOnline(agent.getJid()))) {
 
 				Date eventDate = agent.getEventDate();
 				if (eventDate != null) {
@@ -48,27 +49,25 @@ public class LiderCronJob {
 					long daysDifference = ChronoUnit.DAYS.between(todayLocalDate, dbEventDate);
 					System.out.println(daysDifference);
 
-					if (daysDifference > -120) {
+					if (daysDifference > configurationService.getMachineEventDay()) {
 					
 						agent.setAgentStatus(AgentStatus.Active);
 						agentRepository.save(agent);
-						System.out.println("Event date for agent is greater than 120 days: " + agent.getId());
 					} 
 					else {
 						agent.setAgentStatus(AgentStatus.Passive);
 						agentRepository.save(agent);
-						System.out.println("Event date for agent is less than 120 days: " + agent.getId());
 					}
 				} 
 				else {
 					System.out.println("Event date is null for agent: " + agent.getId());
 				}
+				}
 			}
 		
-			
-		
-		
         System.out.println("Her akşam çalışan cron job çalıştı!");
+		}
     }
+	
 
 }

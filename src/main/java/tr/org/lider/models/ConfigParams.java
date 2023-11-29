@@ -138,6 +138,8 @@ public class ConfigParams {
 	private SudoRoleType sudoRoleType;
 	private String ahenkRepoAddress;
 	private String ahenkRepoKeyAddress;
+	private Boolean machineEventStatus;
+	private int machineEventDay;
 
 	//plugin settings
 	private Boolean allowVNCConnectionWithoutPermission;
@@ -203,6 +205,8 @@ public class ConfigParams {
 		this.ahenkRepoKeyAddress = "";
 		this.sudoRoleType = SudoRoleType.LDAP;
 		this.allowDynamicDNSUpdate = false;
+		this.machineEventStatus = false;
+		this.machineEventDay = 120;
 		
 		this.selectedRegistrationType = RegistrationTemplateType.DEFAULT;
 		this.enableDelete4Directory = false;
@@ -961,6 +965,22 @@ public class ConfigParams {
 
 	public void setXmppBoshAddress(String xmppBoshAddress) {
 		this.xmppBoshAddress = xmppBoshAddress;
+	}
+	
+	public Boolean getMachineEventStatus() {
+		return machineEventStatus;
+	}
+
+	public void setMachineEventStatus(Boolean machineEventStatus) {
+		this.machineEventStatus = machineEventStatus;
+	}
+
+	public int getMachineEventDay() {
+		return machineEventDay;
+	}
+
+	public void setMachineEventDay(int machineEventDay) {
+		this.machineEventDay = machineEventDay;
 	}
 
 }

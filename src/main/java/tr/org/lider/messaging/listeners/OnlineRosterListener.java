@@ -72,15 +72,11 @@ public class OnlineRosterListener implements RosterListener {
 		Type presenceType = presence.getType();
 		String jid = presence.getFrom();
 		logger.info("Presence of the user {} changed to {}.", jid, presenceType);
-		System.out.println(presenceType);
 		if(presenceSubscribers !=null) {
 	
 			if (presenceType.equals(Presence.Type.available)) {
 				logger.info("User {} is online.", jid);
 				for (IPresenceSubscriber subscriber : presenceSubscribers) {
-					System.out.println(presenceSubscribers);
-					System.out.println("presence subscribe online");
-					System.out.println(subscriber);
 					subscriber.onAgentOnline(jid);
 				}
 				try {
@@ -92,9 +88,6 @@ public class OnlineRosterListener implements RosterListener {
 			} else if (presenceType.equals(Presence.Type.unavailable)) {
 				logger.warn("User {} is offline.", jid);
 				for (IPresenceSubscriber subscriber : presenceSubscribers) {
-					System.out.println(presenceSubscribers);
-					System.out.println("presence subscribe offline");
-					System.out.println(subscriber);
 					subscriber.onAgentOffline(jid);
 				}
 				try {

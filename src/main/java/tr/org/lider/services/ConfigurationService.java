@@ -535,6 +535,17 @@ public class ConfigurationService {
 		return getConfigParams().getPardusRepoComponent();
 	}
 	
+	public Boolean getMachineEventStatus() {
+		return getConfigParams().getMachineEventStatus();
+	}
+
+
+	public int getMachineEventDay() {
+		return getConfigParams().getMachineEventDay();
+	}
+
+
+	
 	//	public String getEmailHost() {
 	//		return getConfigParams().getEmailHost();
 	//	}
