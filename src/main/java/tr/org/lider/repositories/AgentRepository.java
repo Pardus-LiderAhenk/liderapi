@@ -106,8 +106,8 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	Page<Map<String, Object>> findUserLoginSessionAllByAgent(Long agentID,Pageable pageable);
 	
 	@Query(value= "SELECT NEW map(s.username as username, "
-			+ "a.hostname as hostname, "
 			+ "a.agentStatus as agentStatus, "
+			+ "a.hostname as hostname, "
 			+ "s.sessionEvent as sessionEvent, "
 			+ "a.ipAddresses as ipAddresses, "
 			+ "a.macAddresses as macAddresses, "
