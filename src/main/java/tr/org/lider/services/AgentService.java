@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.AgentImpl;
+import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
@@ -96,7 +97,8 @@ public class AgentService {
 			Optional<String> processor,
 			Optional<String> osVersion,
 			Optional<String> agentVersion,
-			Optional<String> diskType) {
+			Optional<String> diskType,
+			Optional<String> agentStatus) {
 		
 		List<String> listOfOnlineUsers = new ArrayList<String>();
 		if(!status.get().equals("ALL")) {
@@ -153,8 +155,8 @@ public class AgentService {
 				osVersion, 
 				agentVersion, 
 				diskType,
-				listOfOnlineUsers
-				);
+				listOfOnlineUsers,
+				agentStatus);
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {
 			if(messagingService.isRecipientOnline(listOfAgentsCB.getContent().get(i).getJid())) {
 				listOfAgentsCB.getContent().get(i).setIsOnline(true);
@@ -177,6 +179,11 @@ public class AgentService {
 	public void deleteAgent(String dn) {
 		List<AgentImpl> agentList = agentRepository.findByDn(dn);
 		agentRepository.deleteById(agentList.get(0).getId());
+	}
+	
+	public void getAgentStatus(String agentStatus) {
+		//List<AgentImpl> agentList = agentRepository.findByAgentStatus(agentStatus);
+		agentRepository.findByAgentStatus(agentStatus);
 	}
 	
 	public List<String> getBrands() {

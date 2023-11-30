@@ -95,8 +95,8 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers, "", "Bilgisayar Adı", "Durumu");
-		Collections.addAll(colWidthList, 2500, 3500, 4500);
+		Collections.addAll(headers, "", "Bilgisayar Adı", "Durumu","Aktif/Pasif");
+		Collections.addAll(colWidthList, 2500, 3500, 4500,3000);
 		for (AgentImpl agent : agents) {
 			if(maxCountOfIPAddresses < agent.getIpAddresses().split(",").length) {
 				maxCountOfIPAddresses = agent.getIpAddresses().split(",").length;
@@ -188,6 +188,10 @@ public class ExcelExportService {
 				cell.setCellValue("Çevrimdışı");
 				cell.setCellStyle(csBordered);
 			}
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(agent.getAgentStatus().toString());
+			cell.setCellStyle(csBordered);
 
 			for (int i = 0; i < maxCountOfMacAddresses; i++) {
 				try {
@@ -575,8 +579,8 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers,"", "Bilgisayar Adı");
-		Collections.addAll(colWidthList, 1000,4000);
+		Collections.addAll(headers,"", "Bilgisayar Adı","Makine Durum");
+		Collections.addAll(colWidthList, 1000,4000,3000);
 		
 		
 		int counter = 1;
@@ -652,6 +656,12 @@ public class ExcelExportService {
 		        if("username".equals(key)) {
 		        	cell = row.createCell(colCount++);
 			        cell.setCellValue((String) value);
+			        cell.setCellStyle(csBordered);
+		        }
+		        
+		        if("agentStatus".equals(key)) {
+		        	cell = row.createCell(colCount++);
+			        cell.setCellValue((Integer) value);
 			        cell.setCellStyle(csBordered);
 		        }
 		        

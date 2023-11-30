@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.AgentImpl;
+import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.services.AgentService;
 import tr.org.lider.services.ExcelExportService;
 
@@ -72,7 +73,8 @@ public class AgentInfoController {
 			@RequestParam (value = "processor") Optional<String> processor,
 			@RequestParam (value = "osVersion") Optional<String> osVersion,
 			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-			@RequestParam (value = "diskType") Optional<String> diskType) {
+			@RequestParam (value = "diskType") Optional<String> diskType,
+			@RequestParam (value = "agentStatus") Optional<String> agentStatus) {
 		HashMap<String, Object> resultMap = new HashMap<>();
 		if(getFilterData.isPresent() && getFilterData.get()) {
 			resultMap.put("brands", agentService.getBrands());
@@ -98,7 +100,8 @@ public class AgentInfoController {
 				processor, 
 				osVersion,
 				agentVersion,
-				diskType);
+				diskType,
+				agentStatus);
 				
 		resultMap.put("agents", listOfAgents);
 		return ResponseEntity
@@ -150,7 +153,8 @@ public class AgentInfoController {
 			@RequestParam (value = "processor") Optional<String> processor,
 			@RequestParam (value = "osVersion") Optional<String> osVersion,
 			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-			@RequestParam (value = "diskType") Optional<String> diskType){
+			@RequestParam (value = "diskType") Optional<String> diskType,
+			@RequestParam (value = "agentStatus") Optional<String> agentStatus){
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				1, 
 				agentService.count().intValue(), 
@@ -167,7 +171,8 @@ public class AgentInfoController {
 				processor, 
 				osVersion, 
 				agentVersion,
-				diskType);
+				diskType,
+				agentStatus);
 		
 		try {
 			HttpHeaders headers = new HttpHeaders();

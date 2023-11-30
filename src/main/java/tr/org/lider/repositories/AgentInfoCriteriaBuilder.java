@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
+import tr.org.lider.entities.AgentStatus;
 
 /*
  * AgentInfoCriteriaBuilder implements filtering agents with multiple data.
@@ -55,7 +56,8 @@ public class AgentInfoCriteriaBuilder {
 			Optional<String> osVersion,
 			Optional<String> agentVersion,
 			Optional<String> diskType,
-			List<String> listOfOnlineUsers) {
+			List<String> listOfOnlineUsers,
+			Optional<String> agentStatus) {
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -245,6 +247,11 @@ public class AgentInfoCriteriaBuilder {
 				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now));
 			}
 
+		}
+		
+		if(agentStatus.isPresent() && !agentStatus.get().equals("")) {
+			predicates.add(cb.equal(from.get("agentStatus"), agentStatus.get()));
+			predicatesCount.add(cb.equal(fromCount.get("agentStatus"), agentStatus.get()));
 		}
 
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
