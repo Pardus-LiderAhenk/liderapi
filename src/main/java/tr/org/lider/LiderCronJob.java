@@ -37,7 +37,7 @@ public class LiderCronJob {
 	private ConfigurationService configurationService;
 
 	
-	@Scheduled(cron = "0 03 11 * * ?")
+	@Scheduled(cron = "0 55 10 * * ?")
     public void dailyCronJob() {
 		
 		Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -58,7 +58,7 @@ public class LiderCronJob {
 					
 					long daysDifference = ChronoUnit.DAYS.between(todayLocalDate, dbEventDate);
 
-					if (daysDifference > configurationService.getMachineEventDay()) {
+					if (daysDifference > -configurationService.getMachineEventDay()) {
 					
 						agent.setAgentStatus(AgentStatus.Active);
 						agentRepository.save(agent);

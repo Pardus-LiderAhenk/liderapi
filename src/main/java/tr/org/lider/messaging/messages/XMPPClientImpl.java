@@ -79,6 +79,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.messaging.listeners.OnlineRosterListener;
 import tr.org.lider.messaging.listeners.PacketListener;
 import tr.org.lider.messaging.listeners.PolicyListener;
@@ -470,11 +471,20 @@ public class XMPPClientImpl {
 
 		try{
 			String jidFinal = getFullJid(jid);
-			//logger.info("Sending message: {} to user: {}", new Object[] { message, jidFinal });
-			Message msg = new Message(jidFinal, Message.Type.normal);
-			msg.setBody(message);
-			connection.sendStanza(msg);
-			logger.info("Successfully sent message to user: {}", jidFinal);}
+			System.out.println(jidFinal);
+			if(jidFinal.equals(AgentStatus.Active)) {
+				//logger.info("Sending message: {} to user: {}", new Object[] { message, jidFinal });
+				Message msg = new Message(jidFinal, Message.Type.normal);
+				msg.setBody(message);
+				connection.sendStanza(msg);
+				logger.info("Successfully sent message to user: {}", jidFinal);
+			}
+			else {
+				logger.info("Successfully sent message to user: {}", jidFinal);
+
+				
+			}
+		}
 		catch(NotConnectedException ex){
 			ex.printStackTrace();
 
