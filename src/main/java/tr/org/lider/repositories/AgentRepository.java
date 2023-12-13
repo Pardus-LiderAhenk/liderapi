@@ -24,6 +24,8 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	
 	List<AgentImpl> findByDn(String dn);
 	
+	List<AgentImpl> findByAgentStatus(String agentStatus);
+	
 //	Page<AgentImpl> findAllByJidIn(List<String> jidList, Pageable pageable);
 //	
 //	Page<AgentImpl> findByJidContaining(String jid, Pageable pageable);
@@ -85,6 +87,7 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	
 	@Query(value= "SELECT NEW map(s.username as username, "
 			+ "a.hostname as hostname, "
+			+ "a.agentStatus as agentStatus, "
 			+ "s.sessionEvent as sessionEvent, "
 			+ "a.ipAddresses as ipAddresses, "
 			+ "a.macAddresses as macAddresses, "
@@ -94,6 +97,7 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	
 	@Query(value= "SELECT NEW map(s.username as username, "
 			+ "a.hostname as hostname, "
+			+ "a.agentStatus as agentStatus, "
 			+ "s.sessionEvent as sessionEvent, "
 			+ "a.ipAddresses as ipAddresses, "
 			+ "a.macAddresses as macAddresses, "
@@ -102,6 +106,7 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	Page<Map<String, Object>> findUserLoginSessionAllByAgent(Long agentID,Pageable pageable);
 	
 	@Query(value= "SELECT NEW map(s.username as username, "
+			+ "a.agentStatus as agentStatus, "
 			+ "a.hostname as hostname, "
 			+ "s.sessionEvent as sessionEvent, "
 			+ "a.ipAddresses as ipAddresses, "
@@ -112,6 +117,7 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	
 	@Query(value= "SELECT NEW map(s.username as username, "
 			+ "a.hostname as hostname, "
+			+ "a.agentStatus as agentStatus, "
 			+ "s.sessionEvent as sessionEvent, "
 			+ "a.ipAddresses as ipAddresses, "
 			+ "a.macAddresses as macAddresses, "
@@ -121,6 +127,7 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	
 	@Query(value= "SELECT NEW map(s.username as username, "
 			+ "a.hostname as hostname, "
+			+ "a.agentStatus as agentStatus, "
 			+ "s.sessionEvent as sessionEvent, "
 			+ "a.ipAddresses as ipAddresses, "
 			+ "a.macAddresses as macAddresses, "
@@ -130,6 +137,7 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	
 	@Query(value= "SELECT NEW map(s.username as username, "
 			+ "a.hostname as hostname, "
+			+ "a.agentStatus as agentStatus, "
 			+ "s.sessionEvent as sessionEvent, "
 			+ "a.ipAddresses as ipAddresses, "
 			+ "a.macAddresses as macAddresses, "

@@ -72,7 +72,6 @@ public class OnlineRosterListener implements RosterListener {
 		Type presenceType = presence.getType();
 		String jid = presence.getFrom();
 		logger.info("Presence of the user {} changed to {}.", jid, presenceType);
-		
 		if(presenceSubscribers !=null) {
 	
 			if (presenceType.equals(Presence.Type.available)) {

@@ -95,8 +95,8 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers, "", "Bilgisayar Adı", "Durumu");
-		Collections.addAll(colWidthList, 2500, 3500, 4500);
+		Collections.addAll(headers, "", "Bilgisayar Adı", "Durumu","Aktif/Pasif");
+		Collections.addAll(colWidthList, 2500, 3500, 4500,3000);
 		for (AgentImpl agent : agents) {
 			if(maxCountOfIPAddresses < agent.getIpAddresses().split(",").length) {
 				maxCountOfIPAddresses = agent.getIpAddresses().split(",").length;
@@ -188,6 +188,28 @@ public class ExcelExportService {
 				cell.setCellValue("Çevrimdışı");
 				cell.setCellStyle(csBordered);
 			}
+
+			
+			 if(agent.getAgentStatus() != null) {
+		        	Integer intValue = agent.getAgentStatus().getId();
+		        	
+		        	if(intValue == 0) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Pasif");
+			            cell.setCellStyle(csBordered);
+		        	}
+		        	else if(intValue == 1) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Aktif");
+			            cell.setCellStyle(csBordered);
+		        	}	
+		        	else if(intValue == 2) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Askıda");
+			            cell.setCellStyle(csBordered);
+		        	}
+		        
+		        }
 
 			for (int i = 0; i < maxCountOfMacAddresses; i++) {
 				try {
@@ -575,13 +597,12 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers,"", "Bilgisayar Adı");
-		Collections.addAll(colWidthList, 1000,4000);
-		
-		
 		int counter = 1;
 		int maxCountOfMacAddresses = 0;
 		int maxCountOfIPAddresses = 0;
+		
+		Collections.addAll(headers,"", "Bilgisayar Adı","Aktif/Pasif");
+		Collections.addAll(colWidthList, 1000,4000, 3000);
 		
 		for (Map<String, Object> user : users) {
 
@@ -612,19 +633,18 @@ public class ExcelExportService {
 		        
 		}
 		
+		for (int i = 0; i < maxCountOfMacAddresses; i++) {
+			headers.add("MAC Adresi " + String.valueOf(i+1));
+			colWidthList.add(4000);
+		}
+		
 		for (int i = 0; i < maxCountOfIPAddresses; i++) {
 			headers.add("IP Adresi " + String.valueOf(i+1));
 			colWidthList.add(3500);
 		}
 		
-		Collections.addAll(headers, "Kullanıcı Adı", "Oturum Tipi" );
+		Collections.addAll(headers ,"Kullanıcı Adı", "Oturum Tipi" );
 		Collections.addAll(colWidthList, 3500,4000);
-		
-		
-		for (int i = 0; i < maxCountOfMacAddresses; i++) {
-			headers.add("MAC Adresi " + String.valueOf(i+1));
-			colWidthList.add(4000);
-		}
 		
 		Collections.addAll(headers, "Tarih");
 		Collections.addAll(colWidthList, 4500);
@@ -644,6 +664,39 @@ public class ExcelExportService {
 			cell = row.createCell(colCount++);
 			cell.setCellValue(String.valueOf(counter++));
 			cell.setCellStyle(csBordered);
+			
+			for (Map.Entry<String, Object> entry : user.entrySet()) {
+		        String key = entry.getKey();
+		        Object value = entry.getValue();
+		        
+		        if("hostname".equals(key)) {
+		        	cell = row.createCell(colCount++);
+			        cell.setCellValue((String) value);
+			        cell.setCellStyle(csBordered);
+		        }
+		        
+		        if("agentStatus".equals(key)) {
+		        	Integer intValue = (Integer) value;
+		        	
+		        	if(intValue == 0) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Pasif");
+			            cell.setCellStyle(csBordered);
+		        	}
+		        	else if(intValue == 1) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Aktif");
+			            cell.setCellStyle(csBordered);
+		        	}	
+		        	else if(intValue == 2) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Askıda");
+			            cell.setCellStyle(csBordered);
+		        	}
+		        
+		        }
+		    }
+			
 
 		    for (Map.Entry<String, Object> entry : user.entrySet()) {
 		        String key = entry.getKey();
@@ -669,11 +722,6 @@ public class ExcelExportService {
 					}
 		        }
 		        
-		        if("hostname".equals(key)) {
-		        	cell = row.createCell(colCount++);
-			        cell.setCellValue((String) value);
-			        cell.setCellStyle(csBordered);
-		        }
 		        
 		        if("sessionEvent".equals(key)) {
 		        	Integer intValue = (Integer) value;
@@ -710,11 +758,8 @@ public class ExcelExportService {
 						}
 					}
 		        	
-//		        	strValue = strValue.replace("\'", "");
-//	        		cell = row.createCell(colCount++);
-//			        cell.setCellValue((String) strValue);
-//			        cell.setCellStyle(csBordered);
 		        }
+		        
 		        
 		        if("createDate".equals(key)) {
 			          Timestamp timestampValue = (Timestamp) value;

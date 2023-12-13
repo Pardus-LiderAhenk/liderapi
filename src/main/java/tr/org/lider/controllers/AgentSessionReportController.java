@@ -78,7 +78,8 @@ public class AgentSessionReportController {
 			@RequestParam (value = "processor") Optional<String> processor,
 			@RequestParam (value = "osVersion") Optional<String> osVersion,
 			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-			@RequestParam (value = "diskType") Optional<String> diskType) {
+			@RequestParam (value = "diskType") Optional<String> diskType,
+			@RequestParam (value = "agentStatus") Optional<String> agentStatus) {
 		HashMap<String, Object> resultMap = new HashMap<>();
 		if(getFilterData.isPresent() && getFilterData.get()) {
 			resultMap.put("brands", agentSessionReportService.getBrands());
@@ -104,8 +105,8 @@ public class AgentSessionReportController {
 				processor, 
 				osVersion,
 				agentVersion,
-				diskType
-				);
+				diskType,
+				agentStatus);
 				
 		resultMap.put("agents", listOfAgents);
 		return ResponseEntity

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
+import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.entities.SessionEvent;
 import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.ldap.ILDAPService;
@@ -156,6 +157,7 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 			}
 			// Merge records
 			agent.setLastLoginDate(new Date());
+			agent.setAgentStatus(AgentStatus.Active);
 			agent = agentRepository.save(agent);
 			if (userSession.getUsername() != null) {
 				userSession.setAgent(agent);

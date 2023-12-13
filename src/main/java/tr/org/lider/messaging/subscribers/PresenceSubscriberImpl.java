@@ -16,5 +16,15 @@ public class PresenceSubscriberImpl  implements IPresenceSubscriber{
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void onAgentActive(String jid) {
+		
+	}
+	
+	@Override
+	public void onAgentPassive(String jid) {
+		
+	}
 
 }

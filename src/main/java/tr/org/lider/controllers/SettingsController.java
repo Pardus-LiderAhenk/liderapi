@@ -376,7 +376,9 @@ public class SettingsController {
 			@RequestParam (value = "ahenkRepoAddress", required = true) String ahenkRepoAddress,
 			@RequestParam (value = "ahenkRepoKeyAddress", required = true) String ahenkRepoKeyAddress,
 			@RequestParam (value = "sudoRoleType", required = true) SudoRoleType sudoRoleType,
-			@RequestParam (value = "selectedRegistrationType", required = true) RegistrationTemplateType selectedRegistrationType) {
+			@RequestParam (value = "selectedRegistrationType", required = true) RegistrationTemplateType selectedRegistrationType,
+			@RequestParam (value = "machineEventStatus", required = true) Boolean machineEventStatus,
+			@RequestParam (value = "machineEventDay") int machineEventDay){
 		
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setDisableLocalUser(disableLocalUser);
@@ -385,6 +387,8 @@ public class SettingsController {
 		configParams.setAhenkRepoAddress(ahenkRepoAddress);
 		configParams.setAhenkRepoKeyAddress(ahenkRepoKeyAddress);
 		configParams.setSelectedRegistrationType(selectedRegistrationType);
+		configParams.setMachineEventStatus(machineEventStatus);
+		configParams.setMachineEventDay(machineEventDay);
 		
 		Map<String, Object> requestData = new HashMap<String, Object>();
 		requestData.put("domainType",configParams.getDomainType());

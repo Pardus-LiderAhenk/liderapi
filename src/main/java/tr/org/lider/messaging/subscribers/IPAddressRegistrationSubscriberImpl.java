@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
+import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.entities.RegistrationTemplateImpl;
 import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.ldap.DNType;
@@ -236,6 +237,8 @@ public class IPAddressRegistrationSubscriberImpl implements IRegistrationSubscri
 							agent.getCreateDate(), 
 							new Date(),
 							false,
+							null,
+							AgentStatus.Active,
 							(Set<AgentPropertyImpl>) agent.getProperties(),
 							(Set<UserSessionImpl>) agent.getSessions(),directoryServer);
 					if (message.getData() != null) {
@@ -265,7 +268,7 @@ public class IPAddressRegistrationSubscriberImpl implements IRegistrationSubscri
 						message.getHostname(), 
 						message.getIpAddresses(),  
 						message.getMacAddresses(),
-						new Date(), null, false, null, null,directoryServer);
+						new Date(), null, false, null,null,null, null,directoryServer);
 				if (message.getData() != null) {
 					for (Entry<String, Object> entryy : message.getData().entrySet()) {
 						if (entryy.getKey() != null && entryy.getValue() != null) {

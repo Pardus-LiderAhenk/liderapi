@@ -99,7 +99,8 @@ public class AgentSessionReportService {
 			Optional<String> processor,
 			Optional<String> osVersion,
 			Optional<String> agentVersion,
-			Optional<String> diskType
+			Optional<String> diskType,
+			Optional<String> agentStatus
 			) {
 		
 		List<String> listOfOnlineUsers = new ArrayList<String>();
@@ -157,7 +158,8 @@ public class AgentSessionReportService {
 				osVersion, 
 				agentVersion, 
 				diskType,
-				listOfOnlineUsers
+				listOfOnlineUsers,
+				agentStatus
 				);
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {
 			if(messagingService.isRecipientOnline(listOfAgentsCB.getContent().get(i).getJid())) {

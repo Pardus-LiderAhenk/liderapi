@@ -671,7 +671,8 @@ public class ComputerGroupsController {
 			@RequestParam (value = "diskType") Optional<String> diskType,
 			@RequestParam(value = "selectedOUDN", required=false) String selectedOUDN,
 			@RequestParam(value = "groupName", required=true) String groupName,
-			@RequestParam (value = "agentVersion") Optional<String> agentVersion) {
+			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
+			@RequestParam (value = "agentStatus") Optional<String> agentStatus) {
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				1, 
 				agentService.count().intValue(), 
@@ -688,7 +689,8 @@ public class ComputerGroupsController {
 				processor, 
 				osVersion,
 				agentVersion,
-				diskType);
+				diskType,
+				agentStatus);
 				
 		String newGroupDN = "";
 		LdapEntry entry;
@@ -762,7 +764,8 @@ public class ComputerGroupsController {
 			@RequestParam (value = "osVersion") Optional<String> osVersion,
 			@RequestParam(value = "groupDN", required=false) String groupDN,
 			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-			@RequestParam (value = "diskType") Optional<String> diskType){
+			@RequestParam (value = "diskType") Optional<String> diskType,
+			@RequestParam (value = "agentStatus") Optional<String> agentStatus){
 		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
 				1, 
 				agentService.count().intValue(), 
@@ -779,7 +782,8 @@ public class ComputerGroupsController {
 				processor, 
 				osVersion, 
 				agentVersion,
-				diskType);
+				diskType,
+				agentStatus);
 		LdapEntry entry;			
 		HttpHeaders headers = new HttpHeaders();
 		if(listOfAgents.getContent() == null || listOfAgents.getContent().size() == 0) {

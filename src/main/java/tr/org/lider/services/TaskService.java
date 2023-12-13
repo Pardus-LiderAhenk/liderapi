@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
@@ -25,12 +26,11 @@ import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
-import tr.org.lider.ldap.LdapSearchFilterAttribute;
-import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.messaging.messages.ExecuteTaskMessageImpl;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.messaging.messages.ILiderMessage;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.repositories.TaskRepository;
 import tr.org.lider.utils.IRestResponse;
 import tr.org.lider.utils.ResponseFactoryService;
@@ -69,6 +69,9 @@ public class TaskService {
 	
 	@Autowired
 	private PluginTaskService pluginTaskService;
+	
+	@Autowired
+	private AgentRepository agentRepository;
 
 	public IRestResponse execute(PluginTask request) {
 
@@ -195,7 +198,10 @@ public class TaskService {
 		List<LdapEntry> selectedtEntries= request.getEntryList();
 		for (LdapEntry ldapEntry : selectedtEntries) {
 			if(ldapEntry.getType().equals(DNType.AHENK)) {
-				targetEntries.add(ldapEntry); 
+				if(agentRepository.findByJid(ldapEntry.getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
+					targetEntries.add(ldapEntry); 
+				}
+				
 			}
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
 				List <String> dnList= ldapService.getGroupInGroupsTask(ldapEntry);
@@ -209,7 +215,10 @@ public class TaskService {
 								List<LdapEntry> member= ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.OBJECT);
 								if(member!=null && member.size()>0 ) {
 									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0)))
-										targetEntries.add(member.get(0));
+										if(agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
+											targetEntries.add(member.get(0));
+										}
+										
 								}
 							} catch (LdapException e) {
 								// TODO Auto-generated catch block
