@@ -35,6 +35,7 @@ import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.messaging.enums.StatusCode;
+import tr.org.lider.utils.IUserSessionReport;
 
 @Service
 public class ExcelExportService {
@@ -545,7 +546,7 @@ public class ExcelExportService {
 
 	}
 	
-	public byte[] generateUserSessionReport(List<Map<String, Object>> users) {
+	public byte[] generateUserSessionReport(List<IUserSessionReport> users) {
 		int rowCount = 0;
 		String exportFile = getFileWriteLocation() 
 				+ "Oturum Raporu_" 
@@ -601,54 +602,29 @@ public class ExcelExportService {
 		int maxCountOfMacAddresses = 0;
 		int maxCountOfIPAddresses = 0;
 		
-		Collections.addAll(headers,"", "Bilgisayar Adı","Aktif/Pasif");
-		Collections.addAll(colWidthList, 1000,4000, 3000);
 		
-		for (Map<String, Object> user : users) {
-
-		    for (Map.Entry<String, Object> entry : user.entrySet()) {
-		        String key = entry.getKey();
-		        Object value = entry.getValue();
-		        
-		        if("macAddresses".equals(key)) {
-		        	
-		        	String strValue = (String) value;
 		
-		        	if(maxCountOfMacAddresses < strValue.split(",").length) {
-		        		maxCountOfMacAddresses = strValue.split(",").length;
-		        	}
-		        	
-		        }
-		        
-		        if("ipAddresses".equals(key)) {
-		        	
-		        	String strValue = (String) value;
+		Collections.addAll(headers, " ", "Kullanıcı Adı","Oturum Tipi", "Tarih", "Bilgisayar Adı");
+		Collections.addAll(colWidthList, 1500, 4000, 4500 ,4500, 4000);
 		
-		        	if(maxCountOfIPAddresses < strValue.split(",").length) {
-		        		maxCountOfIPAddresses = strValue.split(",").length;
-		        	}
-		        	
-		        }
-		    }
-		        
+		for (IUserSessionReport user : users) {
+			if(maxCountOfIPAddresses < user.getIpAddresses().split(",").length) {
+				maxCountOfIPAddresses = user.getIpAddresses().split(",").length;
+			}
+			if(maxCountOfMacAddresses < user.getMacAddresses().split(",").length) {
+				maxCountOfMacAddresses = user.getMacAddresses().split(",").length;
+			}
 		}
-		
+
 		for (int i = 0; i < maxCountOfMacAddresses; i++) {
 			headers.add("MAC Adresi " + String.valueOf(i+1));
-			colWidthList.add(4000);
+			colWidthList.add(5000);
 		}
-		
+
 		for (int i = 0; i < maxCountOfIPAddresses; i++) {
 			headers.add("IP Adresi " + String.valueOf(i+1));
-			colWidthList.add(3500);
+			colWidthList.add(5000);
 		}
-		
-		Collections.addAll(headers ,"Kullanıcı Adı", "Oturum Tipi" );
-		Collections.addAll(colWidthList, 3500,4000);
-		
-		Collections.addAll(headers, "Tarih");
-		Collections.addAll(colWidthList, 4500);
-		
 		
 		row = sheet.createRow(rowCount++);
 		for (int i = 0; i < headers.size(); i++) {
@@ -657,121 +633,66 @@ public class ExcelExportService {
 			cell.setCellValue(headers.get(i));
 			cell.setCellStyle(csBoldAndBordered);
 		}
-				
-		for (Map<String, Object> user : users) {
-		    int colCount = 0;
+		
+		for (IUserSessionReport user: users) {
+			int colCount = 0;
 			row = sheet.createRow(rowCount++);  
 			cell = row.createCell(colCount++);
 			cell.setCellValue(String.valueOf(counter++));
 			cell.setCellStyle(csBordered);
 			
-			for (Map.Entry<String, Object> entry : user.entrySet()) {
-		        String key = entry.getKey();
-		        Object value = entry.getValue();
-		        
-		        if("hostname".equals(key)) {
-		        	cell = row.createCell(colCount++);
-			        cell.setCellValue((String) value);
-			        cell.setCellStyle(csBordered);
-		        }
-		        
-		        if("agentStatus".equals(key)) {
-		        	Integer intValue = (Integer) value;
-		        	
-		        	if(intValue == 0) {
-		        		cell = row.createCell(colCount++);
-			            cell.setCellValue("Pasif");
-			            cell.setCellStyle(csBordered);
-		        	}
-		        	else if(intValue == 1) {
-		        		cell = row.createCell(colCount++);
-			            cell.setCellValue("Aktif");
-			            cell.setCellStyle(csBordered);
-		        	}	
-		        	else if(intValue == 2) {
-		        		cell = row.createCell(colCount++);
-			            cell.setCellValue("Askıda");
-			            cell.setCellStyle(csBordered);
-		        	}
-		        
-		        }
-		    }
 			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(user.getUsername());
+			cell.setCellStyle(csBordered);
+			
+			if(user.getSessionEvent() == 1) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Oturum Açıldı");
+	            cell.setCellStyle(csBordered);
+			}
+			else if(user.getSessionEvent() == 2) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Oturum 	Kapatıldı");
+	            cell.setCellStyle(csBordered);
+			}
+			
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getCreateDate()));
+			cell.setCellStyle(csBordered);
+			
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(user.getHostname());
+			cell.setCellStyle(csBordered);
+			
+			for (int i = 0; i < maxCountOfMacAddresses; i++) {
+				try {
+					cell = row.createCell(colCount++);
+					cell.setCellValue(user.getMacAddresses().split(",")[i].replace("'", "").trim());
+					cell.setCellStyle(csBordered);
+				} catch (Exception e) {
+					cell.setCellValue("");
+					cell.setCellStyle(csBordered);
+				}
+			}
 
-		    for (Map.Entry<String, Object> entry : user.entrySet()) {
-		        String key = entry.getKey();
-		        Object value = entry.getValue();
-		        		        
-		        if("username".equals(key)) {
-		        	cell = row.createCell(colCount++);
-			        cell.setCellValue((String) value);
-			        cell.setCellStyle(csBordered);
-		        }
-		        
-		        if("ipAddresses".equals(key)) {
-		        	String strValue = (String) value;
-		        	for (int i = 0; i < maxCountOfIPAddresses; i++) {
-						try {
-							cell = row.createCell(colCount++);
-							cell.setCellValue(strValue.split(",")[i].replace("'", "").trim());
-							cell.setCellStyle(csBordered);
-						} catch (Exception e) {
-							cell.setCellValue("");
-							cell.setCellStyle(csBordered);
-						}
-					}
-		        }
-		        
-		        
-		        if("sessionEvent".equals(key)) {
-		        	Integer intValue = (Integer) value;
-		        	
-		        	if(intValue == 1) {
-		        		cell = row.createCell(colCount++);
-			            cell.setCellValue("Oturum Açıldı");
-			            cell.setCellStyle(csBordered);
-		        	}
-		        	else if(intValue == 2) {
-		        		cell = row.createCell(colCount++);
-			            cell.setCellValue("Oturum 	Kapatıldı");
-			            cell.setCellStyle(csBordered);
-		        	}
-		        	else {
-		        		cell = row.createCell(colCount++);
-			            cell.setCellValue((double) value);
-			            cell.setCellStyle(csBordered);
-		        	}
-		        }
-		        
-		        if("macAddresses".equals(key)) {
-		        	
-		        	String strValue = (String) value;        	
-		        	
-		        	for (int i = 0; i < maxCountOfMacAddresses; i++) {
-						try {
-							cell = row.createCell(colCount++);
-							cell.setCellValue(strValue.split(",")[i].replace("'", "").trim());
-							cell.setCellStyle(csBordered);
-						} catch (Exception e) {
-							cell.setCellValue("");
-							cell.setCellStyle(csBordered);
-						}
-					}
-		        	
-		        }
-		        
-		        
-		        if("createDate".equals(key)) {
-			          Timestamp timestampValue = (Timestamp) value;
-			          Date dateValue = new Date(timestampValue.getTime());
-			            
-			          cell = row.createCell(colCount++);
-			          cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(dateValue)); 
-			          cell.setCellStyle(csBordered);
-		        }
-		    }
+			for (int i = 0; i < maxCountOfIPAddresses; i++) {
+				try {
+					cell = row.createCell(colCount++);
+					cell.setCellValue(user.getIpAddresses().split(",")[i].replace("'", "").trim());
+					cell.setCellStyle(csBordered);
+				} catch (Exception e) {
+					cell.setCellValue("");			
+					cell.setCellStyle(csBordered);
+				}
+			}
+			
+			
+			colCount= 0;
+			
 		}
-	
 
 		try {
 			FileOutputStream outputStream = new FileOutputStream(exportFile);

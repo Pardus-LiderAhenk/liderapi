@@ -40,9 +40,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * Entity class for user login/logout events.
  *
  */
-@JsonIgnoreProperties({ "agent" ,"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "agent"})
 @Entity
-@Table(name = "C_AGENT_USER_SESSION")
+@Table(name = "c_agent_user_session")
 public class UserSessionImpl implements Serializable{
 
 	private static final long serialVersionUID = 8656281647459005125L;

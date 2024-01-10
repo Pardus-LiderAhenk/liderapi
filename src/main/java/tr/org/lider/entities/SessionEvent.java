@@ -19,6 +19,8 @@
 */
 package tr.org.lider.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 /**
  * Session event indicating either login or logout.
  * 
@@ -27,7 +29,8 @@ package tr.org.lider.entities;
  */
 public enum SessionEvent {
 
-	LOGIN(1), LOGOUT(2);
+	LOGIN(1), 
+	LOGOUT(2);
 
 	private int id;
 

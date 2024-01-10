@@ -2,14 +2,11 @@ package tr.org.lider.controllers;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,7 +15,6 @@ import org.springframework.security.access.annotation.Secured;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,9 +23,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.dto.UserSessionDTO;
 import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.services.ExcelExportService;
 import tr.org.lider.services.UserSessionReportService;
+import tr.org.lider.utils.IUserSessionReport;
 
 @Secured({"ROLE_ADMIN", "ROLE_USER_SESSION_REPORT" })
 @RestController
@@ -52,40 +50,42 @@ public class UserSessionReportController {
 		  @ApiResponse(responseCode = "417",description = "Coul not retrieve user session. Unexpected error occured.",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/list")
-	public ResponseEntity<?> getUserSessions(
-			@RequestParam (value = "pageNumber") int pageNumber,
-			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "sessionType") String sessionType,
-			@RequestParam (value = "username", required = false) String username,
-			@RequestParam( value = "dn") String dn,
-			@RequestParam (value="startDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> startDate,
-			@RequestParam (value="endDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> endDate) {
+	public ResponseEntity<?> getUserSessions(UserSessionDTO userSessionDTO) {
 		
-		Page<Map<String, Object>> users = userSessionReportService.getUserSessionByFilter(pageNumber, pageSize, sessionType,username, dn, startDate, endDate);
+		int pageNumber = userSessionDTO.getPageNumber();
+		int pageSize = userSessionDTO.getPageSize();
+		String sessionType = userSessionDTO.getSessionType();
+		String username = userSessionDTO.getUsername();
+		String hostname = userSessionDTO.getHostname();
+		Date startDate = userSessionDTO.getStartDate();
+		Date endDate = userSessionDTO.getEndDate();
 		
+		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(pageNumber, pageSize,sessionType, username, hostname, startDate,endDate);
 		
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(users);
 	}
 	
-	@Operation(summary = "Exports filtered user session list to excel.", description = "", tags = { "operation-log" })
+	@Operation(summary = "Exports filtered user session list to excel.", description = "", tags = { "user-sesion" })
 	@ApiResponses(value = { 
       	  @ApiResponse(responseCode = "200", description = "Created excel file successfully.",
 			  content = { @Content(schema = @Schema(implementation = OperationLogImpl.class))}),
 		  @ApiResponse(responseCode = "400",description = "Could not create operation log report.Bad request.",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> export(
-			@RequestParam (value = "pageNumber") int pageNumber,
-			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "sessionType") String sessionType,
-			@RequestParam (value = "username", required = false) String username,
-			@RequestParam( value = "dn") String dn,
-			@RequestParam (value="startDate", required = false) @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> startDate,
-			@RequestParam (value="endDate", required = false) @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> endDate) {
+	public ResponseEntity<?> export(UserSessionDTO userSessionDTO) {
 		
-		Page<Map<String, Object>> users = userSessionReportService.getUserSessionByFilter(1, userSessionReportService.count().intValue(), sessionType,username, dn, startDate, endDate);
+		int pageNumber = userSessionDTO.getPageNumber();
+		int pageSize = userSessionDTO.getPageSize();
+		String sessionType = userSessionDTO.getSessionType();
+		String username = userSessionDTO.getUsername();
+		String hostname = userSessionDTO.getHostname();
+		Date startDate = userSessionDTO.getStartDate();
+		Date endDate = userSessionDTO.getEndDate();
+		
+		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(1, userSessionReportService.count().intValue(),sessionType, username, hostname, startDate,endDate);		
+		
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");

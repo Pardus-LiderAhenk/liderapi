@@ -2,6 +2,8 @@ package tr.org.lider.dto;
 
 import java.util.Date;
 
+import tr.org.lider.entities.SessionEvent;
+
 public class UserSessionDTO {
 	private String username;
 	private Date createDate;
@@ -9,7 +11,10 @@ public class UserSessionDTO {
 	private String ipAddresses;
 	private int pageNumber;
 	private int pageSize;
-	
+	private String sessionType;
+	private  Date  startDate;
+	private Date endDate;
+
 	public UserSessionDTO(String username, Date createDate, String hostname, String ipAddresses) {
         this.username = username;
         this.createDate = createDate;
@@ -52,5 +57,28 @@ public class UserSessionDTO {
 	}
 	public void setIpAddresses(String ipAddresses) {
 		this.ipAddresses = ipAddresses;
+	}
+	public String getSessionType() {
+		return sessionType;
+	}
+
+	public void setSessionType(String sessionType) {
+		this.sessionType = sessionType;
+	}
+	
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
 	}
 }

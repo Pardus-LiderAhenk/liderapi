@@ -165,59 +165,59 @@ public class AgentSessionReportController {
 		
 	}
 
-	@Operation(summary = "Exports filtered agent session list to excel", description = "", tags = { "agent-service" })
-	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Created excel file successfully", 
-			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
-			  @ApiResponse(responseCode = "400", description = "Could not create client report.", 
-			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> export(
-			@RequestParam (value = "pageNumber") int pageNumber,
-			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "agentID") Long agentID,
-			@RequestParam (value = "sessionType") String sessionType){
-		
-	    Page<Map<String, Object>> agentSessionList = null;
-
-		if(sessionType.equals("LOGIN")) {
-			agentSessionList = agentSessionReportService.getSessionLoginExportList(1,userSessionReportService.count().intValue(),agentID);
-		}
-		else if(sessionType.equals("LOGOUT")) {
-			agentSessionList = agentSessionReportService.getSessionLogoutExportList(1,userSessionReportService.count().intValue(),agentID);
-		}
-		else {
-			agentSessionList = agentSessionReportService.getSessionAllExportList(1, userSessionReportService.count().intValue(), agentID);
-		}
-		
-		try {
-			if (agentSessionList != null) {
-				HttpHeaders headers = new HttpHeaders();
-				headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
-				headers.setContentType(MediaType.parseMediaType("application/csv"));
-				headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-				byte[] excelContent = excelService.generateUserSessionReport(agentSessionList.getContent());
-				return new ResponseEntity<byte[]>(excelContent, headers,  HttpStatus.OK);
-			}
-			else {
-				HttpHeaders headers = new HttpHeaders();
-	            headers.add("message", "Invalid session type: " + sessionType);
-	            return ResponseEntity
-	                .status(HttpStatus.BAD_REQUEST)
-	                .headers(headers)
-	                .build();
-			}
-		} catch (Exception e) {
-        	logger.error("Error occured while creating excel report Error: ." + e.getMessage());
-        	HttpHeaders headers = new HttpHeaders();
-        	headers.add("message", "Error occured while creating excel report. Error: " + e.getMessage());
-    		return ResponseEntity
-    				.status(HttpStatus.EXPECTATION_FAILED)
-    				.headers(headers)
-    				.build();
-		}
-		
-		
-	}
+//	@Operation(summary = "Exports filtered agent session list to excel", description = "", tags = { "agent-service" })
+//	@ApiResponses(value = { 
+//			  @ApiResponse(responseCode = "200", description = "Created excel file successfully", 
+//			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
+//			  @ApiResponse(responseCode = "400", description = "Could not create client report.", 
+//			    content = @Content(schema = @Schema(implementation = String.class))) })
+//	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
+//	public ResponseEntity<?> export(
+//			@RequestParam (value = "pageNumber") int pageNumber,
+//			@RequestParam (value = "pageSize") int pageSize,
+//			@RequestParam (value = "agentID") Long agentID,
+//			@RequestParam (value = "sessionType") String sessionType){
+//		
+//	    Page<Map<String, Object>> agentSessionList = null;
+//
+//		if(sessionType.equals("LOGIN")) {
+//			agentSessionList = agentSessionReportService.getSessionLoginExportList(1,userSessionReportService.count().intValue(),agentID);
+//		}
+//		else if(sessionType.equals("LOGOUT")) {
+//			agentSessionList = agentSessionReportService.getSessionLogoutExportList(1,userSessionReportService.count().intValue(),agentID);
+//		}
+//		else {
+//			agentSessionList = agentSessionReportService.getSessionAllExportList(1, userSessionReportService.count().intValue(), agentID);
+//		}
+//		
+//		try {
+//			if (agentSessionList != null) {
+//				HttpHeaders headers = new HttpHeaders();
+//				headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
+//				headers.setContentType(MediaType.parseMediaType("application/csv"));
+//				headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+//				byte[] excelContent = excelService.generateUserSessionReport(agentSessionList.getContent());
+//				return new ResponseEntity<byte[]>(excelContent, headers,  HttpStatus.OK);
+//			}
+//			else {
+//				HttpHeaders headers = new HttpHeaders();
+//	            headers.add("message", "Invalid session type: " + sessionType);
+//	            return ResponseEntity
+//	                .status(HttpStatus.BAD_REQUEST)
+//	                .headers(headers)
+//	                .build();
+//			}
+//		} catch (Exception e) {
+//        	logger.error("Error occured while creating excel report Error: ." + e.getMessage());
+//        	HttpHeaders headers = new HttpHeaders();
+//        	headers.add("message", "Error occured while creating excel report. Error: " + e.getMessage());
+//    		return ResponseEntity
+//    				.status(HttpStatus.EXPECTATION_FAILED)
+//    				.headers(headers)
+//    				.build();
+//		}
+//		
+//		
+//	}
 
 }
