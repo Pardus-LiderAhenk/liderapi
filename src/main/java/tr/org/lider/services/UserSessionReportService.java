@@ -30,15 +30,16 @@ public class UserSessionReportService {
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
 		Page<IUserSessionReport> results  = null;
 
-		if (sessionType.equals("LOGIN")) {
+		if (sessionType.equals("LOGIN") || sessionType.equals("LOGOUT")) {
 			
-			results = userSessionRepository.findByLoginSession(username,hostname,startDate, endDate, pageable);
-		}
-		else if(sessionType.equals("LOGOUT")) {
+			int sessionTypeId = SessionEvent.LOGIN.getId();
+			if (sessionType.equals("LOGOUT")) {
+				sessionTypeId = SessionEvent.LOGOUT.getId();
+			}
 			
-			results = userSessionRepository.findByLogoutSession(username,hostname,startDate, endDate, pageable);
-
+			results = userSessionRepository.findByLoginOrLogoutSession(sessionTypeId,username,hostname,startDate, endDate, pageable);
 		}
+		
 		else {
 			
 			results = userSessionRepository.findByAllSession(username,hostname,startDate, endDate, pageable);

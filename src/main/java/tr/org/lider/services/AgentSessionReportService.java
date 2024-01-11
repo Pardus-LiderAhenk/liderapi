@@ -14,12 +14,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
+import tr.org.lider.entities.OperationType;
+import tr.org.lider.entities.SessionEvent;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentInfoCriteriaBuilder;
 import tr.org.lider.repositories.AgentRepository;
+import tr.org.lider.utils.IUserSessionReport;
 
 @Service
 public class AgentSessionReportService {
@@ -221,29 +225,35 @@ public class AgentSessionReportService {
 		return agentRepository.getPropertyValueByName("diskType");
 	}
 	
-	public Page<Map<String, Object>> getSessionList(int pageNumber, int pageSize,Long agentID, String sessionType){
+	public Page<IUserSessionReport> getSessionList(int pageNumber, int pageSize,Long agentID, String sessionType){
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
 		
-		if(sessionType.equals("LOGIN")) {
-			return agentRepository.findUserLoginSessionAllByAgent(agentID, pageable);
-		} else if(sessionType.equals("LOGOUT")) {
-			return agentRepository.findUserLogoutSessionAllByAgent(agentID, pageable);
-		} else {
+		
+		
+		if(sessionType.equals("LOGIN") || sessionType.equals("LOGOUT")) {
+			int sessionTypeId = SessionEvent.LOGIN.getId();
+			if (sessionType.equals("LOGOUT")) {
+				sessionTypeId = SessionEvent.LOGOUT.getId();
+			}			
+			return agentRepository.findUserLoginOrLogoutSessionAllByAgent(agentID,sessionTypeId, pageable);
+		} 
+
+		else {
 			return agentRepository.findUserSessionAllByAgent(agentID,pageable);
 		}
 	}
-	public Page<Map<String, Object>> getSessionLoginExportList(int pageNumber, int pageSize, Long agentID){
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		return agentRepository.findByUserSessionLoginExport(agentID,pageable);
-	}
-	public Page<Map<String, Object>> getSessionLogoutExportList(int pageNumber, int pageSize, Long agentID){
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		return agentRepository.findByUserSessionLogoutExport(agentID,pageable);
-	}
-	public Page<Map<String, Object>> getSessionAllExportList(int pageNumber, int pageSize, Long agentID){
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		return agentRepository.findByUserSessionExport(agentID,pageable);
-	}
+//	public Page<Map<String, Object>> getSessionLoginExportList(int pageNumber, int pageSize, Long agentID){
+//		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+//		return agentRepository.findByUserSessionLoginExport(agentID,pageable);
+//	}
+//	public Page<Map<String, Object>> getSessionLogoutExportList(int pageNumber, int pageSize, Long agentID){
+//		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+//		return agentRepository.findByUserSessionLogoutExport(agentID,pageable);
+//	}
+//	public Page<Map<String, Object>> getSessionAllExportList(int pageNumber, int pageSize, Long agentID){
+//		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+//		return agentRepository.findByUserSessionExport(agentID,pageable);
+//	}
 	
 	
 }

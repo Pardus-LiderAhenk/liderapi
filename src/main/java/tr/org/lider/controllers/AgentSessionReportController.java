@@ -29,10 +29,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.services.AgentSessionReportService;
 import tr.org.lider.services.ExcelExportService;
 import tr.org.lider.services.UserSessionReportService;
+import tr.org.lider.utils.IUserSessionReport;
 
 @Secured({"ROLE_ADMIN", "ROLE_USER_SESSION_REPORT" })
 @RestController
@@ -61,27 +63,9 @@ public class AgentSessionReportController {
 			}) 
 		})
 	@PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<HashMap<String, Object>> findAllAgents(
-			@RequestParam (value = "pageNumber") int pageNumber,
-			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
-			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
-			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
-			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
-			@RequestParam (value = "status") Optional<String> status,
-			@RequestParam (value = "dn") Optional<String> dn,
-			@RequestParam (value = "hostname") Optional<String> hostname,
-			@RequestParam (value = "macAddress") Optional<String> macAddress,
-			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
-			@RequestParam (value = "brand") Optional<String> brand,
-			@RequestParam (value = "model") Optional<String> model,
-			@RequestParam (value = "processor") Optional<String> processor,
-			@RequestParam (value = "osVersion") Optional<String> osVersion,
-			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-			@RequestParam (value = "diskType") Optional<String> diskType,
-			@RequestParam (value = "agentStatus") Optional<String> agentStatus) {
+	public ResponseEntity<HashMap<String, Object>> findAllAgents( AgentDTO agentDTO) {
 		HashMap<String, Object> resultMap = new HashMap<>();
-		if(getFilterData.isPresent() && getFilterData.get()) {
+		if(agentDTO.getGetFilterData().isPresent() && agentDTO.getGetFilterData().get()) {
 			resultMap.put("brands", agentSessionReportService.getBrands());
 			resultMap.put("models", agentSessionReportService.getmodels());
 			resultMap.put("processors", agentSessionReportService.getProcessors());
@@ -90,23 +74,23 @@ public class AgentSessionReportController {
 			resultMap.put("diskType", agentSessionReportService.getDiskType());
 		}
 		Page<AgentImpl> listOfAgents = agentSessionReportService.findAllAgents(
-				pageNumber, 
-				pageSize, 
-				sessionReportType,
-				registrationStartDate, 
-				registrationEndDate, 
-				status, 
-				dn,
-				hostname, 
-				macAddress, 
-				ipAddress, 
-				brand, 
-				model, 
-				processor, 
-				osVersion,
-				agentVersion,
-				diskType,
-				agentStatus);
+				agentDTO.getPageNumber(),
+				agentDTO.getPageSize(),
+				agentDTO.getSessionReportType(),
+				agentDTO.getRegistrationStartDate(),
+				agentDTO.getRegistrationEndDate(),
+				agentDTO.getStatus(),
+				agentDTO.getDn(),
+				agentDTO.getHostname(),
+				agentDTO.getMacAddress(),
+				agentDTO.getIpAddress(),
+				agentDTO.getBrand(),
+				agentDTO.getModel(),
+				agentDTO.getProcessor(),
+				agentDTO.getOsVersion(),
+				agentDTO.getAgentVersion(),
+				agentDTO.getDiskType(),
+				agentDTO.getAgentStatus());
 				
 		resultMap.put("agents", listOfAgents);
 		return ResponseEntity
@@ -127,7 +111,7 @@ public class AgentSessionReportController {
 			@RequestParam (value = "agentID") Long agentID,
 			@RequestParam (value = "sessionType") String sessionType) {
 		logger.debug("Agent id:  {} ", agentID);
-		Page<Map<String, Object>> agentSessionList = agentSessionReportService.getSessionList(pageNumber,pageSize, agentID, sessionType);
+		Page<IUserSessionReport> agentSessionList = agentSessionReportService.getSessionList(pageNumber,pageSize, agentID, sessionType);
 		
 		return ResponseEntity
 				.status(HttpStatus.OK)
@@ -135,35 +119,35 @@ public class AgentSessionReportController {
 		
 	}
 	
-	@Operation(summary = "Find agent session list.", description = "", tags = { "agent-service" })
-	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Get agent session detail by id.", 
-			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
-			  @ApiResponse(responseCode = "404", description = "Agent id not found.Not found.", 
-			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/sessions", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?>  findAgentBySessions(
-			@RequestParam (value = "pageNumber") int pageNumber,
-			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "agentID") Long agentID,
-			@RequestParam (value = "sessionType") String sessionType) {
-		logger.debug("Agent id:  {} ", agentID);
-		 Page<Map<String, Object>> agentSessionList = null;
-
-			if(sessionType.equals("LOGIN")) {
-				agentSessionList = agentSessionReportService.getSessionLoginExportList(1,userSessionReportService.count().intValue(),agentID);
-			}
-			else if(sessionType.equals("LOGOUT")) {
-				agentSessionList = agentSessionReportService.getSessionLogoutExportList(1,userSessionReportService.count().intValue(),agentID);
-			}
-			else {
-				agentSessionList = agentSessionReportService.getSessionAllExportList(1, userSessionReportService.count().intValue(), agentID);
-			}		
-		return ResponseEntity
-				.status(HttpStatus.OK)
-				.body(agentSessionList);
-		
-	}
+//	@Operation(summary = "Find agent session list.", description = "", tags = { "agent-service" })
+//	@ApiResponses(value = { 
+//			  @ApiResponse(responseCode = "200", description = "Get agent session detail by id.", 
+//			    content = { @Content(schema = @Schema(implementation = AgentImpl.class)) }),
+//			  @ApiResponse(responseCode = "404", description = "Agent id not found.Not found.", 
+//			    content = @Content(schema = @Schema(implementation = String.class))) })
+//	@PostMapping(value = "/sessions", produces = MediaType.APPLICATION_JSON_VALUE)
+//	public ResponseEntity<?>  findAgentBySessions(
+//			@RequestParam (value = "pageNumber") int pageNumber,
+//			@RequestParam (value = "pageSize") int pageSize,
+//			@RequestParam (value = "agentID") Long agentID,
+//			@RequestParam (value = "sessionType") String sessionType) {
+//		logger.debug("Agent id:  {} ", agentID);
+//		 Page<Map<String, Object>> agentSessionList = null;
+//
+//			if(sessionType.equals("LOGIN")) {
+//				agentSessionList = agentSessionReportService.getSessionLoginExportList(1,userSessionReportService.count().intValue(),agentID);
+//			}
+//			else if(sessionType.equals("LOGOUT")) {
+//				agentSessionList = agentSessionReportService.getSessionLogoutExportList(1,userSessionReportService.count().intValue(),agentID);
+//			}
+//			else {
+//				agentSessionList = agentSessionReportService.getSessionAllExportList(1, userSessionReportService.count().intValue(), agentID);
+//			}		
+//		return ResponseEntity
+//				.status(HttpStatus.OK)
+//				.body(agentSessionList);
+//		
+//	}
 
 //	@Operation(summary = "Exports filtered agent session list to excel", description = "", tags = { "agent-service" })
 //	@ApiResponses(value = { 

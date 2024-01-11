@@ -17,24 +17,13 @@ public interface UserSessionRepository extends BaseJpaRepository<UserSessionImpl
 	@Query(value="SELECT s.sessionEvent as sessionEvent, s.username as username, s.createDate as createDate, a.hostname as hostname, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses " +
 			"FROM UserSessionImpl s " +
 	        "LEFT JOIN AgentImpl a ON s.agent = a.id " +
-	        "WHERE s.sessionEvent = 1" +
+	        "WHERE s.sessionEvent = :sessionTypeId " +
 	        "AND (COALESCE(:username, '') = '' OR s.username LIKE %:username%) " +
 	        "AND (COALESCE(:hostname, '') = '' OR a.hostname LIKE %:hostname%) " +
 	        "AND (:startDate IS NULL OR s.createDate >= :startDate ) " +
 	        "AND (:endDate IS NULL OR s.createDate <= :endDate ) " +
 	        "ORDER BY s.createDate ASC")
-	Page<IUserSessionReport> findByLoginSession(@Param("username") String username, @Param("hostname") String hostname,@Param("startDate") Date startDate,@Param("endDate") Date endDate, Pageable pageable);
-
-	@Query(value="SELECT s.sessionEvent as sessionEvent, s.username as username, s.createDate as createDate, a.hostname as hostname, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses " +
-			"FROM UserSessionImpl s " +
-	        "LEFT JOIN AgentImpl a ON s.agent = a.id " +
-	        "WHERE s.sessionEvent = 2" +
-	        "AND (COALESCE(:username, '') = '' OR s.username LIKE %:username%) " +
-	        "AND (COALESCE(:hostname, '') = '' OR a.hostname LIKE %:hostname%) " +
-	        "AND (:startDate IS NULL OR s.createDate >= :startDate ) " +
-	        "AND (:endDate IS NULL OR s.createDate <= :endDate ) " +
-	        "ORDER BY s.createDate ASC")
-	Page<IUserSessionReport> findByLogoutSession(@Param("username") String username, @Param("hostname") String hostname,@Param("startDate") Date startDate,@Param("endDate") Date endDate, Pageable pageable);
+	Page<IUserSessionReport> findByLoginOrLogoutSession(@Param("sessionTypeId") Integer sessionTypeId,@Param("username") String username, @Param("hostname") String hostname,@Param("startDate") Date startDate,@Param("endDate") Date endDate, Pageable pageable);
 
 	@Query(value="SELECT s.sessionEvent as sessionEvent, s.username as username, s.createDate as createDate, a.hostname as hostname, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses " +
 			"FROM UserSessionImpl s " +
