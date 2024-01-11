@@ -19,8 +19,6 @@
 */
 package tr.org.lider.entities;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 /**
  * Session event indicating either login or logout.
  * 

@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
-import tr.org.lider.entities.AgentStatus;
 
 /*
  * AgentInfoCriteriaBuilder implements filtering agents with multiple data.
@@ -81,11 +80,11 @@ public class AgentInfoCriteriaBuilder {
 			predicatesCount.add(cbCount.like(fromCount.get("dn").as(String.class), "%" + dn.get() + "%"));
 		}
 
-		if (registrationStartDate != null) {
+		if (registrationStartDate.isPresent() && registrationStartDate.get() != null) {
 			predicates.add(cb.greaterThanOrEqualTo(from.get("createDate"), registrationStartDate.get()));
 			predicatesCount.add(cbCount.greaterThanOrEqualTo(fromCount.get("createDate"), registrationStartDate.get()));
 		}
-		if (registrationEndDate != null) {
+		if (registrationEndDate.isPresent() && registrationEndDate.get() != null) {
 			predicates.add(cb.lessThanOrEqualTo(from.get("createDate"), registrationEndDate.get()));
 			predicatesCount.add(cbCount.lessThanOrEqualTo(fromCount.get("createDate"), registrationEndDate.get()));
 		}

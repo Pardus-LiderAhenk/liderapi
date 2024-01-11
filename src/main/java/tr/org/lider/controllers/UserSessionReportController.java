@@ -52,16 +52,15 @@ public class UserSessionReportController {
 	@PostMapping(value = "/list")
 	public ResponseEntity<?> getUserSessions(UserSessionDTO userSessionDTO) {
 		
-		int pageNumber = userSessionDTO.getPageNumber();
-		int pageSize = userSessionDTO.getPageSize();
-		String sessionType = userSessionDTO.getSessionType();
-		String username = userSessionDTO.getUsername();
-		String hostname = userSessionDTO.getHostname();
-		Date startDate = userSessionDTO.getStartDate();
-		Date endDate = userSessionDTO.getEndDate();
-		
-		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(pageNumber, pageSize,sessionType, username, hostname, startDate,endDate);
-		
+		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(
+				userSessionDTO.getPageNumber(), 
+				userSessionDTO.getPageSize(),
+				userSessionDTO.getSessionType(), 
+				userSessionDTO.getUsername(), 
+				userSessionDTO.getHostname(), 
+				userSessionDTO.getStartDate(),
+				userSessionDTO.getEndDate()
+			);
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(users);
@@ -76,16 +75,14 @@ public class UserSessionReportController {
 	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> export(UserSessionDTO userSessionDTO) {
 		
-		int pageNumber = userSessionDTO.getPageNumber();
-		int pageSize = userSessionDTO.getPageSize();
-		String sessionType = userSessionDTO.getSessionType();
-		String username = userSessionDTO.getUsername();
-		String hostname = userSessionDTO.getHostname();
-		Date startDate = userSessionDTO.getStartDate();
-		Date endDate = userSessionDTO.getEndDate();
-		
-		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(1, userSessionReportService.count().intValue(),sessionType, username, hostname, startDate,endDate);		
-		
+		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(1, 
+				userSessionReportService.count().intValue(),
+				userSessionDTO.getSessionType(), 
+				userSessionDTO.getUsername(), 
+				userSessionDTO.getHostname(), 
+				userSessionDTO.getStartDate(),
+				userSessionDTO.getEndDate()
+			);		
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");

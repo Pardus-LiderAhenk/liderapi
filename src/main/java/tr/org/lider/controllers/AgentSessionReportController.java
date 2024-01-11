@@ -3,25 +3,19 @@ package tr.org.lider.controllers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -116,7 +110,6 @@ public class AgentSessionReportController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(agentSessionList);
-		
 	}
 
 	@Operation(summary = "Exports filtered agent session list to excel", description = "", tags = { "agent-service" })
@@ -132,16 +125,7 @@ public class AgentSessionReportController {
 			@RequestParam (value = "agentID") Long agentID,
 			@RequestParam (value = "sessionType") String sessionType){
 		
-		Page<IUserSessionReport> agentSessionList = null;
-
-		if(sessionType.equals("LOGIN") || sessionType.equals("LOGOUT")) {
-			agentSessionList = agentSessionReportService.getSessionLoginOrLogoutExportList(1,userSessionReportService.count().intValue(),agentID,sessionType);
-		}
-		
-		else {
-			agentSessionList = agentSessionReportService.getSessionAllExportList(1, userSessionReportService.count().intValue(), agentID);
-		}
-		
+		Page<IUserSessionReport> agentSessionList = agentSessionReportService.getSessionList(1, userSessionReportService.count().intValue(), agentID, sessionType);
 		try {
 			if (agentSessionList != null) {
 				HttpHeaders headers = new HttpHeaders();
@@ -168,8 +152,5 @@ public class AgentSessionReportController {
     				.headers(headers)
     				.build();
 		}
-		
-		
 	}
-
 }

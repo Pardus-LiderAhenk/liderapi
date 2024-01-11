@@ -3,7 +3,6 @@ package tr.org.lider.services;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
@@ -14,9 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
-import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.SessionEvent;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -227,39 +224,12 @@ public class AgentSessionReportService {
 	
 	public Page<IUserSessionReport> getSessionList(int pageNumber, int pageSize,Long agentID, String sessionType){
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		
-		
-		
-		if(sessionType.equals("LOGIN") || sessionType.equals("LOGOUT")) {
-			int sessionTypeId = SessionEvent.LOGIN.getId();
-			if (sessionType.equals("LOGOUT")) {
-				sessionTypeId = SessionEvent.LOGOUT.getId();
-			}			
-			return agentRepository.findUserLoginOrLogoutSessionAllByAgent(agentID,sessionTypeId, pageable);
-		} 
-
-		else {
-			return agentRepository.findUserSessionAllByAgent(agentID,pageable);
+		int sessionTypeId = 0;
+		if (sessionType.equals("LOGIN")) {
+			sessionTypeId = SessionEvent.LOGIN.getId();
+		} else if (sessionType.equals("LOGOUT")) {
+			sessionTypeId = SessionEvent.LOGOUT.getId();
 		}
+		return agentRepository.findUserSessionAllByAgent(agentID,sessionTypeId, pageable);
 	}
-	public Page<IUserSessionReport> getSessionLoginOrLogoutExportList(int pageNumber, int pageSize, Long agentID, String sessionType){
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		
-		if(sessionType.equals("LOGIN") || sessionType.equals("LOGOUT")) {
-			int sessionTypeId = SessionEvent.LOGIN.getId();
-			if (sessionType.equals("LOGOUT")) {
-				sessionTypeId = SessionEvent.LOGOUT.getId();
-			}			
-			return agentRepository.findUserLoginOrLogoutSessionExport(agentID,sessionTypeId, pageable);
-		}
-		return null; 
-		
-	}
-
-	public Page<IUserSessionReport> getSessionAllExportList(int pageNumber, int pageSize, Long agentID){
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		return agentRepository.findByUserSessionExport(agentID,pageable);
-	}
-	
-	
 }
