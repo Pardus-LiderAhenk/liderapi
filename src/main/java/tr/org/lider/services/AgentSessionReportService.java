@@ -242,18 +242,24 @@ public class AgentSessionReportService {
 			return agentRepository.findUserSessionAllByAgent(agentID,pageable);
 		}
 	}
-//	public Page<Map<String, Object>> getSessionLoginExportList(int pageNumber, int pageSize, Long agentID){
-//		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-//		return agentRepository.findByUserSessionLoginExport(agentID,pageable);
-//	}
-//	public Page<Map<String, Object>> getSessionLogoutExportList(int pageNumber, int pageSize, Long agentID){
-//		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-//		return agentRepository.findByUserSessionLogoutExport(agentID,pageable);
-//	}
-//	public Page<Map<String, Object>> getSessionAllExportList(int pageNumber, int pageSize, Long agentID){
-//		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-//		return agentRepository.findByUserSessionExport(agentID,pageable);
-//	}
+	public Page<IUserSessionReport> getSessionLoginOrLogoutExportList(int pageNumber, int pageSize, Long agentID, String sessionType){
+		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+		
+		if(sessionType.equals("LOGIN") || sessionType.equals("LOGOUT")) {
+			int sessionTypeId = SessionEvent.LOGIN.getId();
+			if (sessionType.equals("LOGOUT")) {
+				sessionTypeId = SessionEvent.LOGOUT.getId();
+			}			
+			return agentRepository.findUserLoginOrLogoutSessionExport(agentID,sessionTypeId, pageable);
+		}
+		return null; 
+		
+	}
+
+	public Page<IUserSessionReport> getSessionAllExportList(int pageNumber, int pageSize, Long agentID){
+		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+		return agentRepository.findByUserSessionExport(agentID,pageable);
+	}
 	
 	
 }
