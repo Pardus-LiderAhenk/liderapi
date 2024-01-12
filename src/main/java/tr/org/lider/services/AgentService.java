@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -82,26 +83,10 @@ public class AgentService {
 	}
 	
 	public Page<AgentImpl> findAllAgents(
-			int pageNumber,
-			int pageSize,
-			Optional<String> sessionReportType,
-			Optional<Date> registrationStartDate,
-			Optional<Date> registrationEndDate,
-			Optional<String> status,
-			Optional<String> dn,
-			Optional<String> hostname,
-			Optional<String> macAddress,
-			Optional<String> ipAddress,
-			Optional<String> brand,
-			Optional<String> model,
-			Optional<String> processor,
-			Optional<String> osVersion,
-			Optional<String> agentVersion,
-			Optional<String> diskType,
-			Optional<String> agentStatus) {
+			AgentDTO agentDTO) {
 		
 		List<String> listOfOnlineUsers = new ArrayList<String>();
-		if(!status.get().equals("ALL")) {
+		if(!agentDTO.getAgentStatus().equals("ALL")) {
 			
 			List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
 			try {
@@ -118,10 +103,11 @@ public class AgentService {
 				e.printStackTrace();
 			}
 		}
-		if(sessionReportType.isPresent()) {
-			if(sessionReportType.get().equals("LAST_ONE_MONTH_NO_SESSIONS") 
-					|| sessionReportType.get().equals("LAST_TWO_MONTHS_NO_SESSIONS") 
-					|| sessionReportType.get().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
+		
+		if(agentDTO.getSessionReportType().isPresent()) {
+			if(agentDTO.getSessionReportType().equals("LAST_ONE_MONTH_NO_SESSIONS") 
+					|| agentDTO.getSessionReportType().equals("LAST_TWO_MONTHS_NO_SESSIONS") 
+					|| agentDTO.getSessionReportType().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
 				List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
 				try {
 		
@@ -139,24 +125,24 @@ public class AgentService {
 			}
 		}
 		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents(
-				pageNumber, 
-				pageSize, 
-				sessionReportType,
-				registrationStartDate, 
-				registrationEndDate, 
-				status,
-				dn,
-				hostname, 
-				macAddress, 
-				ipAddress, 
-				brand, 
-				model, 
-				processor, 
-				osVersion, 
-				agentVersion, 
-				diskType,
-				listOfOnlineUsers,
-				agentStatus);
+				agentDTO.getPageNumber(),
+				agentDTO.getPageSize(),
+				agentDTO.getSessionReportType(),
+				agentDTO.getRegistrationStartDate(),
+				agentDTO.getRegistrationEndDate(),
+				agentDTO.getStatus(),
+				agentDTO.getDn(),
+				agentDTO.getHostname(),
+				agentDTO.getMacAddress(),
+				agentDTO.getIpAddress(),
+				agentDTO.getBrand(),
+				agentDTO.getModel(),
+				agentDTO.getProcessor(),
+				agentDTO.getOsVersion(),
+				agentDTO.getAgentVersion(),
+				agentDTO.getDiskType(),
+				listOfOnlineUsers, 
+				agentDTO.getAgentStatus());
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {
 			if(messagingService.isRecipientOnline(listOfAgentsCB.getContent().get(i).getJid())) {
 				listOfAgentsCB.getContent().get(i).setIsOnline(true);

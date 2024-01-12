@@ -67,24 +67,7 @@ public class AgentSessionReportController {
 			resultMap.put("agentVersions", agentSessionReportService.getAgentVersions());
 			resultMap.put("diskType", agentSessionReportService.getDiskType());
 		}
-		Page<AgentImpl> listOfAgents = agentSessionReportService.findAllAgents(
-				agentDTO.getPageNumber(),
-				agentDTO.getPageSize(),
-				agentDTO.getSessionReportType(),
-				agentDTO.getRegistrationStartDate(),
-				agentDTO.getRegistrationEndDate(),
-				agentDTO.getStatus(),
-				agentDTO.getDn(),
-				agentDTO.getHostname(),
-				agentDTO.getMacAddress(),
-				agentDTO.getIpAddress(),
-				agentDTO.getBrand(),
-				agentDTO.getModel(),
-				agentDTO.getProcessor(),
-				agentDTO.getOsVersion(),
-				agentDTO.getAgentVersion(),
-				agentDTO.getDiskType(),
-				agentDTO.getAgentStatus());
+		Page<AgentImpl> listOfAgents = agentSessionReportService.findAllAgents(agentDTO);
 				
 		resultMap.put("agents", listOfAgents);
 		return ResponseEntity

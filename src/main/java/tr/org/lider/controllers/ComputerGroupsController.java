@@ -648,183 +648,183 @@ public class ComputerGroupsController {
 		return ahenks;
 	}
 	
-	@Operation(summary = "Create new agent group", description = "", tags = { "computer-groups" })
-	@ApiResponses(value = { 
-		  @ApiResponse(responseCode = "200", description = "Created new agent group"),
-		  @ApiResponse(responseCode = "417", description = "Could not create agent group.Unexpected error occured", 
-		    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/agent-report/create-agent-group", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LdapEntry>  findAllAgents(
-			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
-			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
-			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
-			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
-			@RequestParam (value = "status") Optional<String> status,
-			@RequestParam (value = "dn") Optional<String> dn,
-			@RequestParam (value = "hostname") Optional<String> hostname,
-			@RequestParam (value = "macAddress") Optional<String> macAddress,
-			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
-			@RequestParam (value = "brand") Optional<String> brand,
-			@RequestParam (value = "model") Optional<String> model,
-			@RequestParam (value = "processor") Optional<String> processor,
-			@RequestParam (value = "osVersion") Optional<String> osVersion,
-			@RequestParam (value = "diskType") Optional<String> diskType,
-			@RequestParam(value = "selectedOUDN", required=false) String selectedOUDN,
-			@RequestParam(value = "groupName", required=true) String groupName,
-			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-			@RequestParam (value = "agentStatus") Optional<String> agentStatus) {
-		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
-				1, 
-				agentService.count().intValue(), 
-				sessionReportType,
-				registrationStartDate, 
-				registrationEndDate, 
-				status, 
-				dn,
-				hostname, 
-				macAddress, 
-				ipAddress, 
-				brand, 
-				model, 
-				processor, 
-				osVersion,
-				agentVersion,
-				diskType,
-				agentStatus);
-				
-		String newGroupDN = "";
-		LdapEntry entry;
-		if(selectedOUDN == null || selectedOUDN.equals("")) {
-			newGroupDN = "cn=" +  groupName +","+ configurationService.getAhenkGroupLdapBaseDn();
-		} else {
-			newGroupDN = "cn=" +  groupName +","+ selectedOUDN;
-		}
-		Map<String, String[]> attributes = new HashMap<String,String[]>();
-		attributes.put("objectClass", new String[] {"groupOfNames", "top", "pardusLider"} );
-		attributes.put("liderGroupType", new String[] {"AHENK"} );
-		try {
-			String selectedAgentDNList[] = new String[listOfAgents.getContent().size()];
-			selectedAgentDNList = listOfAgents.getContent().stream().map(t -> t.getDn()).toArray(String[]::new);
-			attributes.put("member", selectedAgentDNList);
-			ldapService.addEntry(newGroupDN , attributes);
-			entry = ldapService.getEntryDetail(newGroupDN);
-		} catch (LdapException e) {
-			logger.error("Error occured while adding new group.");
-			HttpHeaders headers = new HttpHeaders();
-			return ResponseEntity.
-					status(HttpStatus.EXPECTATION_FAILED).
-					headers(headers)
-					.build();
-		}
-		
-		String selectedAgentList[] = new String[listOfAgents.getContent().size()];
-		selectedAgentList = listOfAgents.getContent().stream().map(t -> t.getDn()).toArray(String[]::new);
-		Map<String, Object> requestData = new HashMap<String, Object>();
-		requestData.put("newGroupDN", newGroupDN);
-		requestData.put("agents", selectedAgentList);
-		ObjectMapper dataMapper = new ObjectMapper();
-		String jsonString = null;
-		try {
-			jsonString = dataMapper.writeValueAsString(requestData);
-		} catch (JsonProcessingException e1) {
-			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
-		}
-		String log = "New group has been created " + newGroupDN + " and agents has been added";
-		operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
-		
-		
-		return ResponseEntity
-				.status(HttpStatus.OK)
-				.body(entry);
-				
-	}
+//	@Operation(summary = "Create new agent group", description = "", tags = { "computer-groups" })
+//	@ApiResponses(value = { 
+//		  @ApiResponse(responseCode = "200", description = "Created new agent group"),
+//		  @ApiResponse(responseCode = "417", description = "Could not create agent group.Unexpected error occured", 
+//		    content = @Content(schema = @Schema(implementation = String.class))) })
+//	@PostMapping(value = "/agent-report/create-agent-group", produces = MediaType.APPLICATION_JSON_VALUE)
+//	public ResponseEntity<LdapEntry>  findAllAgents(
+//			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
+//			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
+//			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
+//			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
+//			@RequestParam (value = "status") Optional<String> status,
+//			@RequestParam (value = "dn") Optional<String> dn,
+//			@RequestParam (value = "hostname") Optional<String> hostname,
+//			@RequestParam (value = "macAddress") Optional<String> macAddress,
+//			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
+//			@RequestParam (value = "brand") Optional<String> brand,
+//			@RequestParam (value = "model") Optional<String> model,
+//			@RequestParam (value = "processor") Optional<String> processor,
+//			@RequestParam (value = "osVersion") Optional<String> osVersion,
+//			@RequestParam (value = "diskType") Optional<String> diskType,
+//			@RequestParam(value = "selectedOUDN", required=false) String selectedOUDN,
+//			@RequestParam(value = "groupName", required=true) String groupName,
+//			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
+//			@RequestParam (value = "agentStatus") Optional<String> agentStatus) {
+//		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
+//				1, 
+//				agentService.count().intValue(), 
+//				sessionReportType,
+//				registrationStartDate, 
+//				registrationEndDate, 
+//				status, 
+//				dn,
+//				hostname, 
+//				macAddress, 
+//				ipAddress, 
+//				brand, 
+//				model, 
+//				processor, 
+//				osVersion,
+//				agentVersion,
+//				diskType,
+//				agentStatus);
+//				
+//		String newGroupDN = "";
+//		LdapEntry entry;
+//		if(selectedOUDN == null || selectedOUDN.equals("")) {
+//			newGroupDN = "cn=" +  groupName +","+ configurationService.getAhenkGroupLdapBaseDn();
+//		} else {
+//			newGroupDN = "cn=" +  groupName +","+ selectedOUDN;
+//		}
+//		Map<String, String[]> attributes = new HashMap<String,String[]>();
+//		attributes.put("objectClass", new String[] {"groupOfNames", "top", "pardusLider"} );
+//		attributes.put("liderGroupType", new String[] {"AHENK"} );
+//		try {
+//			String selectedAgentDNList[] = new String[listOfAgents.getContent().size()];
+//			selectedAgentDNList = listOfAgents.getContent().stream().map(t -> t.getDn()).toArray(String[]::new);
+//			attributes.put("member", selectedAgentDNList);
+//			ldapService.addEntry(newGroupDN , attributes);
+//			entry = ldapService.getEntryDetail(newGroupDN);
+//		} catch (LdapException e) {
+//			logger.error("Error occured while adding new group.");
+//			HttpHeaders headers = new HttpHeaders();
+//			return ResponseEntity.
+//					status(HttpStatus.EXPECTATION_FAILED).
+//					headers(headers)
+//					.build();
+//		}
+//		
+//		String selectedAgentList[] = new String[listOfAgents.getContent().size()];
+//		selectedAgentList = listOfAgents.getContent().stream().map(t -> t.getDn()).toArray(String[]::new);
+//		Map<String, Object> requestData = new HashMap<String, Object>();
+//		requestData.put("newGroupDN", newGroupDN);
+//		requestData.put("agents", selectedAgentList);
+//		ObjectMapper dataMapper = new ObjectMapper();
+//		String jsonString = null;
+//		try {
+//			jsonString = dataMapper.writeValueAsString(requestData);
+//		} catch (JsonProcessingException e1) {
+//			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+//		}
+//		String log = "New group has been created " + newGroupDN + " and agents has been added";
+//		operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+//		
+//		
+//		return ResponseEntity
+//				.status(HttpStatus.OK)
+//				.body(entry);
+//				
+//	}
 	
-	@Operation(summary = "Update existing group", description = "", tags = { "computer-groups" })
-	@ApiResponses(value = { 
-		  @ApiResponse(responseCode = "200", description = "Existing group updated and agents added"),
-		  @ApiResponse(responseCode = "404", description = "No agents found to add to group. Not Found", 
-		    content = @Content(schema = @Schema(implementation = String.class))),
-		  @ApiResponse(responseCode = "417", description = "Error occured while adding agents to existing group. Unexpected error occured", 
-		    content = @Content(schema = @Schema(implementation = String.class)))
-		  })
-	@PostMapping(value = "/agent-report/existing/group", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<LdapEntry>  addClientToExistGroup(
-			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
-			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
-			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
-			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
-			@RequestParam (value = "status") Optional<String> status,
-			@RequestParam (value = "dn") Optional<String> dn,
-			@RequestParam (value = "hostname") Optional<String> hostname,
-			@RequestParam (value = "macAddress") Optional<String> macAddress,
-			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
-			@RequestParam (value = "brand") Optional<String> brand,
-			@RequestParam (value = "model") Optional<String> model,
-			@RequestParam (value = "processor") Optional<String> processor,
-			@RequestParam (value = "osVersion") Optional<String> osVersion,
-			@RequestParam(value = "groupDN", required=false) String groupDN,
-			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
-			@RequestParam (value = "diskType") Optional<String> diskType,
-			@RequestParam (value = "agentStatus") Optional<String> agentStatus){
-		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
-				1, 
-				agentService.count().intValue(), 
-				sessionReportType,
-				registrationStartDate, 
-				registrationEndDate, 
-				status, 
-				dn,
-				hostname, 
-				macAddress, 
-				ipAddress, 
-				brand, 
-				model, 
-				processor, 
-				osVersion, 
-				agentVersion,
-				diskType,
-				agentStatus);
-		LdapEntry entry;			
-		HttpHeaders headers = new HttpHeaders();
-		if(listOfAgents.getContent() == null || listOfAgents.getContent().size() == 0) {
-			logger.error("No agents found to add to group!");
-			return ResponseEntity.
-					status(HttpStatus.NOT_FOUND).
-					headers(headers)
-					.build();
-		}
-		try {
-			for (AgentImpl agentImpl : listOfAgents.getContent()) {
-				ldapService.updateEntryAddAtribute(groupDN, "member", agentImpl.getDn());
-			}
-		} catch (LdapException e) {
-			logger.error("Error occured while adding agents to existing group.");
-			return ResponseEntity.
-					status(HttpStatus.EXPECTATION_FAILED).
-					headers(headers)
-					.build();
-		}
-		entry = ldapService.getEntryDetail(groupDN);
-		
-		String selectedAgentList[] = new String[listOfAgents.getContent().size()];
-		selectedAgentList = listOfAgents.getContent().stream().map(t -> t.getDn()).toArray(String[]::new);
-		Map<String, Object> requestData = new HashMap<String, Object>();
-		requestData.put("newGroupDN", entry.getDistinguishedName());
-		requestData.put("agents", selectedAgentList);
-		ObjectMapper dataMapper = new ObjectMapper();
-		String jsonString = null;
-		try {
-			jsonString = dataMapper.writeValueAsString(requestData);
-		} catch (JsonProcessingException e1) {
-			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
-		}
-		String log = "Existing group has been updated " + entry.getDistinguishedName() + " and agents has been added";
-		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
-		
-		return ResponseEntity
-				.status(HttpStatus.OK)
-				.body(entry);
-	}
+//	@Operation(summary = "Update existing group", description = "", tags = { "computer-groups" })
+//	@ApiResponses(value = { 
+//		  @ApiResponse(responseCode = "200", description = "Existing group updated and agents added"),
+//		  @ApiResponse(responseCode = "404", description = "No agents found to add to group. Not Found", 
+//		    content = @Content(schema = @Schema(implementation = String.class))),
+//		  @ApiResponse(responseCode = "417", description = "Error occured while adding agents to existing group. Unexpected error occured", 
+//		    content = @Content(schema = @Schema(implementation = String.class)))
+//		  })
+//	@PostMapping(value = "/agent-report/existing/group", produces = MediaType.APPLICATION_JSON_VALUE)
+//	public ResponseEntity<LdapEntry>  addClientToExistGroup(
+//			@RequestParam (value = "getFilterData") Optional<Boolean> getFilterData,
+//			@RequestParam (value = "sessionReportType") Optional<String> sessionReportType,
+//			@RequestParam (value = "registrationStartDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationStartDate,
+//			@RequestParam (value = "registrationEndDate") @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> registrationEndDate,
+//			@RequestParam (value = "status") Optional<String> status,
+//			@RequestParam (value = "dn") Optional<String> dn,
+//			@RequestParam (value = "hostname") Optional<String> hostname,
+//			@RequestParam (value = "macAddress") Optional<String> macAddress,
+//			@RequestParam (value = "ipAddress") Optional<String> ipAddress,
+//			@RequestParam (value = "brand") Optional<String> brand,
+//			@RequestParam (value = "model") Optional<String> model,
+//			@RequestParam (value = "processor") Optional<String> processor,
+//			@RequestParam (value = "osVersion") Optional<String> osVersion,
+//			@RequestParam(value = "groupDN", required=false) String groupDN,
+//			@RequestParam (value = "agentVersion") Optional<String> agentVersion,
+//			@RequestParam (value = "diskType") Optional<String> diskType,
+//			@RequestParam (value = "agentStatus") Optional<String> agentStatus){
+//		Page<AgentImpl> listOfAgents = agentService.findAllAgents(
+//				1, 
+//				agentService.count().intValue(), 
+//				sessionReportType,
+//				registrationStartDate, 
+//				registrationEndDate, 
+//				status, 
+//				dn,
+//				hostname, 
+//				macAddress, 
+//				ipAddress, 
+//				brand, 
+//				model, 
+//				processor, 
+//				osVersion, 
+//				agentVersion,
+//				diskType,
+//				agentStatus);
+//		LdapEntry entry;			
+//		HttpHeaders headers = new HttpHeaders();
+//		if(listOfAgents.getContent() == null || listOfAgents.getContent().size() == 0) {
+//			logger.error("No agents found to add to group!");
+//			return ResponseEntity.
+//					status(HttpStatus.NOT_FOUND).
+//					headers(headers)
+//					.build();
+//		}
+//		try {
+//			for (AgentImpl agentImpl : listOfAgents.getContent()) {
+//				ldapService.updateEntryAddAtribute(groupDN, "member", agentImpl.getDn());
+//			}
+//		} catch (LdapException e) {
+//			logger.error("Error occured while adding agents to existing group.");
+//			return ResponseEntity.
+//					status(HttpStatus.EXPECTATION_FAILED).
+//					headers(headers)
+//					.build();
+//		}
+//		entry = ldapService.getEntryDetail(groupDN);
+//		
+//		String selectedAgentList[] = new String[listOfAgents.getContent().size()];
+//		selectedAgentList = listOfAgents.getContent().stream().map(t -> t.getDn()).toArray(String[]::new);
+//		Map<String, Object> requestData = new HashMap<String, Object>();
+//		requestData.put("newGroupDN", entry.getDistinguishedName());
+//		requestData.put("agents", selectedAgentList);
+//		ObjectMapper dataMapper = new ObjectMapper();
+//		String jsonString = null;
+//		try {
+//			jsonString = dataMapper.writeValueAsString(requestData);
+//		} catch (JsonProcessingException e1) {
+//			logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+//		}
+//		String log = "Existing group has been updated " + entry.getDistinguishedName() + " and agents has been added";
+//		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+//		
+//		return ResponseEntity
+//				.status(HttpStatus.OK)
+//				.body(entry);
+//	}
 	
 	
 //	//add agents to existing group from agent info page
