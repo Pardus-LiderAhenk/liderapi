@@ -80,11 +80,13 @@ public class AgentInfoCriteriaBuilder {
 			predicatesCount.add(cbCount.like(fromCount.get("dn").as(String.class), "%" + dn.get() + "%"));
 		}
 
-		if (registrationStartDate.isPresent() && registrationStartDate.get() != null) {
+		//if (registrationStartDate.isPresent() && registrationStartDate.get() != null)
+		if (registrationStartDate != null) {
 			predicates.add(cb.greaterThanOrEqualTo(from.get("createDate"), registrationStartDate.get()));
 			predicatesCount.add(cbCount.greaterThanOrEqualTo(fromCount.get("createDate"), registrationStartDate.get()));
 		}
-		if (registrationEndDate.isPresent() && registrationEndDate.get() != null) {
+		//if (registrationEndDate.isPresent() && registrationEndDate.get() != null)
+		if (registrationEndDate != null) {
 			predicates.add(cb.lessThanOrEqualTo(from.get("createDate"), registrationEndDate.get()));
 			predicatesCount.add(cbCount.lessThanOrEqualTo(fromCount.get("createDate"), registrationEndDate.get()));
 		}

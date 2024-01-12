@@ -3,6 +3,8 @@ package tr.org.lider.dto;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 
 public class AgentDTO {
 	
@@ -10,7 +12,9 @@ public class AgentDTO {
     private int pageSize;
     private Optional<String> sessionReportType;
     private Optional<Boolean> getFilterData;
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private Optional<Date> registrationStartDate;
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private Optional<Date> registrationEndDate;
     private Optional<String> status;
     private Optional<String> dn;
