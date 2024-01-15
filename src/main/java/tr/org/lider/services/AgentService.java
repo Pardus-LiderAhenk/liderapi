@@ -82,8 +82,7 @@ public class AgentService {
 		}
 	}
 	
-	public Page<AgentImpl> findAllAgents(
-			AgentDTO agentDTO) {
+	public Page<AgentImpl> findAllAgents(AgentDTO agentDTO) {
 		
 		List<String> listOfOnlineUsers = new ArrayList<String>();
 		if(!agentDTO.getAgentStatus().equals("ALL")) {
@@ -125,24 +124,26 @@ public class AgentService {
 			}
 		}
 		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents(
-				agentDTO.getPageNumber(),
-				agentDTO.getPageSize(),
-				agentDTO.getSessionReportType(),
-				agentDTO.getRegistrationStartDate(),
-				agentDTO.getRegistrationEndDate(),
-				agentDTO.getStatus(),
-				agentDTO.getDn(),
-				agentDTO.getHostname(),
-				agentDTO.getMacAddress(),
-				agentDTO.getIpAddress(),
-				agentDTO.getBrand(),
-				agentDTO.getModel(),
-				agentDTO.getProcessor(),
-				agentDTO.getOsVersion(),
-				agentDTO.getAgentVersion(),
-				agentDTO.getDiskType(),
-				listOfOnlineUsers, 
-				agentDTO.getAgentStatus());
+//				agentDTO.getPageNumber(),
+//				agentDTO.getPageSize(),
+//				agentDTO.getSessionReportType(),
+//				agentDTO.getRegistrationStartDate(),
+//				agentDTO.getRegistrationEndDate(),
+//				agentDTO.getStatus(),
+//				agentDTO.getDn(),
+//				agentDTO.getHostname(),
+//				agentDTO.getMacAddress(),
+//				agentDTO.getIpAddress(),
+//				agentDTO.getBrand(),
+//				agentDTO.getModel(),
+//				agentDTO.getProcessor(),
+//				agentDTO.getOsVersion(),
+//				agentDTO.getAgentVersion(),
+//				agentDTO.getDiskType(),
+				agentDTO,
+				listOfOnlineUsers 
+//				agentDTO.getAgentStatus()
+				);
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {
 			if(messagingService.isRecipientOnline(listOfAgentsCB.getContent().get(i).getJid())) {
 				listOfAgentsCB.getContent().get(i).setIsOnline(true);

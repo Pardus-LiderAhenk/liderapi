@@ -7,7 +7,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import tr.org.lider.dto.OperationLogDTO;
 import tr.org.lider.entities.OperationLogImpl;
 
 public interface OperationLogRepository extends BaseJpaRepository<OperationLogImpl, Long> {
@@ -54,5 +56,36 @@ public interface OperationLogRepository extends BaseJpaRepository<OperationLogIm
 	@Query(value = "SELECT o FROM OperationLogImpl o WHERE o.userId LIKE %?1%")
 	Page<OperationLogImpl> findOrderByCreateDateDesc10ByUserId(String userId, Pageable pageable);
 	
+	
+	
+	@Query(value = "SELECT o " +
+			"FROM OperationLogImpl o " +
+			"WHERE (:operationType IS NULL OR  o.operationType = :operationType) " +
+	        "AND (COALESCE(:searchText, '') = '' OR o.userId LIKE %:searchText%) " +
+			"AND (:startDate IS NULL OR o.createDate >= :startDate ) " +
+	        "AND (:endDate IS NULL OR o.createDate <= :endDate ) " +
+	        "ORDER BY o.createDate ASC")
+	Page<OperationLogDTO> findByUserIdAndOperationLogs(
+			@Param("operationType") int operationType, 
+			@Param("searchText") String searchText,
+			@Param("startDate") Optional<Date> startDate,
+			@Param("endDate") Optional<Date> endDate, 
+			Pageable pageable);
+	
+	
+//	@Query(value="SELECT o " +
+//			"FROM OperationLogImpl o " +
+//	        "WHERE (:operationType IS NULL OR  o.operationType = :operationType) " +
+//	        "AND (COALESCE(:searchText, '') = '' OR o.searchText LIKE %:searchText%) " +
+//	        "AND (:startDate IS NULL OR o.createDate >= :startDate ) " +
+//	        "AND (:endDate IS NULL OR o.createDate <= :endDate ) " +
+//	        "ORDER BY o.createDate ASC")
+//	Page<OperationLogDTO> findAllOperation(			
+//			@Param("operationType") int operationType, 
+//			@Param("searchText") String searchText,
+//			@Param("startDate") Date startDate,
+//			@Param("endDate") Date endDate, 
+//			Pageable pageable);
+		
 }
 
