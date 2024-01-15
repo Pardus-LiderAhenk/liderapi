@@ -476,7 +476,7 @@ public class ExcelExportService {
 		csCenter.setAlignment(HorizontalAlignment.CENTER);
 		csCenter.setFont(ftArial);
 
-		XSSFSheet sheet = wb.createSheet("Detaylı İstemci Raporu");
+		XSSFSheet sheet = wb.createSheet("Sistem Güncesi Raporu");
 		
 		//Add header
 		Row row = null; 

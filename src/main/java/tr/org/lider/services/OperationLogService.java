@@ -2,10 +2,7 @@ package tr.org.lider.services;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +13,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import tr.org.lider.dto.OperationLogDTO;
 import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.OperationType;
+import tr.org.lider.repositories.OperationLogCriteriaBuilder;
 import tr.org.lider.repositories.OperationLogRepository;
+
 
 /**
  * 
@@ -37,6 +37,9 @@ public class OperationLogService {
 
 	@Autowired 
 	private HttpServletRequest httpRequest;
+	
+	@Autowired
+	private OperationLogCriteriaBuilder operationLogCriteriaBuilder;
 	
 	public Long count() {
 		return operationLogRepository.count();
@@ -101,83 +104,27 @@ public class OperationLogService {
 		return operationLogRepository.findAll();
 	}
 
-	public Page<OperationLogImpl> getLoginLogsByLiderConsole(String userId, int pageNumber, int pageSize, String type) {
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+	public Page<OperationLogImpl> getLoginLogsByLiderConsole(OperationLogDTO operationLogDTO) {
+		PageRequest pageable = PageRequest.of(operationLogDTO.getPageNumber() - 1, operationLogDTO.getPageSize(), Sort.by("createDate").descending());
+		String userId = AuthenticationService.getDn();
 		Page<OperationLogImpl> pagedResult = null;
-		if (type.equals("all")) {
-			pagedResult = operationLogRepository.findByUserIdAndOperationTypeLoginOrOperationTypeLogout(userId, OperationType.LOGIN.getId(), OperationType.LOGOUT.getId(), pageable);
+		int sessionTypeId = 0;
+		if (operationLogDTO.getOperationType().equals("login")) {
+			sessionTypeId = OperationType.LOGIN.getId();
+		} else if (operationLogDTO.getOperationType().equals("logout")) {
+			sessionTypeId = OperationType.LOGOUT.getId();
 		}
-		if (type.equals("login") || type.equals("logout")) {
-			int typeId = OperationType.LOGIN.getId();
-			if (type.equals("logout")) {
-				typeId = OperationType.LOGOUT.getId();
-			}
-			pagedResult = operationLogRepository.findByUserIdAndOperationType(userId, typeId, pageable);
-		}
+		pagedResult = operationLogRepository.findByUserIdAndOperationType(userId, sessionTypeId, OperationType.LOGIN.getId(), OperationType.LOGOUT.getId(), pageable);
 		return pagedResult;
 	}
-
 	
 	public OperationLogImpl getSelectedLogById(Long id) {
 		return operationLogRepository.findOne(id);
 	}
 	
-	public Page<OperationLogImpl> getOperationLogsByFilter(int pageNumber, int pageSize, String type, String field, String searchText, Optional<Date> startDate, Optional<Date> endDate) {
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
-		Page<OperationLogImpl> result = null;
-
-		if (type.equals("ALL")) {
-			if (searchText != null && !searchText.isEmpty()) {
-				if (field.equals("userId")) {
-					if (startDate.isPresent() && endDate.isPresent()) {
-						result = operationLogRepository.findByUserIdAndCreateDateGreaterThanAndCreateDateLessThan(searchText, startDate, endDate, pageable);
-					} else {
-						result = operationLogRepository.findByUserId(searchText, pageable);
-					}
-				}
-				if (field.equals("requestIp")) {
-					if (startDate.isPresent() && endDate.isPresent()) {
-						result = operationLogRepository.findByRequestIpAndCreateDateGreaterThanAndCreateDateLessThan(searchText, startDate, endDate, pageable);
-					} else {
-						result = operationLogRepository.findByRequestIp(searchText, pageable);
-					}
-				}
-			}else {
-				if (startDate.isPresent() && endDate.isPresent()) {
-					result = operationLogRepository.findByCreateDateGreaterThanAndCreateDateLessThan(startDate, endDate, pageable);
-				} else {
-					result = operationLogRepository.findAll(pageable);
-				}
-			}
-		} else {
-			OperationType typeOfValue = OperationType.getType(Integer.parseInt(type));
-			int typeId = typeOfValue.getId();
-
-			if (searchText != null && !searchText.isEmpty()) {
-				if (field.equals("userId")) {
-					if (startDate.isPresent() && endDate.isPresent()) {
-						result = operationLogRepository.findByUserIdAndOperationTypeAndCreateDateGreaterThanAndCreateDateLessThan(searchText, typeId, startDate, endDate, pageable);
-					} else {
-						result = operationLogRepository.findByUserIdAndOperationType(searchText, typeId, pageable);
-					}
-
-				}
-				if (field.equals("requestIp")) {
-					if (startDate.isPresent() && endDate.isPresent()) {
-						result = operationLogRepository.findByrequestIpAndOperationTypeAndCreateDateGreaterThanAndCreateDateLessThan(searchText, typeId, startDate, endDate, pageable);
-					} else {
-						result = operationLogRepository.findByrequestIpAndOperationType(searchText, typeId, pageable);
-					}
-				}
-			} else {
-				if (startDate.isPresent() && endDate.isPresent()) {
-					result = operationLogRepository.findByOperationTypeAndCreateDateGreaterThanAndCreateDateLessThan(typeId, startDate, endDate, pageable);
-				} else {
-					result = operationLogRepository.findByOperationType(typeId, pageable);
-				}
-			}
-		}
-		return result;
+	public Page<OperationLogImpl> getOperationLogsByFilter(OperationLogDTO operationLogDTO) {
+		Page<OperationLogImpl> operationLogImpl = operationLogCriteriaBuilder.filterLogs(operationLogDTO);
+		return operationLogImpl;
 	}
 	
 	public Page<OperationLogImpl> getLastActivityByUserIdDescLimitTen(String userId) {

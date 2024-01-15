@@ -2,12 +2,10 @@ package tr.org.lider.controllers;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,9 +23,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.dto.OperationLogDTO;
 import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.OperationType;
-import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.ExcelExportService;
 import tr.org.lider.services.OperationLogService;
 
@@ -52,7 +50,6 @@ public class OperationLogController {
 	@Autowired
 	private ExcelExportService excelService;
 	
-//	lider interface usage history by login console user
 		
 	@Operation(summary = "Lider login history", description = "", tags = { "operation-log" })
 	@ApiResponses(value = { 
@@ -61,13 +58,10 @@ public class OperationLogController {
 			  @ApiResponse(responseCode = "417",description = "Could not retrieve login history. Unexpected error occured.",
 			  		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/login")
-	public ResponseEntity<?> loginConsoleUserList(
-			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "pageNumber") int pageNumber,
-			@RequestParam (value = "operationType") String operationType) {
+	public ResponseEntity<?> loginConsoleUserList(OperationLogDTO operationLogDTO) {
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(logService.getLoginLogsByLiderConsole(AuthenticationService.getDn(), pageNumber, pageSize, operationType));
+				.body(logService.getLoginLogsByLiderConsole(operationLogDTO));
 	}
 	
 	@Operation(summary = "Get operation log type", description = "", tags = { "operation-log" })
@@ -83,7 +77,6 @@ public class OperationLogController {
 				.body(OperationType.values());
 	}
 	
-//	lider interface usage history by login console user
 	@Secured({"ROLE_ADMIN", "ROLE_OPERATION_LOG"})
 	@Operation(summary = "Lider usage history.", description = "", tags = { "operation-log" })
 	@ApiResponses(value = { 
@@ -92,19 +85,12 @@ public class OperationLogController {
 		  @ApiResponse(responseCode = "417",description = "Coul not retrieve usage history. Unexpected error occured.",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/logs")
-	public ResponseEntity<?> operationLogs(@RequestParam (value = "pageNumber") int pageNumber,
-			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "operationType") String operationType,
-			@RequestParam (value = "field", required = false) String field,
-			@RequestParam (value = "searchText", required = false) String searchText,
-			@RequestParam (value="startDate", required = false) @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> startDate,
-			@RequestParam (value="endDate", required = false) @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> endDate) {
+	public ResponseEntity<?> operationLogs(OperationLogDTO operationLogDTO) {
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(logService.getOperationLogsByFilter(pageNumber, pageSize, operationType, field, searchText, startDate, endDate));
+				.body(logService.getOperationLogsByFilter(operationLogDTO));
 	}
 	
-//	lider interface usage history by login console user
 	@Secured({"ROLE_ADMIN", "ROLE_OPERATION_LOG"})
 	@Operation(summary = "Get selected log", description = "", tags = { "operation-log" })
 	@ApiResponses(value = { 
@@ -129,19 +115,14 @@ public class OperationLogController {
 		  @ApiResponse(responseCode = "400",description = "Could not create operation log report.Bad request.",
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> export(
-			@RequestParam (value = "operationType") String operationType,
-			@RequestParam (value = "field", required = false) String field,
-			@RequestParam (value = "searchText", required = false) String searchText,
-			@RequestParam (value="startDate", required = false) @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> startDate,
-			@RequestParam (value="endDate", required = false) @DateTimeFormat(pattern="dd/MM/yyyy HH:mm:ss") Optional<Date> endDate) {
-			
-		
-		Page<OperationLogImpl> logs = logService.getOperationLogsByFilter(1, logService.count().intValue(), operationType, field, searchText, startDate, endDate);
+	public ResponseEntity<?> export(OperationLogDTO operationLogDTO) {
+		operationLogDTO.setPageNumber(1);
+		operationLogDTO.setPageSize(logService.count().intValue());
+		Page<OperationLogImpl> logs = logService.getOperationLogsByFilter(operationLogDTO);
 		
 		try {
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("fileName", "Istemci Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
+			headers.add("fileName", "Sistem Guncesi Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
 			headers.setContentType(MediaType.parseMediaType("application/csv"));
 			headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 			byte[] excelContent = excelService.generateOperationLogReport(logs.getContent());

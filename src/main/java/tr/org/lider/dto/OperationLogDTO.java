@@ -11,6 +11,8 @@ public class OperationLogDTO {
 	private  String operationType;
 	private String field;
 	private String searchText;
+    private String userId;
+    private String requestIp;
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
 	private Optional<Date> startDate;
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
@@ -57,6 +59,18 @@ public class OperationLogDTO {
 	}
 	public void setEndDate(Optional<Date> endDate) {
 		this.endDate = endDate;
+	}
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public String getRequestIp() {
+		return requestIp;
+	}
+	public void setRequestIp(String requestIp) {
+		this.requestIp = requestIp;
 	}
 
 }
