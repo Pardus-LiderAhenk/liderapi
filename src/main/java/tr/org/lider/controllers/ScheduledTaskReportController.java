@@ -3,12 +3,10 @@ package tr.org.lider.controllers;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,7 +15,6 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.dto.ScheduledTaskDTO;
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandExecutionResultImpl;
 import tr.org.lider.entities.CommandImpl;
@@ -60,13 +58,8 @@ public class ScheduledTaskReportController {
 			@ApiResponse(responseCode = "417", description = "Could not retrieve scheduled task list. Unexpected error occured.", 
 			content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> findAllCommandsRest(@RequestParam(value = "pageNumber") int pageNumber,
-			@RequestParam(value = "pageSize") int pageSize,
-			@RequestParam(value = "taskCommand") Optional<String> taskCommand,
-			@RequestParam(value = "startDate") @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Optional<Date> startDate,
-			@RequestParam(value = "endDate") @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Optional<Date> endDate) {
-		Page<CommandImpl> commands = scheduledTaskService.findAllCommandsFiltered(pageNumber, pageSize, taskCommand,
-				startDate, endDate);
+	public ResponseEntity<?> findAllCommandsRest(ScheduledTaskDTO scheduledTaskDTO) {
+		Page<CommandImpl> commands = scheduledTaskService.findAllCommandsFiltered(scheduledTaskDTO);
 		for (CommandImpl command : commands.getContent()) {
 			for (CommandExecutionImpl commandExecution : command.getCommandExecutions()) {
 				for (CommandExecutionResultImpl commandExecutionResult : commandExecution
@@ -98,12 +91,11 @@ public class ScheduledTaskReportController {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Exports filtered scheduled task list to excel."),
 			@ApiResponse(responseCode = "400", description = "Could not create scheduled task report.Bad Request.", content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> export(@RequestParam(value = "taskCommand") Optional<String> taskCommand,
-			@RequestParam(value = "startDate") @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Optional<Date> startDate,
-			@RequestParam(value = "endDate") @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss") Optional<Date> endDate) {
-
-		Page<CommandImpl> commands = scheduledTaskService.findAllCommandsFiltered(1, commandService.count().intValue(),
-				taskCommand, startDate, endDate);
+	public ResponseEntity<?> export(ScheduledTaskDTO scheduledTaskDTO) {
+		scheduledTaskDTO.setPageNumber(1);
+		scheduledTaskDTO.setPageSize(commandService.count().intValue());
+		
+		Page<CommandImpl> commands = scheduledTaskService.findAllCommandsFiltered(scheduledTaskDTO);
 		for (CommandImpl command : commands.getContent()) {
 			for (CommandExecutionImpl commandExecution : command.getCommandExecutions()) {
 				for (CommandExecutionResultImpl commandExecutionResult : commandExecution

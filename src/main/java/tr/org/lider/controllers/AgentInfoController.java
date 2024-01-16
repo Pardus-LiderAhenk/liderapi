@@ -67,9 +67,7 @@ public class AgentInfoController {
 			resultMap.put("agentVersions", agentService.getAgentVersions());
 			resultMap.put("diskType", agentService.getDiskType());
 		}
-		Page<AgentImpl> listOfAgents = agentService.findAllAgents( agentDTO
-				
-				);
+		Page<AgentImpl> listOfAgents = agentService.findAllAgents( agentDTO );
 				
 		resultMap.put("agents", listOfAgents);
 		return ResponseEntity
