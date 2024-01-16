@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
-import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
@@ -123,27 +122,8 @@ public class AgentService {
 				}
 			}
 		}
-		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents(
-//				agentDTO.getPageNumber(),
-//				agentDTO.getPageSize(),
-//				agentDTO.getSessionReportType(),
-//				agentDTO.getRegistrationStartDate(),
-//				agentDTO.getRegistrationEndDate(),
-//				agentDTO.getStatus(),
-//				agentDTO.getDn(),
-//				agentDTO.getHostname(),
-//				agentDTO.getMacAddress(),
-//				agentDTO.getIpAddress(),
-//				agentDTO.getBrand(),
-//				agentDTO.getModel(),
-//				agentDTO.getProcessor(),
-//				agentDTO.getOsVersion(),
-//				agentDTO.getAgentVersion(),
-//				agentDTO.getDiskType(),
-				agentDTO,
-				listOfOnlineUsers 
-//				agentDTO.getAgentStatus()
-				);
+		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents(agentDTO,listOfOnlineUsers );
+		
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {
 			if(messagingService.isRecipientOnline(listOfAgentsCB.getContent().get(i).getJid())) {
 				listOfAgentsCB.getContent().get(i).setIsOnline(true);
