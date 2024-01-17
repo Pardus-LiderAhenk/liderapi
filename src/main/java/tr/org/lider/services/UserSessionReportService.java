@@ -1,13 +1,12 @@
 package tr.org.lider.services;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import tr.org.lider.dto.UserSessionDTO;
 import tr.org.lider.entities.SessionEvent;
 import tr.org.lider.repositories.UserSessionRepository;
 import tr.org.lider.utils.IUserSessionReport;
@@ -22,17 +21,23 @@ public class UserSessionReportService {
 		return userSessionRepository.count();
 	}
 	
-	public Page<IUserSessionReport> getUserSessionByFilter(int  pageNumber, int pageSize, String sessionType, String username,String hostname,Date startDate,Date endDate) {
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+	public Page<IUserSessionReport> getUserSessionByFilter(UserSessionDTO userSessionDTO) {
+		PageRequest pageable = PageRequest.of(userSessionDTO.getPageNumber() - 1, userSessionDTO.getPageSize(), Sort.by("createDate").descending());
 		Page<IUserSessionReport> results  = null;
-		
 		int sessionTypeId = 0;
-		if (sessionType.equals("LOGIN")) {
+		if (userSessionDTO.getSessionType().equals("LOGIN")) {
 			sessionTypeId = SessionEvent.LOGIN.getId();
-		} else if (sessionType.equals("LOGOUT")) {
+		} else if (userSessionDTO.getSessionType().equals("LOGOUT")) {
 			sessionTypeId = SessionEvent.LOGOUT.getId();
 		}
-		results = userSessionRepository.findUserSession(sessionTypeId,username,hostname,startDate, endDate, pageable);
+		results = userSessionRepository.findUserSession(
+				sessionTypeId,
+				userSessionDTO.getUsername(),
+				userSessionDTO.getHostname(),
+				userSessionDTO.getStartDate(), 
+				userSessionDTO.getEndDate(), 
+				pageable
+			);
 		return results;
 	}
 

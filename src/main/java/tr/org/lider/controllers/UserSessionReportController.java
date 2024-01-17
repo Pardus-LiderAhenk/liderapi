@@ -51,16 +51,8 @@ public class UserSessionReportController {
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/list")
 	public ResponseEntity<?> getUserSessions(UserSessionDTO userSessionDTO) {
+		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(userSessionDTO);
 		
-		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(
-				userSessionDTO.getPageNumber(), 
-				userSessionDTO.getPageSize(),
-				userSessionDTO.getSessionType(), 
-				userSessionDTO.getUsername(), 
-				userSessionDTO.getHostname(), 
-				userSessionDTO.getStartDate(),
-				userSessionDTO.getEndDate()
-			);
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(users);
@@ -74,15 +66,9 @@ public class UserSessionReportController {
 	   		 content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> export(UserSessionDTO userSessionDTO) {
-		
-		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(1, 
-				userSessionReportService.count().intValue(),
-				userSessionDTO.getSessionType(), 
-				userSessionDTO.getUsername(), 
-				userSessionDTO.getHostname(), 
-				userSessionDTO.getStartDate(),
-				userSessionDTO.getEndDate()
-			);		
+		userSessionDTO.setPageNumber(1);
+		userSessionDTO.setPageSize(userSessionReportService.count().intValue());
+		Page<IUserSessionReport> users = userSessionReportService.getUserSessionByFilter(userSessionDTO);		
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("fileName", "Oturum Raporu_" + new SimpleDateFormat("dd_MM_yyyy_HH:mm:ss.SSS").format(new Date()) + ".xlsx");
@@ -94,6 +80,7 @@ public class UserSessionReportController {
         	logger.error("Error occured while creating excel report Error: ." + e.getMessage());
         	HttpHeaders headers = new HttpHeaders();
         	headers.add("message", "Error occured while creating excel report. Error: " + e.getMessage());
+        	
     		return ResponseEntity
     				.status(HttpStatus.EXPECTATION_FAILED)
     				.headers(headers)
