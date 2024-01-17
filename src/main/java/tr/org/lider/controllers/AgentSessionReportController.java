@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.dto.AgentDTO;
+import tr.org.lider.dto.AgentSessionDTO;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.services.AgentSessionReportService;
 import tr.org.lider.services.ExcelExportService;
@@ -82,13 +83,9 @@ public class AgentSessionReportController {
 			  @ApiResponse(responseCode = "404", description = "Agent id not found.Not found.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/detail", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?>  getAgentSessionsDetail(
-			@RequestParam (value = "pageNumber") int pageNumber,
-			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "agentID") Long agentID,
-			@RequestParam (value = "sessionType") String sessionType) {
-		logger.debug("Agent id:  {} ", agentID);
-		Page<IUserSessionReport> agentSessionList = agentSessionReportService.getSessionList(pageNumber,pageSize, agentID, sessionType);
+	public ResponseEntity<?>  getAgentSessionsDetail(AgentSessionDTO agentSessionDTO) {
+		logger.debug("Agent id:  {} ", agentSessionDTO.getAgentID());
+		Page<IUserSessionReport> agentSessionList = agentSessionReportService.getSessionList(agentSessionDTO);
 		
 		return ResponseEntity
 				.status(HttpStatus.OK)
@@ -102,13 +99,11 @@ public class AgentSessionReportController {
 			  @ApiResponse(responseCode = "400", description = "Could not create client report.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/export", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> export(
-			@RequestParam (value = "pageNumber") int pageNumber,
-			@RequestParam (value = "pageSize") int pageSize,
-			@RequestParam (value = "agentID") Long agentID,
-			@RequestParam (value = "sessionType") String sessionType){
+	public ResponseEntity<?> export(AgentSessionDTO agentSessionDTO){
+		agentSessionDTO.setPageNumber(1);
+		agentSessionDTO.setPageSize(userSessionReportService.count().intValue());
 		
-		Page<IUserSessionReport> agentSessionList = agentSessionReportService.getSessionList(1, userSessionReportService.count().intValue(), agentID, sessionType);
+		Page<IUserSessionReport> agentSessionList = agentSessionReportService.getSessionList(agentSessionDTO);
 		try {
 			if (agentSessionList != null) {
 				HttpHeaders headers = new HttpHeaders();
@@ -120,7 +115,7 @@ public class AgentSessionReportController {
 			}
 			else {
 				HttpHeaders headers = new HttpHeaders();
-	            headers.add("message", "Invalid session type: " + sessionType);
+	            headers.add("message", "Invalid session type: " + agentSessionDTO.getSessionType());
 	            return ResponseEntity
 	                .status(HttpStatus.BAD_REQUEST)
 	                .headers(headers)

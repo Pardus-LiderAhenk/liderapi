@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.dto.AgentDTO;
+import tr.org.lider.dto.AgentSessionDTO;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.SessionEvent;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -187,14 +188,14 @@ public class AgentSessionReportService {
 		return agentRepository.getPropertyValueByName("diskType");
 	}
 	
-	public Page<IUserSessionReport> getSessionList(int pageNumber, int pageSize,Long agentID, String sessionType){
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+	public Page<IUserSessionReport> getSessionList(AgentSessionDTO agentSessionDTO){
+		PageRequest pageable = PageRequest.of(agentSessionDTO.getPageNumber() - 1, agentSessionDTO.getPageSize(), Sort.by("createDate").descending());
 		int sessionTypeId = 0;
-		if (sessionType.equals("LOGIN")) {
+		if (agentSessionDTO.getSessionType().equals("LOGIN")) {
 			sessionTypeId = SessionEvent.LOGIN.getId();
-		} else if (sessionType.equals("LOGOUT")) {
+		} else if (agentSessionDTO.getSessionType().equals("LOGOUT")) {
 			sessionTypeId = SessionEvent.LOGOUT.getId();
 		}
-		return agentRepository.findUserSessionAllByAgent(agentID,sessionTypeId, pageable);
+		return agentRepository.findUserSessionAllByAgent(agentSessionDTO.getAgentID(), sessionTypeId, pageable);
 	}
 }
