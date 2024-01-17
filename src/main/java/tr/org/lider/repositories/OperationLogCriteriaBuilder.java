@@ -48,12 +48,12 @@ public class OperationLogCriteriaBuilder {
 		List<Predicate> predicates = new ArrayList<>();
 		//for filtered result count
 		List<Predicate> predicatesCount = new ArrayList<>();
-	
 
 		if (operationLogDTO.getStartDate() != null) {
 			predicates.add(criteriaBuilder.greaterThanOrEqualTo(from.get("createDate"), operationLogDTO.getStartDate().get()));
 			predicatesCount.add(criteriaBuilderCount.greaterThanOrEqualTo(fromCount.get("createDate"), operationLogDTO.getStartDate().get()));
 		}
+		
 		if (operationLogDTO.getEndDate() != null) {
 			predicates.add(criteriaBuilder.lessThanOrEqualTo(from.get("createDate"), operationLogDTO.getEndDate().get()));
 			predicatesCount.add(criteriaBuilderCount.lessThanOrEqualTo(fromCount.get("createDate"), operationLogDTO.getEndDate().get()));

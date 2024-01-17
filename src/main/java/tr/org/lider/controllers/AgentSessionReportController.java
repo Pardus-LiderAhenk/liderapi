@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -102,7 +101,6 @@ public class AgentSessionReportController {
 	public ResponseEntity<?> export(AgentSessionDTO agentSessionDTO){
 		agentSessionDTO.setPageNumber(1);
 		agentSessionDTO.setPageSize(userSessionReportService.count().intValue());
-		
 		Page<IUserSessionReport> agentSessionList = agentSessionReportService.getSessionList(agentSessionDTO);
 		try {
 			if (agentSessionList != null) {

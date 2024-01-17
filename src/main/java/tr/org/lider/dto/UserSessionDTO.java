@@ -2,8 +2,6 @@ package tr.org.lider.dto;
 
 import java.util.Date;
 
-import tr.org.lider.entities.SessionEvent;
-
 public class UserSessionDTO {
 	private String username;
 	private Date createDate;

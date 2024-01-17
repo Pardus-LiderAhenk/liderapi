@@ -11,7 +11,6 @@ import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.utils.IUserSessionReport;
 
 public interface UserSessionRepository extends BaseJpaRepository<UserSessionImpl, Long> {
-	
 
 
 	@Query(value="SELECT s.sessionEvent as sessionEvent, s.username as username, s.createDate as createDate, a.hostname as hostname, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses " +

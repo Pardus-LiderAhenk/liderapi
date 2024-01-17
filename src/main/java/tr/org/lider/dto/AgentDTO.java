@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.stereotype.Component;
 
 public class AgentDTO {
 	

@@ -1,10 +1,7 @@
 package tr.org.lider.repositories;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -54,11 +51,11 @@ public class ScheduledTaskCriteriaBuilder {
 		//for filtered result count
 		List<Predicate> predicatesCount = new ArrayList<>();
 	
-
 		if (scheduledTaskDTO.getStartDate() != null) {
 			predicates.add(criteriaBuilder.greaterThanOrEqualTo(from.get("createDate"), scheduledTaskDTO.getStartDate().get()));
 			predicatesCount.add(criteriaBuilderCount.greaterThanOrEqualTo(fromCount.get("createDate"), scheduledTaskDTO.getStartDate().get()));
 		}
+		
 		if (scheduledTaskDTO.getEndDate() != null) {
 			predicates.add(criteriaBuilder.lessThanOrEqualTo(from.get("createDate"), scheduledTaskDTO.getEndDate().get()));
 			predicatesCount.add(criteriaBuilderCount.lessThanOrEqualTo(fromCount.get("createDate"), scheduledTaskDTO.getEndDate().get()));
