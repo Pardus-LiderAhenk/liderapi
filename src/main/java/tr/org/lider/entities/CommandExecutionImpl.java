@@ -94,12 +94,15 @@ public class CommandExecutionImpl implements Serializable {
 	@Column(name = "ONLINE")
 	private boolean online; // True if the agent is online during the task
 							// execution, false otherwise
+	
+	@Column(name = "COMMAND_RECEIVED")
+	private boolean  commandReceived;
 
 	public CommandExecutionImpl() {
 	}
 
 	public CommandExecutionImpl(Long id, CommandImpl command, String uid, DNType dnType, String dn, Date createDate,
-			List<CommandExecutionResultImpl> commandExecutionResults, boolean online) {
+			List<CommandExecutionResultImpl> commandExecutionResults, boolean online, boolean commandReceived) {
 		this.id = id;
 		this.command = command;
 		this.uid = uid;
@@ -108,6 +111,7 @@ public class CommandExecutionImpl implements Serializable {
 		this.createDate = createDate;
 		this.commandExecutionResults = commandExecutionResults;
 		this.online = online;
+		this.commandReceived = commandReceived;
 	}
 
 //	public CommandExecutionImpl(ICommandExecution commandExecution) {
@@ -219,6 +223,14 @@ public class CommandExecutionImpl implements Serializable {
 	public void setOnline(boolean online) {
 		this.online = online;
 	}
+	
+	public boolean isCommandReceived() {
+		return commandReceived;
+	}
+
+	public void setCommandReceived(boolean commandReceived) {
+		this.commandReceived = commandReceived;
+	}
 
 
 	public String toJson() {
@@ -234,7 +246,7 @@ public class CommandExecutionImpl implements Serializable {
 
 	public String toString() {
 		return "CommandExecutionImpl [id=" + id + ", uid=" + uid + ", dnType=" + dnType + ", dn=" + dn + ", createDate="
-				+ createDate + ", commandExecutionResults=" + commandExecutionResults + ", online=" + online + "]";
+				+ createDate + ", commandExecutionResults=" + commandExecutionResults + ", online=" + online + ", commandReceived=" + commandReceived +"]";
 	}
 
 }

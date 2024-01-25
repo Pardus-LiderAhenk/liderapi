@@ -92,11 +92,14 @@ public class TaskImpl implements Serializable {
 	@Column(name = "is_mail_send")
 	private boolean isMailSend = false;
 	
+	@Column(name = "task_parts")
+	private boolean taskParts = false;
+
 	public TaskImpl() {
 	}
 
 	public TaskImpl(Long id, PluginImpl plugin, String commandClsId, Map<String, Object> parameterMap, boolean deleted,
-			String cronExpression, Date createDate, Date modifyDate) {
+			String cronExpression, Date createDate, Date modifyDate, boolean taskParts) {
 		this.id = id;
 		this.plugin = plugin;
 		this.commandClsId = commandClsId;
@@ -105,6 +108,7 @@ public class TaskImpl implements Serializable {
 		this.cronExpression = cronExpression;
 		this.createDate = createDate;
 		this.modifyDate = modifyDate;
+		this.taskParts = taskParts;
 	}
 //
 //	public TaskImpl(ITask task) {
@@ -145,6 +149,14 @@ public class TaskImpl implements Serializable {
 
 	public void setCommandClsId(String commandClsId) {
 		this.commandClsId = commandClsId;
+	}
+	
+	public boolean isTaskParts() {
+		return taskParts;
+	}
+
+	public void setTaskParts(boolean taskParts) {
+		this.taskParts = taskParts;
 	}
 
 	
