@@ -140,7 +140,7 @@ public class TaskService {
 			for (int i = 0; i < targetEntries.size(); i += targetEntriesSize) {
                 int endIndex = Math.min(i + targetEntriesSize, targetEntries.size());
 
-                // Belirli bir aralıktaki nesneleri al
+                // Belirlenen aralıkta nesneleri al
                 List<LdapEntry> subEntriesList = targetEntries.subList(i, endIndex);
                 
     			for (final LdapEntry entry : subEntriesList) {
@@ -199,22 +199,13 @@ public class TaskService {
     				commandService.addCommandExecution(execution);
     			}
 
-               
-                // İşlenen nesneleri listeden kaldırabilirsiniz (istediğiniz duruma bağlı olarak)
-                // targetEntries.removeAll(batch);
-
-                // Burada istediğiniz başka bir işlemi gerçekleştirebilirsiniz
-
-                // Örneğin, 100 nesne işlendikten sonra bir süre bekleme
                 try {
-                    Thread.sleep(1000); // 1000 milisaniye (1 saniye) bekleyin
+                    Thread.sleep(1000); //1 sn bekle
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
 			
-
-
 		}
 		return responseFactoryService.createResponse(RestResponseStatus.OK,"Task Basarı ile Gonderildi.");
 	}

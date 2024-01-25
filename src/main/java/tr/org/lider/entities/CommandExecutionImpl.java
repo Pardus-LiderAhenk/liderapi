@@ -96,8 +96,8 @@ public class CommandExecutionImpl implements Serializable {
 							// execution, false otherwise
 	
 	@Column(name = "COMMAND_RECEIVED")
-	private boolean  commandReceived;
-
+	private boolean commandReceived = false;
+	
 	public CommandExecutionImpl() {
 	}
 
