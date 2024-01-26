@@ -83,7 +83,7 @@ public class ProfileImpl implements Serializable {
 	@Column(name = "DELETED")
 	private boolean deleted = false;
 
-	@Lob
+//	@Lob
 	@Column(name = "PROFILE_DATA")
 	private byte[] profileDataBlob;
 

@@ -38,7 +38,7 @@ public class ConfigImpl implements Serializable{
 	@Column(name = "NAME", nullable = false, unique = true)
 	private String name;
 
-	@Lob
+//	@Lob
 	@Column(name = "VALUE")
 	private String value;
 

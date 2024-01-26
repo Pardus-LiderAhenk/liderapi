@@ -38,6 +38,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Type;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -65,8 +67,9 @@ public class TaskImpl implements Serializable {
 	@Column(name = "command_cls_id")
 	private String commandClsId;
 
-	@Lob
+//	@Lob
 	@Column(name = "parameter_map")
+	@Type(type = "org.hibernate.type.BinaryType")
 	private byte[] parameterMapBlob;
 
 	@Transient
@@ -90,7 +93,7 @@ public class TaskImpl implements Serializable {
 
 	
 	@Column(name = "is_mail_send")
-	private boolean isMailSend = false;
+	private Boolean isMailSend = false;
 	
 	public TaskImpl() {
 	}
@@ -262,11 +265,11 @@ public class TaskImpl implements Serializable {
 				+ parameterMap + "]";
 	}
 
-	public boolean isMailSend() {
+	public Boolean isMailSend() {
 		return isMailSend;
 	}
 
-	public void setMailSend(boolean isMailSend) {
+	public void setMailSend(Boolean isMailSend) {
 		this.isMailSend = isMailSend;
 	}
 

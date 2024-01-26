@@ -37,12 +37,12 @@ public class ConkyTemplate implements Serializable {
 	@Column(name = "LABEL", nullable = false, length = 255)
 	private String label;
 	
-	@Lob
-	@Column(name = "CONTENTS", nullable = false)
+//	@Lob
+	@Column(name = "CONTENTS", nullable = false, length = 65555)
 	private String contents;
 	
-	@Lob
-	@Column(name = "SETTINGS", nullable = false)
+//	@Lob
+	@Column(name = "SETTINGS", nullable = false, length = 65555)
 	private String settings;
 
 	@Temporal(TemporalType.TIMESTAMP)

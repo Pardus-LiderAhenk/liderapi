@@ -49,7 +49,7 @@ public class OperationLogImpl implements Serializable {
 	@Column(name = "LOG_MESSAGE", nullable = false)
 	private String logMessage;
 
-	@Lob
+//	@Lob
 	@Column(name = "REQUEST_DATA")
 	private byte[] requestData;
 

@@ -68,7 +68,7 @@ public class CommandExecutionResultImpl {
 	@Column(name = "RESPONSE_CODE", nullable = false, length = 3)
 	private Integer responseCode;
 
-	@Lob
+//	@Lob
 	@Column(name = "RESPONSE_MESSAGE")
 	private String responseMessage;
 
@@ -76,7 +76,7 @@ public class CommandExecutionResultImpl {
 	 * Response data can be anything (JSON data, alphanumeric value, file such
 	 * as JPEG, doc etc.)
 	 */
-	@Lob
+//	@Lob
 	@Column(name = "RESPONSE_DATA", length = 4 * 1024 * 1024 * 1024)
 	private byte[] responseData;
 

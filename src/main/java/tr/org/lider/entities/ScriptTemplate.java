@@ -40,7 +40,7 @@ public class ScriptTemplate implements Serializable {
 	@Column(name = "LABEL", nullable = false, length = 255)
 	private String label;
 
-	@Lob
+//	@Lob
 	@Column(name = "CONTENTS", nullable = false)
 	private String contents;
 

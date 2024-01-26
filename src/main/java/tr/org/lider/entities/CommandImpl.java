@@ -77,15 +77,15 @@ public class CommandImpl implements Serializable{
 	@JoinColumn(name = "TASK_ID", referencedColumnName = "TASK_ID", insertable = true, updatable = false, nullable = true, unique = false)
 	private TaskImpl task;
 
-	@Lob
-	@Column(name = "DN_LIST")
+//	@Lob
+	@Column(name = "DN_LIST", length = 255)
 	private String dnListJsonString;
 
 	@Column(name = "DN_TYPE", length = 1)
 	private Integer dnType;
 
-	@Lob
-	@Column(name = "UID_LIST")
+//	@Lob
+	@Column(name = "UID_LIST", length = 255)
 	private String uidListJsonString;
 
 	@Column(name = "COMMAND_OWNER_UID")

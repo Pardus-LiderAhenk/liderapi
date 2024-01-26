@@ -29,7 +29,7 @@ public class ServerImpl implements Serializable {
 
 	@Id
 	@GeneratedValue
-	@Column(name = "SERVER_ID", unique = true,nullable = false)
+	@Column(name = "SERVER_ID", unique = true, nullable = false)
 	private Long id;
 	
 	@Column(name = "IP")
@@ -41,7 +41,7 @@ public class ServerImpl implements Serializable {
 	@Column(name = "DESCRIPTION")
 	private String description;
 	
-	@Column(name = "USER")
+	@Column(name = "\"USER\"")
 	private String user;
 	
 	@Column(name = "STATUS")
