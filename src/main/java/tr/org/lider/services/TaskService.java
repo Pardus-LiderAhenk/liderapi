@@ -215,9 +215,9 @@ public class TaskService {
 								List<LdapEntry> member= ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.OBJECT);
 								if(member!=null && member.size()>0 ) {
 									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0)))
-										if(agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
+//										if(agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
 											targetEntries.add(member.get(0));
-										}
+//										}
 										
 								}
 							} catch (LdapException e) {

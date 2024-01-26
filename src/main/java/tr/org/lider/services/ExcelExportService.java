@@ -437,7 +437,7 @@ public class ExcelExportService {
 	public byte[] generateOperationLogReport(List<OperationLogImpl> logs) {
 		int rowCount = 0;
 		String exportFile = getFileWriteLocation() 
-				+ "Task Raporu_" 
+				+ "Sistem Güncesi Raporu_" 
 				+ new SimpleDateFormat("ddMMyyyyHH:mm:ss.SSS").format(new Date())
 				+ ".xlsx";
 		XSSFWorkbook wb = new XSSFWorkbook();

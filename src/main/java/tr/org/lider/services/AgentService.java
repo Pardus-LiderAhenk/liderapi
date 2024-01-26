@@ -102,26 +102,26 @@ public class AgentService {
 			}
 		}
 		
-		if(agentDTO.getSessionReportType().isPresent()) {
-			if(agentDTO.getSessionReportType().equals("LAST_ONE_MONTH_NO_SESSIONS") 
-					|| agentDTO.getSessionReportType().equals("LAST_TWO_MONTHS_NO_SESSIONS") 
-					|| agentDTO.getSessionReportType().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
-				List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
-				try {
-		
-					listOfAgents = ldapService.findSubEntries(
-							configurationService.getAgentLdapBaseDn(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
-		
-					for (LdapEntry ldapEntry : listOfAgents) {
-						if(ldapEntry.isOnline()) {
-							listOfOnlineUsers.add(ldapEntry.getUid());
-						}
-					}
-				} catch (LdapException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+//		if(agentDTO.getSessionReportType().isPresent()) {
+//			if(agentDTO.getSessionReportType().equals("LAST_ONE_MONTH_NO_SESSIONS") 
+//					|| agentDTO.getSessionReportType().equals("LAST_TWO_MONTHS_NO_SESSIONS") 
+//					|| agentDTO.getSessionReportType().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
+//				List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
+//				try {
+//		
+//					listOfAgents = ldapService.findSubEntries(
+//							configurationService.getAgentLdapBaseDn(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
+//		
+//					for (LdapEntry ldapEntry : listOfAgents) {
+//						if(ldapEntry.isOnline()) {
+//							listOfOnlineUsers.add(ldapEntry.getUid());
+//						}
+//					}
+//				} catch (LdapException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents(agentDTO,listOfOnlineUsers );
 		
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {
