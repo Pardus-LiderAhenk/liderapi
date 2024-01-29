@@ -608,8 +608,8 @@ public class ExcelExportService {
 		
 		
 		
-		Collections.addAll(headers, " ", "Kullanıcı Adı","Oturum Tipi", "Tarih", "Bilgisayar Adı");
-		Collections.addAll(colWidthList, 1500, 4000, 4500 ,4500, 4000);
+		Collections.addAll(headers, " ", "Kullanıcı Adı","Aktif/Pasif","Oturum Tipi", "Tarih", "Bilgisayar Adı");
+		Collections.addAll(colWidthList, 1500, 4000,3000, 4500 ,4500, 4000);
 		
 		for (IUserSessionReport user : users) {
 			if(maxCountOfIPAddresses < user.getIpAddresses().split(",").length) {
@@ -649,6 +649,17 @@ public class ExcelExportService {
 			cell = row.createCell(colCount++);
 			cell.setCellValue(user.getUsername());
 			cell.setCellStyle(csBordered);
+			
+			if(user.getAgentStatus().equals("0")) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Pasif");
+	            cell.setCellStyle(csBordered);
+			}
+			else if(user.getAgentStatus().equals("1")) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Aktif");
+	            cell.setCellStyle(csBordered);
+			}
 			
 			if(user.getSessionEvent() == 1) {
 				cell = row.createCell(colCount++);
