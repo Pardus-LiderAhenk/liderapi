@@ -14,6 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -37,6 +43,11 @@ public class RdpClientController {
     @Autowired
     RdpClientService rdpClientService;
 
+    @Operation(summary = "Get RdpClient list", description = "", tags = { "rdp-client" })
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "Returns RdpClient list. Successful"),
+        @ApiResponse(responseCode = "417", description = "Could not get RdpClient list. Unexpected error occurred", 
+          content = @Content(schema = @Schema(implementation = String.class))) })
     @GetMapping("/list")
     public ResponseEntity<Page<RdpClient>> getSavedRdpClient(
             @RequestParam(name = "page") int page,
@@ -55,6 +66,11 @@ public class RdpClientController {
         }
     }
 
+    @Operation(summary = "Save RdpClient", description = "", tags = { "rdp-client" })
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "The RdpClient has been successfully saved"),
+        @ApiResponse(responseCode = "417", description = "Could not save RdpClient. Unexpected error occurred", 
+          content = @Content(schema = @Schema(implementation = String.class))) })
     @PostMapping(value = "/save")
     public ResponseEntity<Boolean> saveRdpClient(@RequestBody Map<String, String> data) {
         String host = data.get("host");
@@ -74,16 +90,21 @@ public class RdpClientController {
                     .body(false);
         }
     }
-
+    
+    @Operation(summary = "Update RdpClient", description = "", tags = { "rdp-client" })
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "The RdpClient has been successfully updated"),
+        @ApiResponse(responseCode = "417", description = "Could not update RdpClient. Unexpected error occurred", 
+          content = @Content(schema = @Schema(implementation = String.class))) })
     @PatchMapping(value = "/update")
     public ResponseEntity<Boolean> updateSavedRdpClient(@RequestBody Map<String, String> data) {
-        String id = data.get("id");
+        long id = Long.parseLong(data.get("id"));
         String host = data.get("host");
         String username = data.get("username");
         String hostname = data.get("hostname");
         String description = data.get("description");
 
-        tr.org.lider.entities.RdpClient rdpClient = rdpClientService.getSavedRdpClientById(id);
+        RdpClient rdpClient = rdpClientService.getSavedRdpClientById(id);
 
         rdpClient.setUsername(username);
         rdpClient.setHost(host);
@@ -103,8 +124,13 @@ public class RdpClientController {
         }
     }
 
+    @Operation(summary = "Delete RdpClient", description = "", tags = { "rdp-client" })
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "The RdpClient has been successfully deleted"),
+        @ApiResponse(responseCode = "417", description = "Could not delete RdpClient. Unexpected error occurred", 
+          content = @Content(schema = @Schema(implementation = String.class))) })
     @DeleteMapping(value = "/delete/{id}")
-    public ResponseEntity<Boolean> deleteSavedRdpClient(@PathVariable String id) {
+    public ResponseEntity<Boolean> deleteSavedRdpClient(@PathVariable long id) {
         try {
             rdpClientService.deleteSavedRdpClient(id);
             return ResponseEntity

@@ -10,7 +10,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Entity
 public class RdpClient implements Serializable {
-    @Id
+    private static final long serialVersionUID = 8344837155045058296L;
+
+	@Id
     @GeneratedValue
     @Column(name = "CLIENT_ID", unique = true, nullable = false)
     private Long id;

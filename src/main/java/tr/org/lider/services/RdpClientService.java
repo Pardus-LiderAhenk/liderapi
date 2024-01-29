@@ -27,9 +27,8 @@ public class RdpClientService {
         return rdpClientRepository.findAll(pageable);
     }
 
-    public RdpClient getSavedRdpClientById(String id) {
-        int idInt = Integer.parseInt(id);
-        return rdpClientRepository.findById(idInt);
+    public RdpClient getSavedRdpClientById(long id) {
+        return rdpClientRepository.findOne(id);
     }
 
     public RdpClient getSavedRdpClientByHost(String host) {
@@ -44,32 +43,28 @@ public class RdpClientService {
         return rdpClientRepository.findByHostAndUsername(host, username);
     }
 
-    public String saveRdpClient(String host, String username, String hostname, String description) {
-        rdpClientRepository.save(new tr.org.lider.entities.RdpClient(host, username, hostname, description));
-        return "Saved";
+    public RdpClient saveRdpClient(String host, String username, String hostname, String description) {
+        return rdpClientRepository.save(new RdpClient(host, username, hostname, description));
     }
 
-    public String updateSavedRdpClient(String id, String host, String username, String hostname, String description) {
-        int idInt = Integer.parseInt(id);
-        tr.org.lider.entities.RdpClient rdpClient = rdpClientRepository.findById(idInt);
+    public RdpClient updateSavedRdpClient(Long id, String host, String username, String hostname, String description) {
+    	RdpClient rdpClient = rdpClientRepository.findOne(id);
         rdpClient.setHost(host);
         rdpClient.setUsername(username);
         rdpClient.setHostname(hostname);
         rdpClient.setDescription(description);
-        rdpClientRepository.save(rdpClient);
-        return "Updated";
+        return rdpClientRepository.save(rdpClient);
     }
 
-    public String deleteSavedRdpClient(String id) {
-        int idInt = Integer.parseInt(id);
-        tr.org.lider.entities.RdpClient rdpClient = rdpClientRepository.findById(idInt);
+    public Boolean deleteSavedRdpClient(Long id) {
+        RdpClient rdpClient = rdpClientRepository.findOne(id);
         rdpClientRepository.delete(rdpClient);
-        return "Deleted";
+        return true;
     }
 
-    public String deleteAllSavedRdpClient() {
+    public Boolean deleteAllSavedRdpClient() {
         rdpClientRepository.deleteAll();
-        return "Deleted All";
+        return true;
     }
 
 }

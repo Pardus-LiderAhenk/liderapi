@@ -4,8 +4,6 @@ import tr.org.lider.entities.RdpClient;
 
 public interface RdpClientRepository extends BaseJpaRepository<RdpClient, Long> {
 
-    RdpClient findById(long id);
-
     RdpClient findByHost(String host);
 
     RdpClient findByUsername(String username);
