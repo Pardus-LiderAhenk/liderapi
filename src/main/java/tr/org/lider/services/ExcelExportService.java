@@ -96,8 +96,8 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers, "", "Bilgisayar Adı", "Durumu","Aktif/Pasif");
-		Collections.addAll(colWidthList, 2500, 3500, 4500,3000);
+		Collections.addAll(headers, "", "Bilgisayar Adı","DN", "Durumu","Aktif/Pasif");
+		Collections.addAll(colWidthList, 2500, 3500,8000, 4000,3000);
 		for (AgentImpl agent : agents) {
 			if(maxCountOfIPAddresses < agent.getIpAddresses().split(",").length) {
 				maxCountOfIPAddresses = agent.getIpAddresses().split(",").length;
@@ -179,6 +179,10 @@ public class ExcelExportService {
 
 			cell = row.createCell(colCount++);
 			cell.setCellValue(agent.getHostname());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(agent.getDn());
 			cell.setCellStyle(csBordered);
 			
 			cell = row.createCell(colCount++);
