@@ -95,14 +95,14 @@ public class CommandExecutionImpl implements Serializable {
 	private boolean online; // True if the agent is online during the task
 							// execution, false otherwise
 	
-	@Column(name = "COMMAND_RECEIVED")
-	private boolean commandReceived = false;
-	
+	@Column(name = "COMMAND_SEND")
+	private boolean commanSend = false;
+
 	public CommandExecutionImpl() {
 	}
 
 	public CommandExecutionImpl(Long id, CommandImpl command, String uid, DNType dnType, String dn, Date createDate,
-			List<CommandExecutionResultImpl> commandExecutionResults, boolean online, boolean commandReceived) {
+			List<CommandExecutionResultImpl> commandExecutionResults, boolean online, boolean commanSend) {
 		this.id = id;
 		this.command = command;
 		this.uid = uid;
@@ -111,7 +111,7 @@ public class CommandExecutionImpl implements Serializable {
 		this.createDate = createDate;
 		this.commandExecutionResults = commandExecutionResults;
 		this.online = online;
-		this.commandReceived = commandReceived;
+		this.commanSend = commanSend;
 	}
 
 //	public CommandExecutionImpl(ICommandExecution commandExecution) {
@@ -224,12 +224,12 @@ public class CommandExecutionImpl implements Serializable {
 		this.online = online;
 	}
 	
-	public boolean isCommandReceived() {
-		return commandReceived;
+	public boolean isCommanSend() {
+		return commanSend;
 	}
 
-	public void setCommandReceived(boolean commandReceived) {
-		this.commandReceived = commandReceived;
+	public void setCommanSend(boolean commanSend) {
+		this.commanSend = commanSend;
 	}
 
 
@@ -246,7 +246,7 @@ public class CommandExecutionImpl implements Serializable {
 
 	public String toString() {
 		return "CommandExecutionImpl [id=" + id + ", uid=" + uid + ", dnType=" + dnType + ", dn=" + dn + ", createDate="
-				+ createDate + ", commandExecutionResults=" + commandExecutionResults + ", online=" + online + ", commandReceived=" + commandReceived +"]";
+				+ createDate + ", commandExecutionResults=" + commandExecutionResults + ", online=" + online + ", commanSend=" + commanSend +"]";
 	}
 
 }
