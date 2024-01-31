@@ -39,9 +39,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 
-//import org.codehaus.jackson.JsonGenerationException;
-//import org.codehaus.jackson.map.JsonMappingException;
-//import org.codehaus.jackson.map.ObjectMapper;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.ReconnectionManager;
 import org.jivesoftware.smack.ReconnectionManager.ReconnectionPolicy;
@@ -79,21 +76,10 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.messaging.listeners.OnlineRosterListener;
 import tr.org.lider.messaging.listeners.PacketListener;
 import tr.org.lider.messaging.listeners.PolicyListener;
 import tr.org.lider.messaging.listeners.PolicyStatusListener;
-//import tr.org.liderahenk.lider.messaging.listeners.AgreementStatusListener;
-//import tr.org.liderahenk.lider.messaging.listeners.MissingPluginListener;
-//import tr.org.liderahenk.lider.messaging.listeners.OnlineRosterListener;
-//import tr.org.liderahenk.lider.messaging.listeners.PolicyListener;
-//import tr.org.liderahenk.lider.messaging.listeners.PolicyStatusListener;
-//import tr.org.liderahenk.lider.messaging.listeners.RegistrationListener;
-//import tr.org.liderahenk.lider.messaging.listeners.RequestAgreementListener;
-//import tr.org.liderahenk.lider.messaging.listeners.ScriptResultListener;
-//import tr.org.liderahenk.lider.messaging.listeners.TaskStatusListener;
-//import tr.org.liderahenk.lider.messaging.listeners.UserSessionListener;
 import tr.org.lider.messaging.listeners.RegistrationListener;
 import tr.org.lider.messaging.listeners.TaskStatusListener;
 import tr.org.lider.messaging.listeners.UserSessionListener;
@@ -471,19 +457,10 @@ public class XMPPClientImpl {
 
 		try{
 			String jidFinal = getFullJid(jid);
-			System.out.println(jidFinal);
-			if(jidFinal.equals(AgentStatus.Active)) {
-				//logger.info("Sending message: {} to user: {}", new Object[] { message, jidFinal });
-				Message msg = new Message(jidFinal, Message.Type.normal);
-				msg.setBody(message);
-				connection.sendStanza(msg);
-				logger.info("Successfully sent message to user: {}", jidFinal);
-			}
-			else {
-				logger.info("Successfully sent message to user: {}", jidFinal);
-
-				
-			}
+			Message msg = new Message(jidFinal, Message.Type.normal);
+			msg.setBody(message);
+			connection.sendStanza(msg);
+			logger.info("Successfully sent message to user: {}", jidFinal);
 		}
 		catch(NotConnectedException ex){
 			ex.printStackTrace();
