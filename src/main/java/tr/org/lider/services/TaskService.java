@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandImpl;
@@ -198,9 +199,15 @@ public class TaskService {
 		List<LdapEntry> selectedtEntries= request.getEntryList();
 		for (LdapEntry ldapEntry : selectedtEntries) {
 			if(ldapEntry.getType().equals(DNType.AHENK)) {
-				if(agentRepository.findByJid(ldapEntry.getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
-					targetEntries.add(ldapEntry); 
-				}
+			    List<AgentImpl> agentList = agentRepository.findByJid(ldapEntry.getUid());
+
+			    if (agentList != null && !agentList.isEmpty()) {
+			        AgentStatus agentStatus = agentList.get(0).getAgentStatus();
+
+			        if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
+			            targetEntries.add(ldapEntry);
+			        }
+			    }
 				
 			}
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
@@ -214,10 +221,13 @@ public class TaskService {
 							try {
 								List<LdapEntry> member= ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.OBJECT);
 								if(member!=null && member.size()>0 ) {
-									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0)))
-//										if(agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
-											targetEntries.add(member.get(0));
-//										}
+									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0))) {
+										AgentStatus agentStatus = agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus();
+
+										if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
+										    targetEntries.add(member.get(0));
+										}
+									}
 										
 								}
 							} catch (LdapException e) {
