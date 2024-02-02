@@ -96,13 +96,13 @@ public class CommandExecutionImpl implements Serializable {
 							// execution, false otherwise
 	
 	@Column(name = "COMMAND_SEND")
-	private boolean commanSend = false;
+	private boolean commandSend = false;
 
 	public CommandExecutionImpl() {
 	}
 
 	public CommandExecutionImpl(Long id, CommandImpl command, String uid, DNType dnType, String dn, Date createDate,
-			List<CommandExecutionResultImpl> commandExecutionResults, boolean online, boolean commanSend) {
+			List<CommandExecutionResultImpl> commandExecutionResults, boolean online, boolean commandSend) {
 		this.id = id;
 		this.command = command;
 		this.uid = uid;
@@ -111,7 +111,7 @@ public class CommandExecutionImpl implements Serializable {
 		this.createDate = createDate;
 		this.commandExecutionResults = commandExecutionResults;
 		this.online = online;
-		this.commanSend = commanSend;
+		this.commandSend = commandSend;
 	}
 
 //	public CommandExecutionImpl(ICommandExecution commandExecution) {
@@ -225,11 +225,11 @@ public class CommandExecutionImpl implements Serializable {
 	}
 	
 	public boolean isCommanSend() {
-		return commanSend;
+		return commandSend;
 	}
 
-	public void setCommanSend(boolean commanSend) {
-		this.commanSend = commanSend;
+	public void setCommanSend(boolean commandSend) {
+		this.commandSend = commandSend;
 	}
 
 
@@ -246,7 +246,7 @@ public class CommandExecutionImpl implements Serializable {
 
 	public String toString() {
 		return "CommandExecutionImpl [id=" + id + ", uid=" + uid + ", dnType=" + dnType + ", dn=" + dn + ", createDate="
-				+ createDate + ", commandExecutionResults=" + commandExecutionResults + ", online=" + online + ", commanSend=" + commanSend +"]";
+				+ createDate + ", commandExecutionResults=" + commandExecutionResults + ", online=" + online + ", commandSend=" + commandSend +"]";
 	}
 
 }
