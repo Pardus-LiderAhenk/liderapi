@@ -471,19 +471,11 @@ public class XMPPClientImpl {
 
 		try{
 			String jidFinal = getFullJid(jid);
-			System.out.println(jidFinal);
-			if(jidFinal.equals(AgentStatus.Active)) {
-				//logger.info("Sending message: {} to user: {}", new Object[] { message, jidFinal });
-				Message msg = new Message(jidFinal, Message.Type.normal);
-				msg.setBody(message);
-				connection.sendStanza(msg);
-				logger.info("Successfully sent message to user: {}", jidFinal);
-			}
-			else {
-				logger.info("Successfully sent message to user: {}", jidFinal);
-
-				
-			}
+			//logger.info("Sending message: {} to user: {}", new Object[] { message, jidFinal });
+			Message msg = new Message(jidFinal, Message.Type.normal);
+			msg.setBody(message);
+			connection.sendStanza(msg);
+			logger.info("Successfully sent message to user: {}", jidFinal);
 		}
 		catch(NotConnectedException ex){
 			ex.printStackTrace();

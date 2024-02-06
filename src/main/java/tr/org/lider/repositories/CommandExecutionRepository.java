@@ -39,8 +39,15 @@ public interface CommandExecutionRepository extends BaseJpaRepository<CommandExe
 	@Query("SELECT cex FROM CommandExecutionImpl cex " +
 		       "WHERE cex.commandSend = 0 AND cex.uid IN :targetList " +
 		       "ORDER BY cex.createDate")
-	List<Object[]> findCommandExecutionByUidList(@Param("targetList") List<LdapEntry> targetList);
+	List<String> findCommandExecutionByUidList(@Param("targetList") List<LdapEntry> targetList);
 			//, @Param("uidListSize") int uidListSize);
 	
 	void deleteByDn(String dn);
+	
+	@Query("SELECT cex FROM TaskImpl t "
+			+"LEFT JOIN CommandImpl c ON (t.id = c.task.id) " 
+			+"LEFT JOIN CommandExecutionImpl cex ON (c.id = cex.command.id) "
+			+"WHERE t.taskParts = 1 AND cex.commandSend = 0 "
+			+"ORDER BY t.createDate ASC LIMIT = :size")
+	List<CommandExecutionImpl> findCommandExecution(@Param("size") int size);
 }

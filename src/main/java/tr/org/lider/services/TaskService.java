@@ -3,17 +3,12 @@ package tr.org.lider.services;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Queue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
@@ -35,6 +30,7 @@ import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
+import tr.org.lider.messaging.messages.ExecuteScheduledTaskMessageImpl;
 import tr.org.lider.messaging.messages.ExecuteTaskMessageImpl;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.messaging.messages.ILiderMessage;
@@ -86,11 +82,14 @@ public class TaskService {
 	@Autowired
 	private CommandExecutionRepository commandExecutionRepository;
 	
+	@Autowired
+	private TaskSchedulerService taskSchedulerService;
+	
 	@PersistenceContext
 	private EntityManager entityManager;
 
 
-	public IRestResponse execute(PluginTask request) {
+	public IRestResponse execute(PluginTask request){
 
 		// Getting target entries 
 		/**
@@ -139,19 +138,15 @@ public class TaskService {
 		// Task has an activation date, it will be sent to agent(s) on that date.
 
 		List<String> uidList = new ArrayList<String>();
-        //Queue<String> uidList = new LinkedList<String>();
-
 
 		for (LdapEntry entry : targetEntries) {
 			if (ldapService.isAhenk(entry)) {
 				uidList.add(entry.get(configService.getAgentLdapJidAttribute()));
-				//uidList.add(entry.get(configService.getAgentLdapJidAttribute()));
 				System.out.println(uidList + "  uid list getirliyo");
 			}
 		}
 
 		CommandImpl command=null;
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);        
 
 		try {
 
@@ -169,13 +164,8 @@ public class TaskService {
 		if(command!=null)
 			commandService.addCommand(command);
 		
-        int uidListSize = 10;
-
 
 		if (targetEntries != null && !targetEntries.isEmpty()) {
-
-			 List<Object[]> commandExecutionsList = getCommandExecutions(targetEntries);
-
 			 
 			for (final LdapEntry entry : targetEntries) {
 
@@ -188,49 +178,59 @@ public class TaskService {
 				uid=uid.trim();
 
 				Boolean isOnline=messagingService.isRecipientOnline(getFullJid(uid));
-
-				CommandExecutionImpl execution=	new CommandExecutionImpl(null, 
-						command, uid, entry.getType(), entry.getDistinguishedName(),
-						new Date(), null, isOnline, true);
-
-				command.addCommandExecution(execution);
-
-				// Task message
-				ILiderMessage message = null;
-				if (isAhenk) {
-					// Set agent JID (the JID is UID of the LDAP entry)
-					if (uid == null || uid.isEmpty()) {
-						logger.error("JID was null. Ignoring task: {} for agent: {}",	new Object[] { task.toJson(), entry.getDistinguishedName() });
-						continue;
-					}
-					logger.info("Sending task to agent with JID: {}", uid);
-
-					String taskJsonString = null;
-					try {
-						taskJsonString = task.toJson();
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}
-
-					FileServerConf fileServerConf=request.getPlugin().isUsesFileTransfer() ? configService.getFileServerConf(uid.toLowerCase()) : null;
-					// uid=jid
-					message= new ExecuteTaskMessageImpl(taskJsonString, uid, new Date(), fileServerConf);
-
-					// TaskStatusUpdateListener in XMPPClientImpl class
-					try {
-						messagingService.sendMessage(message);
-					} catch (JsonGenerationException e) {
-						e.printStackTrace();
-					} catch (JsonMappingException e) {
-						e.printStackTrace();
-					} catch (NotConnectedException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
+				
+				CommandExecutionImpl execution = new CommandExecutionImpl();
+				Boolean isTaskSend = false;
+				if(task.isTaskParts() == false) {
+					isTaskSend = true;
 				}
-				commandService.addCommandExecution(execution);
+				
+					execution=	new CommandExecutionImpl(null, command, uid, entry.getType(), entry.getDistinguishedName(),new Date(), null, isOnline, isTaskSend);
+					command.addCommandExecution(execution);
+					
+					// Task message
+					ILiderMessage message = null;
+					if (isAhenk) {
+						// Set agent JID (the JID is UID of the LDAP entry)
+						if (uid == null || uid.isEmpty()) {
+							logger.error("JID was null. Ignoring task: {} for agent: {}",	new Object[] { task.toJson(), entry.getDistinguishedName() });
+							continue;
+						}
+						logger.info("Sending task to agent w6ith JID: {}", uid);
+
+						String taskJsonString = null;
+						try {
+							taskJsonString = task.toJson();
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+						}
+
+						FileServerConf fileServerConf=request.getPlugin().isUsesFileTransfer() ? configService.getFileServerConf(uid.toLowerCase()) : null;
+						// uid=jid
+						message= new ExecuteTaskMessageImpl(taskJsonString, uid, new Date(), fileServerConf);
+
+						// TaskStatusUpdateListener in XMPPClientImpl class
+						try {
+							if(!task.isTaskParts()) {
+								messagingService.sendMessage(message);
+							}
+							taskSchedulerService.sendScheduledTaskMesasage();
+							
+						} catch (JsonGenerationException e) {
+							e.printStackTrace();
+						} catch (JsonMappingException e) {
+							e.printStackTrace();
+						} catch (NotConnectedException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (Throwable e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+					}
+					commandService.addCommandExecution(execution);
 			}
 		}
 		return responseFactoryService.createResponse(RestResponseStatus.OK,"Task Basarı ile Gonderildi.");
@@ -310,21 +310,8 @@ public class TaskService {
 		return tasks;
 	}
 	
-	public List<Object[]> getCommandExecutions(List<LdapEntry> targetList) {
+	public List<String> getCommandExecutions(List<LdapEntry> targetList) {
         return commandExecutionRepository.findCommandExecutionByUidList(targetList);
     }
-
-//	public List<LdapEntry> findCommandExecutionByUidList(List<LdapEntry> targetList, int uidListSize) {
-//	    TypedQuery<LdapEntry> query = entityManager.createQuery(
-//	            "SELECT cex.uid FROM CommandExecutionImpl cex " +
-//	                    "WHERE cex.commandSend = 0 AND cex.uid IN :targetList " +
-//	                    "ORDER BY cex.createDate", LdapEntry.class);
-//
-//	    query.setParameter("uidList", targetList);
-//	    query.setMaxResults(uidListSize);
-//
-//	    return query.getResultList();
-//	}
-
 
 }

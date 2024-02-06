@@ -17,4 +17,9 @@ public interface TaskRepository extends BaseJpaRepository<TaskImpl, Integer>{
 					+ "GROUP BY p.description "
 					+ "ORDER BY quantity DESC;")
 	List<Object[]> findExecutedTaskWithCount(@Param("username") String username); 
+	
+	@Query(nativeQuery = true,
+			value = "SELECT * FROM c_task t "
+					+"WHERE t.id = :taskId ")
+	List<TaskImpl> findByTask(@Param("taskId") Long taskId);
 }
