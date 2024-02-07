@@ -309,9 +309,5 @@ public class TaskService {
 		List<Object[]> tasks = taskRepository.findExecutedTaskWithCount(AuthenticationService.getUserName());
 		return tasks;
 	}
-	
-	public List<String> getCommandExecutions(List<LdapEntry> targetList) {
-        return commandExecutionRepository.findCommandExecutionByUidList(targetList);
-    }
 
 }

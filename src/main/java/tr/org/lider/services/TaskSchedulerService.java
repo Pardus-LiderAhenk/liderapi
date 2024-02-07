@@ -15,6 +15,7 @@ import com.mysql.cj.x.protobuf.MysqlxDatatypes.Array;
 
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandImpl;
+import tr.org.lider.entities.PluginTask;
 import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.messaging.messages.ExecuteScheduledTaskMessageImpl;
 import tr.org.lider.messaging.messages.FileServerConf;
@@ -48,12 +49,10 @@ public class TaskSchedulerService {
 	ILiderMessage scheduledMessage = null;
 	
 	public IRestResponse sendScheduledTaskMesasage() throws Throwable, JsonMappingException, NotConnectedException, IOException {
-		
-		int size = 50;
+						
+		List<CommandExecutionImpl> executionList = commandExecutionRepository.findCommandExecution();
 				
-		List<CommandExecutionImpl> executionList = commandExecutionRepository.findCommandExecution(size);
-				
-		for(int i=0;i<size;i++) {
+		for(int i=0;i<1;i++) {
 			
 			Long commandId = executionList.get(i).getCommand().getId();
 			
@@ -62,10 +61,15 @@ public class TaskSchedulerService {
 			String taskJsonString = null;
 			taskJsonString = taskList.toString();
 			
+			executionList.get(i).setCommanSend(true);	
+			
+			
 			FileServerConf fileServerConf=taskList.get(i).getPlugin().isUsesFileTransfer() ? configService.getFileServerConf(executionList.get(i).getUid().toLowerCase()) : null;
 
 			scheduledMessage = new ExecuteScheduledTaskMessageImpl(taskJsonString, executionList.get(i).getUid(), new Date(), fileServerConf);
 			messagingService.sendMessage(scheduledMessage);
+			
+			//command execution constructorunu command send true yap yolla
 		}
 		
 		
