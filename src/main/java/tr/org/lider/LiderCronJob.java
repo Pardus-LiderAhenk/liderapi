@@ -1,11 +1,13 @@
 package tr.org.lider;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
+import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +15,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.TaskSchedulerService;
 
 /**
  * @author <a href="mailto:ebru.arslan@pardus.org.tr">Ebru Arslan</a>
@@ -35,6 +40,9 @@ public class LiderCronJob {
 	
 	@Autowired
 	private ConfigurationService configurationService;
+	
+	@Autowired
+	private TaskSchedulerService taskScheduledService;
 
 	
 	@Scheduled(cron = "0 55 10 * * ?")
@@ -77,4 +85,9 @@ public class LiderCronJob {
 			logger.info("Executed cron job for machine update");
 		}
     }
+	
+	@Scheduled(cron = "0 26 16 * * ?")
+	public void taskJob() throws  Throwable {
+		taskScheduledService.sendScheduledTaskMesasage();
+	}
 }

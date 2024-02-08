@@ -30,7 +30,6 @@ import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
-import tr.org.lider.messaging.messages.ExecuteScheduledTaskMessageImpl;
 import tr.org.lider.messaging.messages.ExecuteTaskMessageImpl;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.messaging.messages.ILiderMessage;
@@ -214,7 +213,6 @@ public class TaskService {
 							if(!task.isTaskParts()) {
 								messagingService.sendMessage(message);
 							}
-							taskSchedulerService.sendScheduledTaskMesasage();
 							
 						} catch (JsonGenerationException e) {
 							e.printStackTrace();
@@ -223,9 +221,6 @@ public class TaskService {
 						} catch (NotConnectedException e) {
 							e.printStackTrace();
 						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (Throwable e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 
