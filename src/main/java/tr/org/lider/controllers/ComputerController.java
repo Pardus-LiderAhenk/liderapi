@@ -27,11 +27,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
 import tr.org.lider.entities.OperationType;
@@ -42,15 +42,15 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.services.AgentService;
 import tr.org.lider.services.CommandService;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.PluginService;
 import tr.org.lider.services.TaskService;
-import tr.org.lider.utils.IRestResponse;
-import tr.org.lider.services.OperationLogService;;
+import tr.org.lider.utils.IRestResponse;;
 
 
 /**
@@ -70,7 +70,7 @@ public class ComputerController {
 	private ConfigurationService configurationService;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private AgentService agentService;
@@ -86,9 +86,6 @@ public class ComputerController {
 
 	@Autowired
 	private AgentRepository agentRepository;
-	
-	@Autowired
-	private XMPPClientImpl xmppClient;
 	
 	@Autowired
 	private OperationLogService operationLogService;
@@ -604,7 +601,7 @@ public class ComputerController {
 			//update uid attribute
 			ldapService.renameHostname("uid", newHostname, agentDN);
 			
-			xmppClient.addClientToRoster(newHostname + "@"+configurationService.getXmppServiceName());
+			messagingService.addClientToRoster(newHostname + "@"+configurationService.getXmppServiceName());
 
 			//check memberships and if membership exists in any group update DN info
 			ldapService.renameEntry(agentDN, "cn=" + newHostname);

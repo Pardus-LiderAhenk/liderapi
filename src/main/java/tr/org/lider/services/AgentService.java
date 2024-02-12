@@ -15,7 +15,7 @@ import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.repositories.AgentInfoCriteriaBuilder;
 import tr.org.lider.repositories.AgentRepository;
 
@@ -26,7 +26,7 @@ public class AgentService {
 	private AgentRepository agentRepository;
 	
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 	
 	@Autowired
 	private AgentInfoCriteriaBuilder agentInfoCB;

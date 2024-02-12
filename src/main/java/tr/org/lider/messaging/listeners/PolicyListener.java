@@ -10,12 +10,13 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Stanza;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.messages.GetPoliciesMessageImpl;
 import tr.org.lider.messaging.messages.IExecutePoliciesMessage;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.messaging.subscribers.IPolicySubscriber;
 
 /**
@@ -27,20 +28,21 @@ public class PolicyListener implements StanzaListener, StanzaFilter {
 
 	private static Logger logger = LoggerFactory.getLogger(PolicyListener.class);
 
+	@Autowired
+	private IMessagingService messagingService;
+	
 	/**
 	 * Pattern used to filter messages
 	 */
 	private static final Pattern messagePattern = Pattern.compile(".*\\\"type\\\"\\s*:\\s*\\\"GET_POLICIES\\\".*",
 			Pattern.CASE_INSENSITIVE);
 	
-	private XMPPClientImpl client;
 	/**
 	 * Message subscriber
 	 */
 	private IPolicySubscriber subscriber;
 	
-	public PolicyListener(XMPPClientImpl client) {
-		 this.client = client;
+	public PolicyListener() {
 	}
 
 	@Override
@@ -75,7 +77,7 @@ public class PolicyListener implements StanzaListener, StanzaFilter {
 				if (subscriber != null) {
 					IExecutePoliciesMessage responseExecutePoliciesMessageList = subscriber.messageReceived(message);
 					logger.debug("Notified subscriber => {}", subscriber);
-					client.sendMessage(new ObjectMapper().writeValueAsString(responseExecutePoliciesMessageList), msg.getFrom());
+					messagingService.sendMessage(new ObjectMapper().writeValueAsString(responseExecutePoliciesMessageList), msg.getFrom());
 				}
 			}
 		} catch (Exception e) {

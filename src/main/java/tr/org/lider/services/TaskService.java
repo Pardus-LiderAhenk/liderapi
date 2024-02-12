@@ -27,16 +27,15 @@ import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.messages.ExecuteTaskMessageImpl;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.messaging.messages.ILiderMessage;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.repositories.TaskRepository;
 import tr.org.lider.utils.IRestResponse;
 import tr.org.lider.utils.ResponseFactoryService;
 import tr.org.lider.utils.RestResponseStatus;
-import tr.org.lider.services.ConfigurationService;
 
 
 @Service
@@ -54,7 +53,7 @@ public class TaskService {
 	private ConfigurationService configService;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private CommandService commandService;
