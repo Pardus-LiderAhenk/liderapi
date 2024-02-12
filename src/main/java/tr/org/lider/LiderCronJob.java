@@ -1,21 +1,17 @@
 package tr.org.lider;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
-import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentStatus;
@@ -86,7 +82,7 @@ public class LiderCronJob {
 		}
     }
 	
-	@Scheduled(cron = "0 26 16 * * ?")
+	@Scheduled(cron = "0 */2 * * * ?")
 	public void taskJob() throws  Throwable {
 		taskScheduledService.sendScheduledTaskMesasage();
 	}

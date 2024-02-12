@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -43,11 +44,15 @@ public class TaskSchedulerService {
 	@Autowired
 	private ConfigurationService configService;
 
-	ILiderMessage scheduledMessage = null;
 	
 	public IRestResponse sendScheduledTaskMesasage() throws Throwable {
+		
+		ILiderMessage scheduledMessage = null;
+		
+		Long taskId = taskRepository.findByTaskId().get(0).longValue();
+
 						
-		List<CommandExecutionImpl> executionList = commandExecutionRepository.findCommandExecution();
+		List<CommandExecutionImpl> executionList = commandExecutionRepository.findCommandExecution(taskId);
 		
 		String taskJsonString = null;
 		

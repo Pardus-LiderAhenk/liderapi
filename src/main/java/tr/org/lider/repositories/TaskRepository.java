@@ -2,6 +2,7 @@ package tr.org.lider.repositories;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -21,4 +22,11 @@ public interface TaskRepository extends BaseJpaRepository<TaskImpl, Integer>{
 	@Query("SELECT t FROM TaskImpl t "
 			+"WHERE t.id = :taskId ")
 	List<TaskImpl> findByTask(@Param("taskId") Long taskId);
+	
+	@Query(nativeQuery = true,
+			value = "SELECT t.task_id FROM c_task t " +
+            "LEFT JOIN c_command c ON (t.task_id = c.task_id) " +
+            "LEFT JOIN c_command_execution cex ON (c.command_id = cex.command_id) " +
+            "WHERE t.task_parts = 1 AND cex.command_send = 0 AND t.create_date ")
+	List<Integer> findByTaskId();
 }
