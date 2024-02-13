@@ -98,7 +98,6 @@ public class TaskService {
 		 * 
 		 */
 		List<LdapEntry> targetEntries = getTargetList(request);
-	    //ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 		// Create & persist task
 		TaskImpl task= new TaskImpl(null, request.getPlugin(), request.getCommandId(), request.getParameterMap(), false,
@@ -141,16 +140,14 @@ public class TaskService {
 		for (LdapEntry entry : targetEntries) {
 			if (ldapService.isAhenk(entry)) {
 				uidList.add(entry.get(configService.getAgentLdapJidAttribute()));
-				System.out.println(uidList + "  uid list getirliyo");
 			}
 		}
 
 		CommandImpl command=null;
 
 		try {
-
-			    command = new CommandImpl(null, null, task, request.getDnList(), request.getDnType(), uidList, findCommandOwnerJid(),
-			            ((PluginTask) request).getActivationDate(),null, new Date(), null, false, false);
+			command = new CommandImpl(null, null, task, request.getDnList(), request.getDnType(), uidList, findCommandOwnerJid(),
+					((PluginTask) request).getActivationDate(),null, new Date(), null, false, false);
 
 		} catch (JsonGenerationException e) {
 			e.printStackTrace();
@@ -169,15 +166,11 @@ public class TaskService {
 			for (final LdapEntry entry : targetEntries) {
 
 				boolean isAhenk = ldapService.isAhenk(entry);
-
 				String uid = isAhenk ? entry.get(configService.getAgentLdapJidAttribute()) : null;
-
 				logger.info("DN type: {}, UID: {}", entry.getType().toString(), uid);
-
 				uid=uid.trim();
 
 				Boolean isOnline=messagingService.isRecipientOnline(getFullJid(uid));
-				
 				CommandExecutionImpl execution = new CommandExecutionImpl();
 				Boolean isTaskSend = false;
 				if(task.isTaskParts() == false) {
