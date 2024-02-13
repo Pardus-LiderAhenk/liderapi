@@ -1,6 +1,7 @@
 package tr.org.lider.utils;
 
 import java.util.Date;
+import java.util.Optional;
 
 import tr.org.lider.entities.SessionEvent;
 
@@ -30,6 +31,9 @@ public interface IUserSessionReport {
     
 	void setMacAddresses(String macAddresses);
 	
+	String getAgentStatus();
+	
+	void setAgentStatus(String agentStatus);
 	
 	
 

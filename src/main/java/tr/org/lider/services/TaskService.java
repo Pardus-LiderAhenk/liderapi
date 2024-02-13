@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandImpl;
@@ -30,17 +31,16 @@ import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.messages.ExecuteTaskMessageImpl;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.messaging.messages.ILiderMessage;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.repositories.CommandExecutionRepository;
 import tr.org.lider.repositories.TaskRepository;
 import tr.org.lider.utils.IRestResponse;
 import tr.org.lider.utils.ResponseFactoryService;
 import tr.org.lider.utils.RestResponseStatus;
-import tr.org.lider.services.ConfigurationService;
 
 
 @Service
@@ -58,7 +58,7 @@ public class TaskService {
 	private ConfigurationService configService;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private CommandService commandService;
@@ -238,9 +238,15 @@ public class TaskService {
 		List<LdapEntry> selectedtEntries= request.getEntryList();
 		for (LdapEntry ldapEntry : selectedtEntries) {
 			if(ldapEntry.getType().equals(DNType.AHENK)) {
-				if(agentRepository.findByJid(ldapEntry.getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
-					targetEntries.add(ldapEntry); 
-				}
+			    List<AgentImpl> agentList = agentRepository.findByJid(ldapEntry.getUid());
+
+			    if (agentList != null && !agentList.isEmpty()) {
+			        AgentStatus agentStatus = agentList.get(0).getAgentStatus();
+
+			        if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
+			            targetEntries.add(ldapEntry);
+			        }
+			    }
 				
 			}
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
@@ -259,7 +265,13 @@ public class TaskService {
 										//if(agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
 											targetEntries.add(member.get(0));
 										//}
-										
+									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0))) {
+										AgentStatus agentStatus = agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus();
+
+										if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
+										    targetEntries.add(member.get(0));
+										}
+									}										
 								}
 							} catch (LdapException e) {
 								// TODO Auto-generated catch block

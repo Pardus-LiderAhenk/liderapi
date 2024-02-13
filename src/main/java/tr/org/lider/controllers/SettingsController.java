@@ -11,6 +11,7 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,25 +25,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.HttpHeaders;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.RoleImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.OLCAccessRule;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.messaging.enums.Protocol;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.security.CustomPasswordEncoder;
@@ -50,7 +51,6 @@ import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.RoleService;
-import tr.org.lider.messaging.enums.SudoRoleType;
 
 /**
  * This controller is used for showing and updating all settings for lider
@@ -71,7 +71,7 @@ public class SettingsController {
 	ConfigurationService configurationService;
 
 	@Autowired
-	XMPPClientImpl xmppClient;
+	IMessagingService messagingService;
 
 	@Autowired
 	private LDAPServiceImpl ldapService;
@@ -224,8 +224,8 @@ public class SettingsController {
 		if(updatedParams != null) {
 			logger.info("XMPP settings are updated. XMPP will disconnect and reconnect after resetting XMPP parameters.");
 			try {
-				xmppClient.disconnect();
-				xmppClient.initXMPPClient();
+				messagingService.disconnect();
+				messagingService.init();
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -20,9 +20,9 @@ import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.ldap.DNType;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.messages.ILiderMessage;
 import tr.org.lider.messaging.messages.UpdateScheduledTaskMessageImpl;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.TaskRepository;
 
 @Service
@@ -31,7 +31,7 @@ public class ScheduledTaskService {
 	Logger logger = LoggerFactory.getLogger(ScheduledTaskService.class);
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private CommandService commandService;

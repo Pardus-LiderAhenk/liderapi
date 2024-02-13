@@ -32,9 +32,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandExecutionResultImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.enums.StatusCode;
 import tr.org.lider.messaging.messages.IPolicyStatusMessage;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.repositories.CommandExecutionRepository;
 import tr.org.lider.repositories.CommandExecutionResultRepository;
@@ -58,7 +58,7 @@ public class PolicyManagerImpl implements IPolicyStatusSubscriber {
 	private CommandExecutionResultRepository commandExecutionResultRepository;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 	public void init() {
 		logger.info("Initializing policy manager.");
