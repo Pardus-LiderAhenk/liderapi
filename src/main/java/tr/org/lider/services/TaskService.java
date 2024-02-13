@@ -98,7 +98,6 @@ public class TaskService {
 		 * 
 		 */
 		List<LdapEntry> targetEntries = getTargetList(request);
-	    //ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 		// Create & persist task
 		TaskImpl task= new TaskImpl(null, request.getPlugin(), request.getCommandId(), request.getParameterMap(), false,
@@ -135,20 +134,16 @@ public class TaskService {
 			e.printStackTrace();
 		}
 		// Task has an activation date, it will be sent to agent(s) on that date.
-
 		List<String> uidList = new ArrayList<String>();
 
 		for (LdapEntry entry : targetEntries) {
 			if (ldapService.isAhenk(entry)) {
 				uidList.add(entry.get(configService.getAgentLdapJidAttribute()));
-				System.out.println(uidList + "  uid list getirliyo");
 			}
 		}
-
 		CommandImpl command=null;
 
 		try {
-
 			    command = new CommandImpl(null, null, task, request.getDnList(), request.getDnType(), uidList, findCommandOwnerJid(),
 			            ((PluginTask) request).getActivationDate(),null, new Date(), null, false, false);
 
@@ -169,21 +164,16 @@ public class TaskService {
 			for (final LdapEntry entry : targetEntries) {
 
 				boolean isAhenk = ldapService.isAhenk(entry);
-
 				String uid = isAhenk ? entry.get(configService.getAgentLdapJidAttribute()) : null;
-
 				logger.info("DN type: {}, UID: {}", entry.getType().toString(), uid);
-
 				uid=uid.trim();
 
 				Boolean isOnline=messagingService.isRecipientOnline(getFullJid(uid));
-				
 				CommandExecutionImpl execution = new CommandExecutionImpl();
 				Boolean isTaskSend = false;
 				if(task.isTaskParts() == false) {
 					isTaskSend = true;
 				}
-				
 					execution=	new CommandExecutionImpl(null, command, uid, entry.getType(), entry.getDistinguishedName(),new Date(), null, isOnline, isTaskSend);
 					command.addCommandExecution(execution);
 					
@@ -231,7 +221,6 @@ public class TaskService {
 		return responseFactoryService.createResponse(RestResponseStatus.OK,"Task Basarı ile Gonderildi.");
 	}
 	
-	
 	private List<LdapEntry> getTargetList(PluginTask request) {
 		List<LdapEntry> targetEntries= new ArrayList<>();
 		List <LdapEntry> ldapEntryGroups = new ArrayList<>();
@@ -241,7 +230,6 @@ public class TaskService {
 				if(agentRepository.findByJid(ldapEntry.getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
 					targetEntries.add(ldapEntry); 
 				}
-				
 			}
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
 				List <String> dnList= ldapService.getGroupInGroupsTask(ldapEntry);
@@ -256,10 +244,10 @@ public class TaskService {
 								List<LdapEntry> member= ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.OBJECT);
 								if(member!=null && member.size()>0 ) {
 									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0)))
-										//if(agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
+										if(!agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Passive)) {
 											targetEntries.add(member.get(0));
-										//}
-										
+										}
+						
 								}
 							} catch (LdapException e) {
 								// TODO Auto-generated catch block
@@ -272,7 +260,6 @@ public class TaskService {
 
 			}
 		}
-
 
 		return targetEntries;
 	}
