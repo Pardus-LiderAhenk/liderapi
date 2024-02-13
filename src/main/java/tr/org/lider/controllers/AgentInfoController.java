@@ -56,7 +56,7 @@ public class AgentInfoController {
 	@PostMapping(value = "/list", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<HashMap<String, Object>> findAllAgents(AgentDTO agentDTO) {
 		HashMap<String, Object> resultMap = new HashMap<>();
-		if(agentDTO.getGetFilterData().isPresent() && agentDTO.getGetFilterData().get()) {
+		if(agentDTO.getGetFilterData() != null) {
 			resultMap.put("brands", agentService.getBrands());
 			resultMap.put("models", agentService.getmodels());
 			resultMap.put("processors", agentService.getProcessors());

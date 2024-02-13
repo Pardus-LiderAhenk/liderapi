@@ -58,7 +58,7 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 			+ "where a.last_login_date >:startDate", nativeQuery = true)
 	int getCountByLastLoginToday(@Param("startDate") Date startDate);
 	
-	@Query(value="SELECT s.sessionEvent as sessionEvent, s.username as username, s.createDate as createDate, a.hostname as hostname, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses " +
+	@Query(value="SELECT s.sessionEvent as sessionEvent, s.username as username, s.createDate as createDate, a.agentStatus as agentStatus, a.hostname as hostname, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses " +
 			"FROM UserSessionImpl s " +
 	        "LEFT JOIN AgentImpl a ON s.agent = a.id " +
 	        "WHERE a.id = :agentID " +

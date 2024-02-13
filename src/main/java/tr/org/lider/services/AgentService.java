@@ -15,7 +15,7 @@ import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.repositories.AgentInfoCriteriaBuilder;
 import tr.org.lider.repositories.AgentRepository;
 
@@ -26,7 +26,7 @@ public class AgentService {
 	private AgentRepository agentRepository;
 	
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 	
 	@Autowired
 	private AgentInfoCriteriaBuilder agentInfoCB;
@@ -102,26 +102,26 @@ public class AgentService {
 			}
 		}
 		
-		if(agentDTO.getSessionReportType().isPresent()) {
-			if(agentDTO.getSessionReportType().equals("LAST_ONE_MONTH_NO_SESSIONS") 
-					|| agentDTO.getSessionReportType().equals("LAST_TWO_MONTHS_NO_SESSIONS") 
-					|| agentDTO.getSessionReportType().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
-				List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
-				try {
-		
-					listOfAgents = ldapService.findSubEntries(
-							configurationService.getAgentLdapBaseDn(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
-		
-					for (LdapEntry ldapEntry : listOfAgents) {
-						if(ldapEntry.isOnline()) {
-							listOfOnlineUsers.add(ldapEntry.getUid());
-						}
-					}
-				} catch (LdapException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+//		if(agentDTO.getSessionReportType().isPresent()) {
+//			if(agentDTO.getSessionReportType().equals("LAST_ONE_MONTH_NO_SESSIONS") 
+//					|| agentDTO.getSessionReportType().equals("LAST_TWO_MONTHS_NO_SESSIONS") 
+//					|| agentDTO.getSessionReportType().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
+//				List<LdapEntry> listOfAgents = new ArrayList<LdapEntry>();
+//				try {
+//		
+//					listOfAgents = ldapService.findSubEntries(
+//							configurationService.getAgentLdapBaseDn(), "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.SUBTREE);
+//		
+//					for (LdapEntry ldapEntry : listOfAgents) {
+//						if(ldapEntry.isOnline()) {
+//							listOfOnlineUsers.add(ldapEntry.getUid());
+//						}
+//					}
+//				} catch (LdapException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
 		Page<AgentImpl> listOfAgentsCB = agentInfoCB.filterAgents(agentDTO,listOfOnlineUsers );
 		
 		for (int i = 0; i < listOfAgentsCB.getContent().size(); i++) {

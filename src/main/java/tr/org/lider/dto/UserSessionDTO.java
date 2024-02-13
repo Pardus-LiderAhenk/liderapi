@@ -7,6 +7,8 @@ public class UserSessionDTO {
 	private Date createDate;
 	private String hostname;
 	private String ipAddresses;
+	private String agentStatus;
+
 	private int pageNumber;
 	private int pageSize;
 	private String sessionType;
@@ -78,5 +80,12 @@ public class UserSessionDTO {
 
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
+	}
+	public String getAgentStatus() {
+		return agentStatus;
+	}
+
+	public void setAgentStatus(String agentStatus) {
+		this.agentStatus = agentStatus;
 	}
 }

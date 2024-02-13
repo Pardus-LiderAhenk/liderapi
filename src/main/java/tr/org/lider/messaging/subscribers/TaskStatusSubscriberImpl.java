@@ -18,10 +18,10 @@ import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandExecutionResultImpl;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.PluginImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.enums.ContentType;
 import tr.org.lider.messaging.enums.StatusCode;
 import tr.org.lider.messaging.messages.ITaskStatusMessage;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.models.TaskStatusNotificationImpl;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.repositories.CommandExecutionRepository;
@@ -51,7 +51,7 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 	private ConfigurationService configurationService;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 
 	@Override

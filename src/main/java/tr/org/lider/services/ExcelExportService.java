@@ -96,8 +96,8 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers, "", "Bilgisayar Adı", "Durumu","Aktif/Pasif");
-		Collections.addAll(colWidthList, 2500, 3500, 4500,3000);
+		Collections.addAll(headers, "", "Bilgisayar Adı","DN", "Durumu","Aktif/Pasif");
+		Collections.addAll(colWidthList, 2500, 3500,8000, 4000,3000);
 		for (AgentImpl agent : agents) {
 			if(maxCountOfIPAddresses < agent.getIpAddresses().split(",").length) {
 				maxCountOfIPAddresses = agent.getIpAddresses().split(",").length;
@@ -179,6 +179,10 @@ public class ExcelExportService {
 
 			cell = row.createCell(colCount++);
 			cell.setCellValue(agent.getHostname());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(agent.getDn());
 			cell.setCellStyle(csBordered);
 			
 			cell = row.createCell(colCount++);
@@ -437,7 +441,7 @@ public class ExcelExportService {
 	public byte[] generateOperationLogReport(List<OperationLogImpl> logs) {
 		int rowCount = 0;
 		String exportFile = getFileWriteLocation() 
-				+ "Task Raporu_" 
+				+ "Sistem Güncesi Raporu_" 
 				+ new SimpleDateFormat("ddMMyyyyHH:mm:ss.SSS").format(new Date())
 				+ ".xlsx";
 		XSSFWorkbook wb = new XSSFWorkbook();
@@ -604,8 +608,8 @@ public class ExcelExportService {
 		
 		
 		
-		Collections.addAll(headers, " ", "Kullanıcı Adı","Oturum Tipi", "Tarih", "Bilgisayar Adı");
-		Collections.addAll(colWidthList, 1500, 4000, 4500 ,4500, 4000);
+		Collections.addAll(headers, " ", "Kullanıcı Adı","Aktif/Pasif","Oturum Tipi", "Tarih", "Bilgisayar Adı");
+		Collections.addAll(colWidthList, 1500, 4000,3000, 4500 ,4500, 4000);
 		
 		for (IUserSessionReport user : users) {
 			if(maxCountOfIPAddresses < user.getIpAddresses().split(",").length) {
@@ -645,6 +649,17 @@ public class ExcelExportService {
 			cell = row.createCell(colCount++);
 			cell.setCellValue(user.getUsername());
 			cell.setCellStyle(csBordered);
+			
+			if(user.getAgentStatus().equals("0")) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Pasif");
+	            cell.setCellStyle(csBordered);
+			}
+			else if(user.getAgentStatus().equals("1")) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Aktif");
+	            cell.setCellStyle(csBordered);
+			}
 			
 			if(user.getSessionEvent() == 1) {
 				cell = row.createCell(colCount++);

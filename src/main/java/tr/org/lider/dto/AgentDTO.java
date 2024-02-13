@@ -27,6 +27,9 @@ public class AgentDTO {
     private Optional<String> agentVersion;
     private Optional<String> diskType;
     private Optional<String> agentStatus;
+    private Optional<String> selectedOUDN;
+    private Optional<String> groupName;
+    private Optional<String> groupDN;
     
     public int getPageNumber() {
 		return pageNumber;
@@ -135,5 +138,23 @@ public class AgentDTO {
 	}
 	public void setAgentStatus(Optional<String> agentStatus) {
 		this.agentStatus = agentStatus;
+	}
+	public Optional<String> getGroupDN() {
+		return groupDN;
+	}
+	public void setGroupDN(Optional<String> groupDN) {
+		this.groupDN = groupDN;
+	}
+	public Optional<String> getGroupName() {
+		return groupName;
+	}
+	public void setGroupName(Optional<String> groupName) {
+		this.groupName = groupName;
+	}
+	public Optional<String> getSelectedOUDN() {
+		return selectedOUDN;
+	}
+	public void setSelectedOUDN(Optional<String> selectedOUDN) {
+		this.selectedOUDN = selectedOUDN;
 	}
 }

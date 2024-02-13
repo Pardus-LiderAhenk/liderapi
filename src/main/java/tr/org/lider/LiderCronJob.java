@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentStatus;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.TaskSchedulerService;
@@ -32,7 +32,7 @@ public class LiderCronJob {
 	private  AgentRepository agentRepository;
 	
 	@Autowired
-	private XMPPClientImpl xmppClientImpl;
+	private IMessagingService messagingService;
 	
 	@Autowired
 	private ConfigurationService configurationService;
@@ -53,7 +53,7 @@ public class LiderCronJob {
 		
 			for(AgentImpl agent : agentsEventDate) {
 			
-				if(!(xmppClientImpl.isRecipientOnline(agent.getJid()))) {
+				if(!(messagingService.isRecipientOnline(agent.getJid()))) {
 
 				Date eventDate = agent.getEventDate();
 				if (eventDate != null) {
