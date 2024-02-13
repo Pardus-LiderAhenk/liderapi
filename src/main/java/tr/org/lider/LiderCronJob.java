@@ -18,6 +18,7 @@ import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.TaskSchedulerService;
 
 /**
  * @author <a href="mailto:ebru.arslan@pardus.org.tr">Ebru Arslan</a>
@@ -35,6 +36,9 @@ public class LiderCronJob {
 	
 	@Autowired
 	private ConfigurationService configurationService;
+	
+	@Autowired
+	private TaskSchedulerService taskScheduledService;
 
 	
 	@Scheduled(cron = "0 55 10 * * ?")
@@ -77,4 +81,9 @@ public class LiderCronJob {
 			logger.info("Executed cron job for machine update");
 		}
     }
+	
+	@Scheduled(cron = "0 */2 * * * ?")
+	public void taskJob() throws  Throwable {
+		taskScheduledService.sendScheduledTaskMesasage();
+	}
 }

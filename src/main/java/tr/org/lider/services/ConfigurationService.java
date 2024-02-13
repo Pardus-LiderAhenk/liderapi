@@ -544,7 +544,9 @@ public class ConfigurationService {
 		return getConfigParams().getMachineEventDay();
 	}
 
-
+	public int getClientSize() {
+		return getConfigParams().getClientSize();
+	}
 	
 	//	public String getEmailHost() {
 	//		return getConfigParams().getEmailHost();
