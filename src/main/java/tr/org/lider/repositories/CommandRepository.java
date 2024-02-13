@@ -56,4 +56,7 @@ public interface CommandRepository extends BaseJpaRepository<CommandImpl, Long>{
 	
 	@Query("SELECT c FROM CommandImpl c WHERE c.policy is not null")
 	List<CommandImpl> findCommandAllByPolicy();
+	
+	@Query("SELECT c FROM CommandImpl c WHERE c.id = :commandId")
+	List<CommandImpl> findCommandId(@Param("commandId") Long commandId);
 }
