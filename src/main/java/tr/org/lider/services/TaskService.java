@@ -255,16 +255,16 @@ public class TaskService {
 								List<LdapEntry> member= ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.OBJECT);
 								if(member!=null && member.size()>0 ) {
 									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0)))
-										//if(agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Active)) {
+										if(!agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Passive)) {
 											targetEntries.add(member.get(0));
-										//}
-									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0))) {
-										AgentStatus agentStatus = agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus();
-
-										if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
-										    targetEntries.add(member.get(0));
 										}
-									}										
+//									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0))) {
+//										AgentStatus agentStatus = agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus();
+//
+//										if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
+//										    targetEntries.add(member.get(0));
+//										}
+//									}										
 								}
 							} catch (LdapException e) {
 								// TODO Auto-generated catch block
