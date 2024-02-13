@@ -1,19 +1,13 @@
 package tr.org.lider.services;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandImpl;
-import tr.org.lider.entities.PluginTask;
 import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.messaging.messages.ExecuteTaskMessageImpl;
 import tr.org.lider.messaging.messages.FileServerConf;
@@ -43,7 +37,10 @@ public class TaskSchedulerService {
 	
 	@Autowired
 	private ConfigurationService configService;
-
+	
+	@Autowired
+	private ConfigurationService configurationService;
+	
 	
 	public IRestResponse sendScheduledTaskMesasage() throws Throwable {
 		
@@ -56,7 +53,7 @@ public class TaskSchedulerService {
 		
 		String taskJsonString = null;
 		
-		int limit = Math.min(5, executionList.size());
+		int limit = Math.min(configurationService.getClientSize(), executionList.size());
 
 		for(int i=0;i<limit;i++) {		
 			

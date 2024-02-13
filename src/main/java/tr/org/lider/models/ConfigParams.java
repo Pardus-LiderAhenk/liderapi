@@ -140,6 +140,7 @@ public class ConfigParams {
 	private String ahenkRepoKeyAddress;
 	private Boolean machineEventStatus;
 	private int machineEventDay;
+	private int clientSize;
 
 	//plugin settings
 	private Boolean allowVNCConnectionWithoutPermission;
@@ -148,7 +149,7 @@ public class ConfigParams {
 	private String pardusRepoAddress;
 	private String pardusRepoComponent;
 	private Boolean enableDelete4Directory;
-	
+
 	private RegistrationTemplateType selectedRegistrationType;
 	
 	public ConfigParams() {
@@ -207,6 +208,8 @@ public class ConfigParams {
 		this.allowDynamicDNSUpdate = false;
 		this.machineEventStatus = false;
 		this.machineEventDay = 120;
+		this.clientSize = 1;
+		
 		
 		this.selectedRegistrationType = RegistrationTemplateType.DEFAULT;
 		this.enableDelete4Directory = false;
@@ -981,6 +984,14 @@ public class ConfigParams {
 
 	public void setMachineEventDay(int machineEventDay) {
 		this.machineEventDay = machineEventDay;
+	}
+	
+	public int getClientSize() {
+		return clientSize;
+	}
+
+	public void setClientSize(int clientSize) {
+		this.clientSize = clientSize;
 	}
 
 }

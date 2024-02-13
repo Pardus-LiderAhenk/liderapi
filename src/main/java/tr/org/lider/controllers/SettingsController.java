@@ -378,7 +378,8 @@ public class SettingsController {
 			@RequestParam (value = "sudoRoleType", required = true) SudoRoleType sudoRoleType,
 			@RequestParam (value = "selectedRegistrationType", required = true) RegistrationTemplateType selectedRegistrationType,
 			@RequestParam (value = "machineEventStatus", required = true) Boolean machineEventStatus,
-			@RequestParam (value = "machineEventDay") int machineEventDay){
+			@RequestParam (value = "machineEventDay") int machineEventDay,
+			@RequestParam (value= "clientSize") int clientSize){
 		
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setDisableLocalUser(disableLocalUser);
@@ -389,6 +390,7 @@ public class SettingsController {
 		configParams.setSelectedRegistrationType(selectedRegistrationType);
 		configParams.setMachineEventStatus(machineEventStatus);
 		configParams.setMachineEventDay(machineEventDay);
+		configParams.setClientSize(clientSize);
 		
 		Map<String, Object> requestData = new HashMap<String, Object>();
 		requestData.put("domainType",configParams.getDomainType());
