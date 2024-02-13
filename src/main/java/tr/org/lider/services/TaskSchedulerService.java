@@ -52,11 +52,13 @@ public class TaskSchedulerService {
 	public IRestResponse sendScheduledTaskMesasage() throws Throwable {
 		
 		ILiderMessage scheduledMessage = null;
-		
-		Long taskId = taskRepository.findByTaskId().get(0).longValue();				
-		List<CommandExecutionImpl> executionList = commandExecutionRepository.findCommandExecution(taskId);
+		List<CommandExecutionImpl> executionList = null;
 		String taskJsonString = null;
-
+		Long taskId = taskRepository.findByTaskId().get(0).longValue();	
+		
+		if(taskId != null) {
+			executionList = commandExecutionRepository.findCommandExecution(taskId);
+		}
 		
 		try {
 			if(executionList != null) {

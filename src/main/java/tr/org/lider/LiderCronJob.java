@@ -40,12 +40,12 @@ public class LiderCronJob {
 	@Autowired
 	private TaskSchedulerService taskScheduledService;
 
+	Logger logger = LoggerFactory.getLogger(this.getClass());
+
 	
 	@Scheduled(cron = "0 55 10 * * ?")
     public void dailyCronJob() {
 		
-		Logger logger = LoggerFactory.getLogger(this.getClass());
-
 		
 		if(configurationService.getMachineEventStatus() == true) {
 			Date today = new Date();
@@ -82,8 +82,15 @@ public class LiderCronJob {
 		}
     }
 	
-	@Scheduled(cron = "0 */2 * * * ?")
-	public void taskJob() throws  Throwable {
-		taskScheduledService.sendScheduledTaskMesasage();
+	@Scheduled(cron = "0 */1 * * * ?")
+	public void taskJob() {
+		try {
+			taskScheduledService.sendScheduledTaskMesasage();
+		} catch (IndexOutOfBoundsException e) {
+	       logger.info("Array size is not enough" + e.getMessage());
+	    } catch (Throwable t) {
+	    	logger.info(t.getMessage());
+	    }
+		
 	}
 }
