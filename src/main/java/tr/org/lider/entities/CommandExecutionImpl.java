@@ -96,13 +96,13 @@ public class CommandExecutionImpl implements Serializable {
 							// execution, false otherwise
 	
 	@Column(name = "COMMAND_SEND")
-	private boolean commandSend = false;
+	private Boolean commandSend = false;
 
 	public CommandExecutionImpl() {
 	}
 
 	public CommandExecutionImpl(Long id, CommandImpl command, String uid, DNType dnType, String dn, Date createDate,
-			List<CommandExecutionResultImpl> commandExecutionResults, boolean online, boolean commandSend) {
+			List<CommandExecutionResultImpl> commandExecutionResults, boolean online, Boolean commandSend) {
 		this.id = id;
 		this.command = command;
 		this.uid = uid;
@@ -176,7 +176,6 @@ public class CommandExecutionImpl implements Serializable {
 		}
 	}
 
-
 	public String getDn() {
 		return dn;
 	}
@@ -193,7 +192,6 @@ public class CommandExecutionImpl implements Serializable {
 	public void setCommandExecutionResults(List<CommandExecutionResultImpl> commandExecutionResults) {
 		this.commandExecutionResults = commandExecutionResults;
 	}
-
 
 	public void addCommandExecutionResult(CommandExecutionResultImpl commandExecutionResult) {
 		if (commandExecutionResults == null) {
@@ -224,14 +222,13 @@ public class CommandExecutionImpl implements Serializable {
 		this.online = online;
 	}
 	
-	public boolean isCommanSend() {
-		return commandSend;
+	public Boolean isCommanSend() {
+		return commandSend != null ? commandSend : true;
 	}
 
-	public void setCommanSend(boolean commandSend) {
-		this.commandSend = commandSend;
+	public void setCommanSend(Boolean commandSend) {
+	    this.commandSend = commandSend != null ? commandSend : true;
 	}
-
 
 	public String toJson() {
 		ObjectMapper mapper = new ObjectMapper();
