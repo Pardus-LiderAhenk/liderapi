@@ -98,12 +98,14 @@ public class ConfigParams {
 	private String mailPassword;
 	private String mailHost;
 	private Integer mailSmtpPort;
+	private Integer mailPort;
 	private Boolean mailSmtpAuth;
 	private Boolean mailSmtpStartTlsEnable;
 	private Boolean mailSmtpSslEnable;
 	private Integer mailSmtpConnTimeout;
 	private Integer mailSmtpTimeout;
 	private Integer mailSmtpWriteTimeout;
+	private Boolean mailTlsEnabled;
 
 	private Boolean mailSendOnTaskCompletion;
 	private Long mailCheckTaskCompletionPeriod;
@@ -542,7 +544,23 @@ public class ConfigParams {
 	public void setMailAddress(String mailAddress) {
 		this.mailAddress = mailAddress;
 	}
+	
+	public Boolean getMailTlsEnabled() {
+		return mailTlsEnabled;
+	}
 
+	public void setMailTlsEnabled(Boolean mailTlsEnabled) {
+		this.mailTlsEnabled = mailTlsEnabled;
+	}
+
+	public Integer getMailPort() {
+		return mailPort;
+	}
+
+	public void setMailPort(Integer mailPort) {
+		this.mailPort = mailPort;
+	}
+	
 	public String getMailPassword() {
 		return mailPassword;
 	}
