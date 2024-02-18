@@ -92,7 +92,7 @@ public class TaskService {
 
 		// Getting target entries 
 		/**
-		 * Getting target entries.. selected entries can be group ahhenk or organizational unit.
+		 * Getting target entries.. selected entries can be group ahenk or organizational unit.
 		 * targetEntries must be only Ahenk. 
 		 * getTargetList method finds all suitable ahenks from selected group or organizational unit
 		 * 
@@ -112,17 +112,16 @@ public class TaskService {
 		String fragmentationLogMessage = "";
 		if (request.getEntryList().get(0).getType().equals(DNType.GROUP)) {
 			if(task.isTaskParts() == true) {
-				fragmentationLogMessage = "[ "+ request.getEntryList().get(0).getDistinguishedName() + " ] istemci grubuna [ " + commandIdForLog + " ] görevi parçalı olarak gönderildi.";
+				fragmentationLogMessage = "[ " + commandIdForLog + " ] task was sent to the  [ "+ request.getEntryList().get(0).getDistinguishedName() + " ] client group in parts.";
 
 			}else {
 				
-				logMessage = "[ "+ request.getEntryList().get(0).getDistinguishedName() + " ] istemci grubuna [ " + commandIdForLog + " ] görevi gönderildi.";
-
+				logMessage = "[ " + commandIdForLog + " ] task sent to  [ "+ request.getEntryList().get(0).getDistinguishedName() + " ] client group.";
 			}
 			
 		} 
 		else {
-			logMessage = "[ "+ request.getEntryList().get(0).get(configService.getAgentLdapJidAttribute()) +" ] istemciye [ " + commandIdForLog + " ] görevi gönderildi.";
+			logMessage = "[ " + commandIdForLog + " ] task sent to  [ "+ request.getEntryList().get(0).getDistinguishedName() + " ] client group.";
 		}
 		try {
 			if(task.isTaskParts() == true) {
