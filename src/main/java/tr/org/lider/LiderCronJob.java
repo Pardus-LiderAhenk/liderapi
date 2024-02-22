@@ -82,7 +82,7 @@ public class LiderCronJob {
 		}
     }
 	
-	@Scheduled(cron = "0 */5 * * * ?")
+	@Scheduled(cron = "0 */20 * * * ?")
 	public void taskJob() {
 		try {
 			taskScheduledService.sendScheduledTaskMesasage();

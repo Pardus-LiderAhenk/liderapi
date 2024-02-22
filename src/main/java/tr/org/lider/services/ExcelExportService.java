@@ -415,7 +415,10 @@ public class ExcelExportService {
 				cell.setCellStyle(csBordered);
 			
 			cell = row.createCell(colCount++);
-			cell.setCellValue("HAYIR");
+			if(command.getTask().getCronExpression() != null) {
+				cell.setCellValue("EVET");
+			}else
+				cell.setCellValue("HAYIR");
 			cell.setCellStyle(csBordered);
 			
 			colCount= 0;
