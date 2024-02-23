@@ -17,7 +17,7 @@ public class RdpClient implements Serializable {
     @Column(name = "CLIENT_ID", unique = true, nullable = false)
     private Long id;
 
-    @Column(name = "HOST", nullable = false)
+    @Column(name = "HOST", unique = true, nullable = false)
     private String host;
 
     @Column(name = "USERNAME", nullable = false)
