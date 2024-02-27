@@ -23,4 +23,11 @@ public class ScheduledTaskReportService {
 
 		return commands;
 	}
+	public Page<CommandImpl> findAllCommandsFilteredByActive(ScheduledTaskDTO scheduledTaskDTO) {
+		
+		Page<CommandImpl> commands = scheduledTaskCB.filterActiveCommands(scheduledTaskDTO);
+
+		return commands;
+		
+	}
 }
