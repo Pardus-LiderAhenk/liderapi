@@ -77,7 +77,16 @@ public class RdpClientController {
         String username = data.get("username");
         String hostname = data.get("hostname");
         String description = data.get("description");
+        
+        RdpClient existingClient = rdpClientRepository.findByHost(host);
 
+        if (existingClient != null) {
+        	logger.error("Already exist");
+        	return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(false);
+        }
+        
         try {
             rdpClientService.saveRdpClient(host, username, hostname, description);
             return ResponseEntity
@@ -105,7 +114,15 @@ public class RdpClientController {
         String description = data.get("description");
 
         RdpClient rdpClient = rdpClientService.getSavedRdpClientById(id);
+        RdpClient rdpClientHost = rdpClientService.getSavedRdpClientByHost(host);
 
+        if (rdpClientHost != null && !rdpClientHost.getId().equals(rdpClient.getId())) {
+            logger.error("The host is already used by another client.");
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(false);
+        }
+        
         rdpClient.setUsername(username);
         rdpClient.setHost(host);
         rdpClient.setHostname(hostname);
