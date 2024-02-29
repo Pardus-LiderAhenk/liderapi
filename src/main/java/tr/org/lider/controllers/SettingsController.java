@@ -295,14 +295,14 @@ public class SettingsController {
 	@Operation(summary = "Update email settings", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Email settings updated."),
-			  @ApiResponse(responseCode = "417", description = "could not update email settings. Unexpected error occured.", 
+			  @ApiResponse(responseCode = "417", description = "Could not update email settings. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/update/email-settings", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ConfigParams>  updateEmailSettings(ConfigParams settingsDTO) {
 		
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setMailHost(settingsDTO.getMailHost());
-		configParams.setMailPassword(settingsDTO.getMailPassword());
+		//configParams.setMailPassword(settingsDTO.getMailPassword());
 		configParams.setMailPort(settingsDTO.getMailPort());
 		configParams.setMailSmtpAuth(settingsDTO.getMailSmtpAuth());
 		configParams.setMailTlsEnabled(settingsDTO.getMailTlsEnabled());
@@ -335,6 +335,50 @@ public class SettingsController {
 				.body(configurationService.updateConfigParams(configParams));
 				
 	}
+	
+	@Operation(summary = "Updated email password", description = "", tags = { "settings" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Mail server password has been updated"),
+			  @ApiResponse(responseCode = "400", description = "Could not update email password. Bad request", 
+			    content = @Content(schema = @Schema(implementation = String.class))),
+			  @ApiResponse(responseCode = "500", description = "Could not update email password.Internal server error.", 
+			    content = @Content(schema = @Schema(implementation = String.class)))})
+	@PostMapping(value = "/update/email-password",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> matchesEmailPassword(String mailPassword,String newMailPassword) {
+	    try {
+	        ConfigParams configParams = configurationService.getConfigParams();
+	        if(configParams.getMailPassword().equals(mailPassword)){
+	            configParams.setMailPassword(newMailPassword);
+	            Map<String, Object> requestData = new HashMap<String, Object>();
+	            requestData.put("mailPassword",configParams.getMailPassword());
+	            ObjectMapper dataMapper = new ObjectMapper();
+	            String jsonString = dataMapper.writeValueAsString(requestData);
+	    		String log = "Mail server password has been updated";
+	            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+	            configurationService.updateConfigParams(configParams);
+	            return ResponseEntity
+	                    .status(HttpStatus.OK)
+	                    .body(true);
+	        }
+	        else if(!configParams.getMailPassword().equals(mailPassword)) {
+				HttpHeaders headers = new HttpHeaders();
+				return ResponseEntity
+			            .status(HttpStatus.BAD_REQUEST)
+			            .headers(headers)
+			            .build();
+	        }
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .headers(headers)
+    				.build();
+	    }
+		return null;
+	}
+
 	
 	@Operation(summary = "Update other settings", description = "", tags = { "settings" })
 	@ApiResponses(value = { 

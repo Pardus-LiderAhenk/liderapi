@@ -363,6 +363,10 @@ public class ConfigurationService {
 	public Integer getMailSmtpPort() {
 		return getConfigParams().getMailSmtpPort();
 	}
+	
+	public Integer getMailPort() {
+		return getConfigParams().getMailPort();
+	}
 
 	public Boolean getMailSmtpAuth() {
 		return getConfigParams().getMailSmtpAuth();
@@ -575,7 +579,7 @@ public class ConfigurationService {
 	public Boolean isEmailConfigurationComplete() {
 		if(getConfigParams().getMailHost() != null && !getConfigParams().getMailHost().equals("")
 				&& getConfigParams().getMailPassword() != null && !getConfigParams().getMailPassword().equals("")
-				&& getConfigParams().getMailSmtpPort() != null && !getConfigParams().getMailSmtpPort().equals("")
+				&& getConfigParams().getMailPort() != null && !getConfigParams().getMailPort().equals("")
 				&& getConfigParams().getMailAddress() != null && !getConfigParams().getMailAddress().equals("")) {
 			return true;
 		}
