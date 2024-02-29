@@ -291,6 +291,48 @@ public class SettingsController {
 				.status(HttpStatus.OK)
 				.body(configurationService.updateConfigParams(configParams));
 	}
+	@Operation(summary = "Updated file server password", description = "", tags = { "settings" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "File server password has been updated"),
+			  @ApiResponse(responseCode = "400", description = "Could not update file server password. Bad request", 
+			    content = @Content(schema = @Schema(implementation = String.class))),
+			  @ApiResponse(responseCode = "500", description = "Could not update file server password.Internal server error.", 
+			    content = @Content(schema = @Schema(implementation = String.class)))})
+	@PostMapping(value = "/update/file-password",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> updateFileServerPassword(String fileServerPassword,String newFileServerPassword) {
+	    try {
+	        ConfigParams configParams = configurationService.getConfigParams();
+	        if(configParams.getFileServerPassword().equals(fileServerPassword)){
+	            configParams.setFileServerPassword(newFileServerPassword);
+	            Map<String, Object> requestData = new HashMap<String, Object>();
+	            requestData.put("fileServerPassword",configParams.getFileServerPassword());
+	            ObjectMapper dataMapper = new ObjectMapper();
+	            String jsonString = dataMapper.writeValueAsString(requestData);
+	    		String log = "File server password has been updated";
+	            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+	            configurationService.updateConfigParams(configParams);
+	            return ResponseEntity
+	                    .status(HttpStatus.OK)
+	                    .body(true);
+	        }
+	        else if(!configParams.getFileServerPassword().equals(fileServerPassword)) {
+				HttpHeaders headers = new HttpHeaders();
+				return ResponseEntity
+			            .status(HttpStatus.BAD_REQUEST)
+			            .headers(headers)
+			            .build();
+	        }
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .headers(headers)
+    				.build();
+	    }
+		return null;
+	}
 
 	@Operation(summary = "Update email settings", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
@@ -298,7 +340,7 @@ public class SettingsController {
 			  @ApiResponse(responseCode = "417", description = "Could not update email settings. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/update/email-settings", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<ConfigParams>  updateEmailSettings(ConfigParams settingsDTO) {
+	public ResponseEntity<ConfigParams> updateEmailSettings(ConfigParams settingsDTO) {
 		
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setMailHost(settingsDTO.getMailHost());
@@ -344,7 +386,7 @@ public class SettingsController {
 			  @ApiResponse(responseCode = "500", description = "Could not update email password.Internal server error.", 
 			    content = @Content(schema = @Schema(implementation = String.class)))})
 	@PostMapping(value = "/update/email-password",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> matchesEmailPassword(String mailPassword,String newMailPassword) {
+	public ResponseEntity<Boolean> updateEmailServerPassword(String mailPassword,String newMailPassword) {
 	    try {
 	        ConfigParams configParams = configurationService.getConfigParams();
 	        if(configParams.getMailPassword().equals(mailPassword)){
