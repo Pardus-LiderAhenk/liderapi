@@ -252,7 +252,7 @@ public class SettingsController {
 	@Operation(summary = "Updated xmpp server password", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "File xmpp password has been updated"),
-			  @ApiResponse(responseCode = "400", description = "Could not update xmpp server password. Bad request", 
+			  @ApiResponse(responseCode = "403", description = "Could not update xmpp server password. Bad request", 
 			    content = @Content(schema = @Schema(implementation = String.class))),
 			  @ApiResponse(responseCode = "500", description = "Could not update xmpp server password.Internal server error.", 
 			    content = @Content(schema = @Schema(implementation = String.class)))})
@@ -274,11 +274,9 @@ public class SettingsController {
 	                    .body(true);
 	        }
 	        else if(!configParams.getFileServerPassword().equals(xmppServerPassword)) {
-				HttpHeaders headers = new HttpHeaders();
 				return ResponseEntity
-			            .status(HttpStatus.BAD_REQUEST)
-			            .headers(headers)
-			            .build();
+			            .status(HttpStatus.FORBIDDEN)
+			            .body(false);
 	        }
 	        
 	    } catch (Exception e) {
@@ -337,7 +335,7 @@ public class SettingsController {
 	@Operation(summary = "Updated file server password", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "File server password has been updated"),
-			  @ApiResponse(responseCode = "400", description = "Could not update file server password. Bad request", 
+			  @ApiResponse(responseCode = "403", description = "Could not update file server password. Bad request", 
 			    content = @Content(schema = @Schema(implementation = String.class))),
 			  @ApiResponse(responseCode = "500", description = "Could not update file server password.Internal server error.", 
 			    content = @Content(schema = @Schema(implementation = String.class)))})
@@ -359,11 +357,9 @@ public class SettingsController {
 	                    .body(true);
 	        }
 	        else if(!configParams.getFileServerPassword().equals(fileServerPassword)) {
-				HttpHeaders headers = new HttpHeaders();
 				return ResponseEntity
-			            .status(HttpStatus.BAD_REQUEST)
-			            .headers(headers)
-			            .build();
+			            .status(HttpStatus.FORBIDDEN)
+			            .body(false);
 	        }
 	        
 	    } catch (Exception e) {
@@ -424,7 +420,7 @@ public class SettingsController {
 	@Operation(summary = "Updated email password", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Mail server password has been updated"),
-			  @ApiResponse(responseCode = "400", description = "Could not update email password. Bad request", 
+			  @ApiResponse(responseCode = "403", description = "Could not update email password. Bad request", 
 			    content = @Content(schema = @Schema(implementation = String.class))),
 			  @ApiResponse(responseCode = "500", description = "Could not update email password.Internal server error.", 
 			    content = @Content(schema = @Schema(implementation = String.class)))})
@@ -446,11 +442,9 @@ public class SettingsController {
 	                    .body(true);
 	        }
 	        else if(!configParams.getMailPassword().equals(mailPassword)) {
-				HttpHeaders headers = new HttpHeaders();
 				return ResponseEntity
-			            .status(HttpStatus.BAD_REQUEST)
-			            .headers(headers)
-			            .build();
+			            .status(HttpStatus.FORBIDDEN)
+			            .body(false);
 	        }
 	        
 	    } catch (Exception e) {
