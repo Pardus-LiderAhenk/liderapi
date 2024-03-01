@@ -197,7 +197,7 @@ public class SettingsController {
 		configParams.setXmppHost(settingsDTO.getXmppHost());
 		configParams.setXmppPort(settingsDTO.getXmppPort());
 		configParams.setXmppUsername(settingsDTO.getXmppUsername());
-		configParams.setXmppPassword(settingsDTO.getXmppPassword());
+		//configParams.setXmppPassword(settingsDTO.getXmppPassword());
 		configParams.setXmppMaxRetryConnectionCount(settingsDTO.getXmppMaxRetryConnectionCount());
 		configParams.setXmppPacketReplayTimeout(settingsDTO.getXmppPacketReplayTimeout());
 		configParams.setXmppPingTimeout(settingsDTO.getXmppPingTimeout());
@@ -247,6 +247,49 @@ public class SettingsController {
 				.status(HttpStatus.OK)
 				.body(updatedParams);
 				
+	}
+	
+	@Operation(summary = "Updated xmpp server password", description = "", tags = { "settings" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "File xmpp password has been updated"),
+			  @ApiResponse(responseCode = "400", description = "Could not update xmpp server password. Bad request", 
+			    content = @Content(schema = @Schema(implementation = String.class))),
+			  @ApiResponse(responseCode = "500", description = "Could not update xmpp server password.Internal server error.", 
+			    content = @Content(schema = @Schema(implementation = String.class)))})
+	@PostMapping(value = "/update/xmpp-password",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> updateXmppServerPassword(String xmppServerPassword,String newXmppServerPassword) {
+	    try {
+	        ConfigParams configParams = configurationService.getConfigParams();
+	        if(configParams.getXmppPassword().equals(xmppServerPassword)){
+	            configParams.setXmppPassword(newXmppServerPassword);
+	            Map<String, Object> requestData = new HashMap<String, Object>();
+	            requestData.put("fileServerPassword",configParams.getFileServerPassword());
+	            ObjectMapper dataMapper = new ObjectMapper();
+	            String jsonString = dataMapper.writeValueAsString(requestData);
+	    		String log = "File server password has been updated";
+	            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+	            configurationService.updateConfigParams(configParams);
+	            return ResponseEntity
+	                    .status(HttpStatus.OK)
+	                    .body(true);
+	        }
+	        else if(!configParams.getFileServerPassword().equals(xmppServerPassword)) {
+				HttpHeaders headers = new HttpHeaders();
+				return ResponseEntity
+			            .status(HttpStatus.BAD_REQUEST)
+			            .headers(headers)
+			            .build();
+	        }
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .headers(headers)
+    				.build();
+	    }
+		return null;
 	}
 
 	@Operation(summary = "Update file server ", description = "", tags = { "settings" })
