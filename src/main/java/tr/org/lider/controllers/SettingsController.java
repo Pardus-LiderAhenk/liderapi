@@ -136,7 +136,7 @@ public class SettingsController {
 		configParams.setLdapServer(settingsDTO.getLdapServer());
 		configParams.setLdapPort(settingsDTO.getLdapPort());
 		configParams.setLdapUsername(settingsDTO.getLdapUsername());
-		configParams.setLdapPassword(settingsDTO.getLdapPassword());
+		//configParams.setLdapPassword(settingsDTO.getLdapPassword());
 		configParams.setAdIpAddress(settingsDTO.getAdIpAddress());
 		configParams.setAdPort(settingsDTO.getAdPort());
 		configParams.setAdDomainName(settingsDTO.getAdDomainName());
@@ -180,6 +180,47 @@ public class SettingsController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(configurationService.updateConfigParams(configParams));
+	}
+	
+	@Operation(summary = "Updated ldap password", description = "", tags = { "settings" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Ldap password has been updated"),
+			  @ApiResponse(responseCode = "403", description = "Could not update ldap password. Bad request", 
+			    content = @Content(schema = @Schema(implementation = String.class))),
+			  @ApiResponse(responseCode = "500", description = "Could not update ldap password.Internal server error.", 
+			    content = @Content(schema = @Schema(implementation = String.class)))})
+	@PostMapping(value = "/update/ldap-password",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> updateLdapPassword(String ldapPassword,String newldapPassword) {
+	    try {
+	        ConfigParams configParams = configurationService.getConfigParams();
+	        if(configParams.getLdapPassword().equals(ldapPassword)){
+	            configParams.setLdapPassword(newldapPassword);
+	            Map<String, Object> requestData = new HashMap<String, Object>();
+	            requestData.put("ldapPassword",configParams.getMailPassword());
+	            ObjectMapper dataMapper = new ObjectMapper();
+	            String jsonString = dataMapper.writeValueAsString(requestData);
+	    		String log = "Ldap password has been updated";
+	            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+	            configurationService.updateConfigParams(configParams);
+	            return ResponseEntity
+	                    .status(HttpStatus.OK)
+	                    .body(true);
+	        }
+	        else if(!configParams.getLdapPassword().equals(ldapPassword)) {
+				return ResponseEntity
+			            .status(HttpStatus.FORBIDDEN)
+			            .body(false);
+	        }
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .headers(headers)
+    				.build();
+	    }
+		return null;
 	}
 
 	@Operation(summary = "Update xmpp server setting", description = "", tags = { "settings" })
