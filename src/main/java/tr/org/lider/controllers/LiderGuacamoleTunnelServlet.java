@@ -2,6 +2,7 @@ package tr.org.lider.controllers;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -24,9 +25,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.OperationType;
+import tr.org.lider.repositories.OperationLogRepository;
+import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.OperationLogService;
+
 
 @Controller
 public class LiderGuacamoleTunnelServlet extends GuacamoleHTTPTunnelServlet {
@@ -43,45 +50,39 @@ public class LiderGuacamoleTunnelServlet extends GuacamoleHTTPTunnelServlet {
 	private static String USERNAME = "";
 	private static String PASSWORD = "";
 	private static String DOMAIN = "";
-
+	private static String LIDERUSER = "";
+	
+	
 	@Autowired
-	private OperationLogService operationLogService;
+	private OperationLogRepository operationLogRepository;
 
 	@Override
 	protected GuacamoleTunnel doConnect(HttpServletRequest request) {
 
-		// Create our configuration
-//    		PROTOCOL="rdp";
-//    		HOST="rdp";
-//    		PORT="rdp";
-//    		PASSWORD="rdp";
-//    		HOST="192.168.56.108";
-//    		PROTOCOL="vnc";
-//    		PORT = "5900";
-//    		PASSWORD ="123";
-
 		if (PROTOCOL != "" && HOST != "" && PORT != "" && PASSWORD != "") {
-
 			logger.info("Starting Remote Connection HOST: " + HOST + " PORT: " + PORT + " PROTOCOL" + PROTOCOL);
-			
 			String host = HOST.replace("'", "");
 			
 			if (host != null) {
 				try {
 					GuacamoleConfiguration config = new GuacamoleConfiguration();
 					config.setProtocol(PROTOCOL);
+					
 					if (PROTOCOL.equals("ssh")) {
+						
 						config.setParameter("hostname", host.trim());
 						config.setParameter("port", PORT);
 						config.setParameter("password", PASSWORD);
 						config.setParameter("username", USERNAME);
+						config.setParameter("lideruser", LIDERUSER);
 					} else if (PROTOCOL.equals("vnc")) {
-
+						
 						config.setParameter("hostname", host.trim());
 						logger.info("Connection remote to host: " + host.trim());
 						logger.info("Connection remote to password: " + PASSWORD);
 						config.setParameter("port", PORT);
 						config.setParameter("password", PASSWORD);
+						config.setParameter("lideruser", LIDERUSER);
 					} else if (PROTOCOL.equals("rdp")) {
 
 						config.setParameter("hostname", HOST);
@@ -90,21 +91,36 @@ public class LiderGuacamoleTunnelServlet extends GuacamoleHTTPTunnelServlet {
 						config.setParameter("password", PASSWORD);
 						config.setParameter("domain", DOMAIN);
 						config.setParameter("ignore-cert", "true");
-
+						config.setParameter("lideruser", LIDERUSER);
 					}
 					// Connect to guacd
 					GuacamoleSocket socket = new ConfiguredGuacamoleSocket(new InetGuacamoleSocket("localhost", 4822),
 							config);
 					// Return a new tunnel which uses the connected socket
 					GuacamoleTunnel tunnel = new SimpleGuacamoleTunnel(socket);
+					
+					System.out.println("Remote Access Task Run. Host:" + HOST + " Protokol: " + PROTOCOL
+							+ " User:" + USERNAME + " Lider User:" + LIDERUSER);
+					
+					OperationLogImpl operationLogImpl= new OperationLogImpl();
+					operationLogImpl.setCreateDate(new Date());
+					operationLogImpl.setCrudType(OperationType.EXECUTE_TASK);
+					operationLogImpl.setLogMessage("Connected to the device with the IP address "+ HOST + " using the " + PROTOCOL.toUpperCase());
+					operationLogImpl.setRequestData(null);
+					operationLogImpl.setTaskId(null);
+					operationLogImpl.setProfileId(null);
+					operationLogImpl.setPolicyId(null);
 
-					System.out.println("Uzak Erişim Görevi Çalıştırıldı. Host:" + HOST + " Protokol: " + PROTOCOL
-							+ " User:" + USERNAME);
+					if (AuthenticationService.isLogged()) {
+						String userId = AuthenticationService.getDn();
+						operationLogImpl.setUserId(userId);
+					} else {
+						operationLogImpl.setUserId(LIDERUSER);
+					}
 
-					operationLogService.saveOperationLog(OperationType.EXECUTE_TASK,
-							"Uzak Erişim Görevi Çalıştırıldı. Host:" + HOST + " Protokol: " + PROTOCOL + " User:"
-									+ USERNAME,
-							null);
+					HttpServletRequest request1 = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+					operationLogImpl.setRequestIp(request1.getRemoteAddr());
+					operationLogRepository.save(operationLogImpl);
 
 					return tunnel;
 
@@ -120,7 +136,6 @@ public class LiderGuacamoleTunnelServlet extends GuacamoleHTTPTunnelServlet {
 		} else {
 			return null;
 		}
-
 	}
 
 	private boolean checkIpPortAvailable(String ip, String port) {
@@ -155,13 +170,15 @@ public class LiderGuacamoleTunnelServlet extends GuacamoleHTTPTunnelServlet {
 	@RequestMapping(value = "/sendremote", method = { RequestMethod.POST })
 	public ResponseEntity<String> getRemote(@RequestParam(value = "protocol") String protocol,
 			@RequestParam(value = "host") String host, @RequestParam(value = "port") String port,
-			@RequestParam(value = "username") String username, @RequestParam(value = "password") String password) {
+			@RequestParam(value = "username") String username, @RequestParam(value = "password") String password,
+			@RequestParam(value = "lideruser") String lideruser){
 
 		LiderGuacamoleTunnelServlet.PROTOCOL = protocol;
 		LiderGuacamoleTunnelServlet.HOST = host;
 		LiderGuacamoleTunnelServlet.PORT = port;
 		LiderGuacamoleTunnelServlet.USERNAME = username;
 		LiderGuacamoleTunnelServlet.PASSWORD = password;
+		LiderGuacamoleTunnelServlet.LIDERUSER = lideruser;
 		return new ResponseEntity<String>("OK", HttpStatus.OK);
 	}
 
