@@ -231,7 +231,7 @@ public class SettingsController {
 	        if(SettingsPasswordType.XMPP_PASSWORD.getValue().equals(type)) {
 	        	if(configParams.getXmppPassword().equals(oldPassword)){
 		            configParams.setXmppPassword(newPassword);
-		            requestData.put("oldPassword",configParams.getFileServerPassword());
+		            requestData.put("oldPassword",configParams.getXmppPassword());
 		            String jsonString = dataMapper.writeValueAsString(requestData);
 		    		String log = "File server password has been updated";
 		            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
