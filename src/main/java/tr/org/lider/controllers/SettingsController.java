@@ -41,11 +41,8 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.OLCAccessRule;
 import tr.org.lider.message.service.IMessagingService;
-import tr.org.lider.messaging.enums.DomainType;
-import tr.org.lider.messaging.enums.Protocol;
-import tr.org.lider.messaging.enums.SudoRoleType;
+import tr.org.lider.messaging.enums.SettingsPasswordType;
 import tr.org.lider.models.ConfigParams;
-import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.ConfigurationService;
@@ -136,13 +133,11 @@ public class SettingsController {
 		configParams.setLdapServer(settingsDTO.getLdapServer());
 		configParams.setLdapPort(settingsDTO.getLdapPort());
 		configParams.setLdapUsername(settingsDTO.getLdapUsername());
-		//configParams.setLdapPassword(settingsDTO.getLdapPassword());
 		configParams.setAdIpAddress(settingsDTO.getAdIpAddress());
 		configParams.setAdPort(settingsDTO.getAdPort());
 		configParams.setAdDomainName(settingsDTO.getAdDomainName());
 		configParams.setAdAdminUserName(settingsDTO.getAdAdminUserName());
 		configParams.setAdAdminUserFullDN(settingsDTO.getAdAdminUserFullDN());
-		configParams.setAdAdminPassword(settingsDTO.getAdAdminPassword());
 		configParams.setAdHostName(settingsDTO.getAdHostName());
 		configParams.setAdUseSSL(settingsDTO.getAdUseSSL());
 		configParams.setAdUseTLS(settingsDTO.getAdUseTLS());
@@ -182,34 +177,110 @@ public class SettingsController {
 				.body(configurationService.updateConfigParams(configParams));
 	}
 	
-	@Operation(summary = "Updated ldap password", description = "", tags = { "settings" })
+	@Operation(summary = "Updated settings password", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Ldap password has been updated"),
-			  @ApiResponse(responseCode = "403", description = "Could not update ldap password. Bad request", 
+			  @ApiResponse(responseCode = "200", description = "Settings password has been updated"),
+			  @ApiResponse(responseCode = "403", description = "Could not update settings password. Bad request", 
 			    content = @Content(schema = @Schema(implementation = String.class))),
-			  @ApiResponse(responseCode = "500", description = "Could not update ldap password.Internal server error.", 
+			  @ApiResponse(responseCode = "500", description = "Could not update settings password.Internal server error.", 
 			    content = @Content(schema = @Schema(implementation = String.class)))})
-	@PostMapping(value = "/update/ldap-password",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> updateLdapPassword(String ldapPassword,String newldapPassword) {
+	@PostMapping(value = "/update/settings-password",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> updateLdapPassword(String type, String oldPassword,String newPassword) {
 	    try {
 	        ConfigParams configParams = configurationService.getConfigParams();
-	        if(configParams.getLdapPassword().equals(ldapPassword)){
-	            configParams.setLdapPassword(newldapPassword);
-	            Map<String, Object> requestData = new HashMap<String, Object>();
-	            requestData.put("ldapPassword",configParams.getMailPassword());
-	            ObjectMapper dataMapper = new ObjectMapper();
-	            String jsonString = dataMapper.writeValueAsString(requestData);
-	    		String log = "Ldap password has been updated";
-	            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
-	            configurationService.updateConfigParams(configParams);
-	            return ResponseEntity
-	                    .status(HttpStatus.OK)
-	                    .body(true);
+            Map<String, Object> requestData = new HashMap<String, Object>();
+            ObjectMapper dataMapper = new ObjectMapper();
+
+	        if(SettingsPasswordType.LDAP_PASSWORD.getValue().equals(type)) {
+	        	if(configParams.getLdapPassword().equals(oldPassword)){
+		            configParams.setLdapPassword(newPassword);
+		            requestData.put("oldPassword",configParams.getLdapPassword());
+		            String jsonString = dataMapper.writeValueAsString(requestData);
+		    		String log = "Ldap password has been updated";
+		            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		            configurationService.updateConfigParams(configParams);
+		            return ResponseEntity
+		                    .status(HttpStatus.OK)
+		                    .body(true);
+		        }
+	        	else {
+	        		return ResponseEntity
+		                    .status(HttpStatus.FORBIDDEN)
+		                    .body(false);
+	        	}
+	        	
 	        }
-	        else if(!configParams.getLdapPassword().equals(ldapPassword)) {
-				return ResponseEntity
-			            .status(HttpStatus.FORBIDDEN)
-			            .body(false);
+	        if(SettingsPasswordType.AD_ADMIN_PASSWORD.getValue().equals(type)) {
+	        	if(configParams.getAdAdminPassword().equals(oldPassword)){
+		            configParams.setAdAdminPassword(newPassword);
+		            requestData.put("oldPassword",configParams.getAdAdminPassword());
+		            String jsonString = dataMapper.writeValueAsString(requestData);
+		    		String log = "AD admin password has been updated";
+		            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		            configurationService.updateConfigParams(configParams);
+		            return ResponseEntity
+		                    .status(HttpStatus.OK)
+		                    .body(true);
+		        }
+	        	else {
+	        		return ResponseEntity
+		                    .status(HttpStatus.FORBIDDEN)
+		                    .body(false);
+	        	}
+	        }
+	        if(SettingsPasswordType.XMPP_PASSWORD.getValue().equals(type)) {
+	        	if(configParams.getXmppPassword().equals(oldPassword)){
+		            configParams.setXmppPassword(newPassword);
+		            requestData.put("oldPassword",configParams.getFileServerPassword());
+		            String jsonString = dataMapper.writeValueAsString(requestData);
+		    		String log = "File server password has been updated";
+		            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		            configurationService.updateConfigParams(configParams);
+		            return ResponseEntity
+		                    .status(HttpStatus.OK)
+		                    .body(true);
+		        }
+	        	else {
+	        		return ResponseEntity
+		                    .status(HttpStatus.FORBIDDEN)
+		                    .body(false);
+	        	}
+	        }
+	        if(SettingsPasswordType.FILE_SERVER_PASSWORD.getValue().equals(type)) {
+	        	if(configParams.getFileServerPassword().equals(oldPassword)){
+		            configParams.setFileServerPassword(newPassword);
+		            requestData.put("oldPassword",configParams.getFileServerPassword());
+		            String jsonString = dataMapper.writeValueAsString(requestData);
+		    		String log = "File server password has been updated";
+		            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		            configurationService.updateConfigParams(configParams);
+		            return ResponseEntity
+		                    .status(HttpStatus.OK)
+		                    .body(true);
+		        }
+	        	else {
+	        		return ResponseEntity
+		                    .status(HttpStatus.FORBIDDEN)
+		                    .body(false);
+	        	}
+	        }
+	        if(SettingsPasswordType.EMAIL_SERVER_PASSWORD.getValue().equals(type)) {
+	        	if(configParams.getMailPassword().equals(oldPassword)){
+		            configParams.setMailPassword(newPassword);
+		            requestData.put("oldPassword",configParams.getMailPassword());
+		            String jsonString = dataMapper.writeValueAsString(requestData);
+		    		String log = "Mail server password has been updated";
+		            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+		            configurationService.updateConfigParams(configParams);
+		            return ResponseEntity
+		                    .status(HttpStatus.OK)
+		                    .body(true);
+		        }
+	        	else {
+	        		return ResponseEntity
+		                    .status(HttpStatus.FORBIDDEN)
+		                    .body(false);
+	        	}
 	        }
 	        
 	    } catch (Exception e) {
@@ -222,6 +293,7 @@ public class SettingsController {
 	    }
 		return null;
 	}
+	
 
 	@Operation(summary = "Update xmpp server setting", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
@@ -238,7 +310,6 @@ public class SettingsController {
 		configParams.setXmppHost(settingsDTO.getXmppHost());
 		configParams.setXmppPort(settingsDTO.getXmppPort());
 		configParams.setXmppUsername(settingsDTO.getXmppUsername());
-		//configParams.setXmppPassword(settingsDTO.getXmppPassword());
 		configParams.setXmppMaxRetryConnectionCount(settingsDTO.getXmppMaxRetryConnectionCount());
 		configParams.setXmppPacketReplayTimeout(settingsDTO.getXmppPacketReplayTimeout());
 		configParams.setXmppPingTimeout(settingsDTO.getXmppPingTimeout());
@@ -289,47 +360,6 @@ public class SettingsController {
 				.body(updatedParams);
 				
 	}
-	
-	@Operation(summary = "Updated xmpp server password", description = "", tags = { "settings" })
-	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "File xmpp password has been updated"),
-			  @ApiResponse(responseCode = "403", description = "Could not update xmpp server password. Bad request", 
-			    content = @Content(schema = @Schema(implementation = String.class))),
-			  @ApiResponse(responseCode = "500", description = "Could not update xmpp server password.Internal server error.", 
-			    content = @Content(schema = @Schema(implementation = String.class)))})
-	@PostMapping(value = "/update/xmpp-password",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> updateXmppServerPassword(String xmppServerPassword,String newXmppServerPassword) {
-	    try {
-	        ConfigParams configParams = configurationService.getConfigParams();
-	        if(configParams.getXmppPassword().equals(xmppServerPassword)){
-	            configParams.setXmppPassword(newXmppServerPassword);
-	            Map<String, Object> requestData = new HashMap<String, Object>();
-	            requestData.put("fileServerPassword",configParams.getFileServerPassword());
-	            ObjectMapper dataMapper = new ObjectMapper();
-	            String jsonString = dataMapper.writeValueAsString(requestData);
-	    		String log = "File server password has been updated";
-	            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
-	            configurationService.updateConfigParams(configParams);
-	            return ResponseEntity
-	                    .status(HttpStatus.OK)
-	                    .body(true);
-	        }
-	        else if(!configParams.getFileServerPassword().equals(xmppServerPassword)) {
-				return ResponseEntity
-			            .status(HttpStatus.FORBIDDEN)
-			            .body(false);
-	        }
-	        
-	    } catch (Exception e) {
-	        e.printStackTrace();
-			HttpHeaders headers = new HttpHeaders();
-	        return ResponseEntity
-	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .headers(headers)
-    				.build();
-	    }
-		return null;
-	}
 
 	@Operation(summary = "Update file server ", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
@@ -344,7 +374,6 @@ public class SettingsController {
 		configParams.setFileServerPort(settingsDTO.getFileServerPort());
 		configParams.setFileServerHost(settingsDTO.getFileServerHost());
 		configParams.setFileServerUsername(settingsDTO.getFileServerUsername());
-		configParams.setFileServerPassword(settingsDTO.getFileServerPassword());
 		configParams.setFileServerAgentFilePath(settingsDTO.getFileServerAgentFilePath());
 		
 		Map<String, Object> requestData = new HashMap<String, Object>();
@@ -373,46 +402,6 @@ public class SettingsController {
 				.status(HttpStatus.OK)
 				.body(configurationService.updateConfigParams(configParams));
 	}
-	@Operation(summary = "Updated file server password", description = "", tags = { "settings" })
-	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "File server password has been updated"),
-			  @ApiResponse(responseCode = "403", description = "Could not update file server password. Bad request", 
-			    content = @Content(schema = @Schema(implementation = String.class))),
-			  @ApiResponse(responseCode = "500", description = "Could not update file server password.Internal server error.", 
-			    content = @Content(schema = @Schema(implementation = String.class)))})
-	@PostMapping(value = "/update/file-password",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> updateFileServerPassword(String fileServerPassword,String newFileServerPassword) {
-	    try {
-	        ConfigParams configParams = configurationService.getConfigParams();
-	        if(configParams.getFileServerPassword().equals(fileServerPassword)){
-	            configParams.setFileServerPassword(newFileServerPassword);
-	            Map<String, Object> requestData = new HashMap<String, Object>();
-	            requestData.put("fileServerPassword",configParams.getFileServerPassword());
-	            ObjectMapper dataMapper = new ObjectMapper();
-	            String jsonString = dataMapper.writeValueAsString(requestData);
-	    		String log = "File server password has been updated";
-	            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
-	            configurationService.updateConfigParams(configParams);
-	            return ResponseEntity
-	                    .status(HttpStatus.OK)
-	                    .body(true);
-	        }
-	        else if(!configParams.getFileServerPassword().equals(fileServerPassword)) {
-				return ResponseEntity
-			            .status(HttpStatus.FORBIDDEN)
-			            .body(false);
-	        }
-	        
-	    } catch (Exception e) {
-	        e.printStackTrace();
-			HttpHeaders headers = new HttpHeaders();
-	        return ResponseEntity
-	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .headers(headers)
-    				.build();
-	    }
-		return null;
-	}
 
 	@Operation(summary = "Update email settings", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
@@ -424,7 +413,6 @@ public class SettingsController {
 		
 		ConfigParams configParams = configurationService.getConfigParams();
 		configParams.setMailHost(settingsDTO.getMailHost());
-		//configParams.setMailPassword(settingsDTO.getMailPassword());
 		configParams.setMailPort(settingsDTO.getMailPort());
 		configParams.setMailSmtpAuth(settingsDTO.getMailSmtpAuth());
 		configParams.setMailTlsEnabled(settingsDTO.getMailTlsEnabled());
@@ -456,47 +444,6 @@ public class SettingsController {
 				.status(HttpStatus.OK)
 				.body(configurationService.updateConfigParams(configParams));
 				
-	}
-	
-	@Operation(summary = "Updated email password", description = "", tags = { "settings" })
-	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Mail server password has been updated"),
-			  @ApiResponse(responseCode = "403", description = "Could not update email password. Bad request", 
-			    content = @Content(schema = @Schema(implementation = String.class))),
-			  @ApiResponse(responseCode = "500", description = "Could not update email password.Internal server error.", 
-			    content = @Content(schema = @Schema(implementation = String.class)))})
-	@PostMapping(value = "/update/email-password",produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Boolean> updateEmailServerPassword(String mailPassword,String newMailPassword) {
-	    try {
-	        ConfigParams configParams = configurationService.getConfigParams();
-	        if(configParams.getMailPassword().equals(mailPassword)){
-	            configParams.setMailPassword(newMailPassword);
-	            Map<String, Object> requestData = new HashMap<String, Object>();
-	            requestData.put("mailPassword",configParams.getMailPassword());
-	            ObjectMapper dataMapper = new ObjectMapper();
-	            String jsonString = dataMapper.writeValueAsString(requestData);
-	    		String log = "Mail server password has been updated";
-	            operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
-	            configurationService.updateConfigParams(configParams);
-	            return ResponseEntity
-	                    .status(HttpStatus.OK)
-	                    .body(true);
-	        }
-	        else if(!configParams.getMailPassword().equals(mailPassword)) {
-				return ResponseEntity
-			            .status(HttpStatus.FORBIDDEN)
-			            .body(false);
-	        }
-	        
-	    } catch (Exception e) {
-	        e.printStackTrace();
-			HttpHeaders headers = new HttpHeaders();
-	        return ResponseEntity
-	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .headers(headers)
-    				.build();
-	    }
-		return null;
 	}
 
 	
