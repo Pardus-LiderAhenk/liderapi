@@ -91,7 +91,7 @@ public class SettingsController {
 	public ResponseEntity<ConfigParams>  getConfigParams() {
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(configurationService.getConfigParams());
+				.body(configurationService.getConfigParamasNoPassword());
 	}
 
 	

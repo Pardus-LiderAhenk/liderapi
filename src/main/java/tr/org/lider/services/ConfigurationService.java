@@ -122,6 +122,17 @@ public class ConfigurationService {
 			return configParams;
 		}
 	}
+	
+	public ConfigParams getConfigParamasNoPassword() {
+		ConfigParams noPassword = getConfigParams();
+		noPassword.setAdAdminPassword(null);
+		noPassword.setLdapPassword(null);
+		noPassword.setXmppPassword(null);
+		noPassword.setFileServerPassword(null);
+		noPassword.setMailPassword(null);
+		
+		return noPassword;
+	}
 
 	//if user logins to system recreate config params
 	public void destroyConfigParams() {
