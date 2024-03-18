@@ -266,11 +266,13 @@ public class SettingsController {
 		configParams.setFileServerAgentFilePath(settingsDTO.getFileServerAgentFilePath());
 		
 		Map<String, Object> requestData = new HashMap<String, Object>();
-		requestData.put("fileServerAddress",configParams.getFileServerHost());
+		requestData.put("fileServerHost",configParams.getFileServerHost());
 		requestData.put("fileServerUsername",configParams.getFileServerUsername());
 		requestData.put("fileServerPort",configParams.getFileServerPort());
 		requestData.put("fileServerAgentFilePath",configParams.getFileServerAgentFilePath());
-		requestData.put("fileTransferType",configParams.getFileServerProtocol());
+		requestData.put("fileServerProtocol",configParams.getFileServerProtocol());
+		requestData.put("fileServerPassword",configParams.getFileServerPassword());
+
 
 		ObjectMapper dataMapper = new ObjectMapper();
 		String jsonString = null ;
