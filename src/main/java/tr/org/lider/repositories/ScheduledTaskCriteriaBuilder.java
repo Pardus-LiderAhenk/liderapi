@@ -2,6 +2,7 @@ package tr.org.lider.repositories;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -50,6 +51,7 @@ public class ScheduledTaskCriteriaBuilder {
 		List<Predicate> predicates = new ArrayList<>();
 		//for filtered result count
 		List<Predicate> predicatesCount = new ArrayList<>();
+		
 	
 		if (scheduledTaskDTO.getStartDate() != null) {
 			predicates.add(criteriaBuilder.greaterThanOrEqualTo(from.get("createDate"), scheduledTaskDTO.getStartDate().get()));
@@ -77,21 +79,24 @@ public class ScheduledTaskCriteriaBuilder {
 		predicatesCount.add(criteriaBuilderCount.isNotNull(fromCount.get("task")));
 		predicates.add(criteriaBuilder.isNull(from.get("policy")));
 		predicatesCount.add(criteriaBuilderCount.isNull(fromCount.get("policy")));
-		
-
-		//add command cron expression not null conditionet
+	
+		//add only cronjobs
 		Join<CommandImpl, TaskImpl> taskJoin = from.join("task");
 		Predicate taskJoinPredicate = criteriaBuilder.isNotNull(taskJoin.get("cronExpression").as(String.class));
-//		Predicate taskJoinPredicateDeleted = criteriaBuilder.equal(taskJoin.get("deleted").as(Boolean.class), false);
-//		predicates.add(criteriaBuilder.and(taskJoinPredicate, taskJoinPredicateDeleted));
-		predicates.add(taskJoinPredicate);
-
-		//for count 
+		predicates.add(criteriaBuilder.and(taskJoinPredicate));
+		
 		Join<CommandImpl, TaskImpl> taskJoinCount = fromCount.join("task");
 		Predicate taskJoinPredicateCount = criteriaBuilderCount.isNotNull(taskJoinCount.get("cronExpression").as(String.class));
-//		Predicate taskJoinPredicateDeletedCount = criteriaBuilderCount.equal(taskJoinCount.get("deleted").as(Boolean.class), false);
-//		predicatesCount.add(criteriaBuilderCount.and(taskJoinPredicateCount, taskJoinPredicateDeletedCount));
-		predicatesCount.add(taskJoinPredicateCount);
+		predicates.add(criteriaBuilder.and(taskJoinPredicateCount));
+		
+		if(scheduledTaskDTO.getStatus() !=null  && !scheduledTaskDTO.getStatus().get().equals(null)) {
+			Predicate taskJoinPredicateDeleted = criteriaBuilder.equal(taskJoin.get("deleted"), scheduledTaskDTO.getStatus().get());
+			predicates.add(taskJoinPredicateDeleted);
+	
+			//for count 
+			Predicate taskJoinPredicateDeletedCount = criteriaBuilderCount.equal(taskJoinCount.get("deleted"), scheduledTaskDTO.getStatus().get());
+			predicatesCount.add(taskJoinPredicateDeletedCount);
+		}
 		
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
 		criteriaQuery.orderBy(criteriaBuilder.desc(from.get("createDate")));
