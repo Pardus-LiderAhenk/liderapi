@@ -315,7 +315,7 @@ public class XMPPMessagingService implements IMessagingService {
 		taskStatusListener.setSubscribers(taskStatusSubscribers);
 		connection.addAsyncStanzaListener(taskStatusListener, taskStatusListener);
 		// Hook listener for get-policy messages
-		policyListener = new PolicyListener();
+		policyListener = new PolicyListener(this);
 		policyListener.setSubscriber(policySubscriber);
 		connection.addAsyncStanzaListener(policyListener, policyListener);
 		// Hook listener for policy status messages

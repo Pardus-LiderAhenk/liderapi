@@ -38,7 +38,7 @@ public class EmailService {
 		props.put("mail.smtp.auth", configService.getMailSmtpAuth().toString());
 		props.put("mail.smtp.starttls.enable", configService.getMailSmtpStartTlsEnable());
 		props.put("mail.smtp.host", configService.getMailHost());
-		props.put("mail.smtp.port", configService.getMailSmtpPort());
+		props.put("mail.smtp.port", configService.getMailPort());
 
 		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {

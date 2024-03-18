@@ -11,6 +11,7 @@ import org.jivesoftware.smack.packet.Stanza;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -24,6 +25,7 @@ import tr.org.lider.messaging.subscribers.IPolicySubscriber;
  * to agent.
  * 
  */
+@Component
 public class PolicyListener implements StanzaListener, StanzaFilter {
 
 	private static Logger logger = LoggerFactory.getLogger(PolicyListener.class);
@@ -42,7 +44,8 @@ public class PolicyListener implements StanzaListener, StanzaFilter {
 	 */
 	private IPolicySubscriber subscriber;
 	
-	public PolicyListener() {
+	public PolicyListener(IMessagingService messagingService) {
+		this.messagingService = messagingService;
 	}
 
 	@Override
@@ -73,7 +76,6 @@ public class PolicyListener implements StanzaListener, StanzaFilter {
 				// Construct message
 				GetPoliciesMessageImpl message = mapper.readValue(msg.getBody(), GetPoliciesMessageImpl.class);
 				message.setFrom(msg.getFrom());
-
 				if (subscriber != null) {
 					IExecutePoliciesMessage responseExecutePoliciesMessageList = subscriber.messageReceived(message);
 					logger.debug("Notified subscriber => {}", subscriber);
