@@ -76,29 +76,6 @@ public class ScheduledTaskReportController {
 				.body(commands);
 	}
 	
-	@Operation(summary = "Find all scheduled active task list.", description = "", tags = { "scheduled-task-report" })
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Find all scheduled active task list."),
-			@ApiResponse(responseCode = "417", description = "Could not retrieve scheduled task list. Unexpected error occured.", 
-			content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/active-list", produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<?> findAllActiveCommandsRest(ScheduledTaskDTO scheduledTaskDTO) {
-		Page<CommandImpl> commands = scheduledTaskService.findAllCommandsFilteredByActive(scheduledTaskDTO);
-		for (CommandImpl command : commands.getContent()) {
-			for (CommandExecutionImpl commandExecution : command.getCommandExecutions()) {
-				for (CommandExecutionResultImpl commandExecutionResult : commandExecution
-						.getCommandExecutionResults()) {
-					if (commandExecutionResult.getResponseData() != null) {
-						commandExecutionResult
-								.setResponseDataStr((new String(commandExecutionResult.getResponseData())));
-					}
-				}
-			}
-		}
-		return ResponseEntity
-				.status(HttpStatus.OK)
-				.body(commands);
-	}
-
 	@Operation(summary = "Find all plugin tasks.", description = "", tags = { "scheduled-task-report" })
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Find all plugin tasks."),
 			@ApiResponse(responseCode = "417", description = "Could not retrieve scheduled task plugins. Unexpected error occured.", 

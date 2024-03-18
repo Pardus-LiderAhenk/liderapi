@@ -15,16 +15,7 @@ public class ScheduledTaskReportService {
 	ScheduledTaskCriteriaBuilder scheduledTaskCB;
 	
 	public Page<CommandImpl> findAllCommandsFiltered(ScheduledTaskDTO scheduledTaskDTO) {
-
 		Page<CommandImpl> commands = scheduledTaskCB.filterCommands(scheduledTaskDTO);
-
 		return commands;
-	}
-	public Page<CommandImpl> findAllCommandsFilteredByActive(ScheduledTaskDTO scheduledTaskDTO) {
-		
-		Page<CommandImpl> commands = scheduledTaskCB.filterActiveCommands(scheduledTaskDTO);
-
-		return commands;
-		
 	}
 }

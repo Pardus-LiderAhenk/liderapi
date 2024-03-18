@@ -87,7 +87,7 @@ public class ScheduledTaskCriteriaBuilder {
 		
 		Join<CommandImpl, TaskImpl> taskJoinCount = fromCount.join("task");
 		Predicate taskJoinPredicateCount = criteriaBuilderCount.isNotNull(taskJoinCount.get("cronExpression").as(String.class));
-		predicates.add(criteriaBuilder.and(taskJoinPredicateCount));
+		predicatesCount.add(criteriaBuilder.and(taskJoinPredicateCount));
 		
 		if(scheduledTaskDTO.getStatus() !=null  && !scheduledTaskDTO.getStatus().get().equals(null)) {
 			Predicate taskJoinPredicateDeleted = criteriaBuilder.equal(taskJoin.get("deleted"), scheduledTaskDTO.getStatus().get());
@@ -97,84 +97,6 @@ public class ScheduledTaskCriteriaBuilder {
 			Predicate taskJoinPredicateDeletedCount = criteriaBuilderCount.equal(taskJoinCount.get("deleted"), scheduledTaskDTO.getStatus().get());
 			predicatesCount.add(taskJoinPredicateDeletedCount);
 		}
-		
-		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-		criteriaQuery.orderBy(criteriaBuilder.desc(from.get("createDate")));
-		Long count = count(criteriaBuilderCount, predicatesCount, criteriaCount);
-
-		TypedQuery<CommandImpl> typedQuery = entityManager.createQuery(select);
-		typedQuery.setFirstResult((scheduledTaskDTO.getPageNumber() - 1)*scheduledTaskDTO.getPageSize());
-		if(scheduledTaskDTO.getPageNumber()*scheduledTaskDTO.getPageSize() > count) {
-			typedQuery.setMaxResults((int) (count%scheduledTaskDTO.getPageSize()));
-		} else {
-			typedQuery.setMaxResults(scheduledTaskDTO.getPageSize());
-		}
-		
-		Page<CommandImpl> commands = new PageImpl<CommandImpl>(typedQuery.getResultList(), pageable, count);
-
-		return commands;
-	}
-	
-	public Page<CommandImpl> filterActiveCommands(ScheduledTaskDTO scheduledTaskDTO) {
-		PageRequest pageable = PageRequest.of(scheduledTaskDTO.getPageNumber() - 1, scheduledTaskDTO.getPageSize());
-
-		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-		//for filtered result count
-		CriteriaBuilder criteriaBuilderCount = entityManager.getCriteriaBuilder();
-		CriteriaQuery<Long> criteriaCount = criteriaBuilderCount.createQuery(Long.class);
-		Root<CommandImpl> fromCount = criteriaCount.from(CommandImpl.class);
-		criteriaCount.select(criteriaBuilderCount.count(fromCount));
-
-		CriteriaQuery<CommandImpl> criteriaQuery = criteriaBuilder.createQuery(CommandImpl.class);
-		Root<CommandImpl> from = criteriaQuery.from(CommandImpl.class);
-		CriteriaQuery<CommandImpl> select = criteriaQuery.select(from);
-
-		List<Predicate> predicates = new ArrayList<>();
-		//for filtered result count
-		List<Predicate> predicatesCount = new ArrayList<>();
-	
-		if (scheduledTaskDTO.getStartDate() != null) {
-			predicates.add(criteriaBuilder.greaterThanOrEqualTo(from.get("createDate"), scheduledTaskDTO.getStartDate().get()));
-			predicatesCount.add(criteriaBuilderCount.greaterThanOrEqualTo(fromCount.get("createDate"), scheduledTaskDTO.getStartDate().get()));
-		}
-		
-		if (scheduledTaskDTO.getEndDate() != null) {
-			predicates.add(criteriaBuilder.lessThanOrEqualTo(from.get("createDate"), scheduledTaskDTO.getEndDate().get()));
-			predicatesCount.add(criteriaBuilderCount.lessThanOrEqualTo(fromCount.get("createDate"), scheduledTaskDTO.getEndDate().get()));
-		}
-		
-		if(scheduledTaskDTO.getTaskCommand() != null && !scheduledTaskDTO.getTaskCommand().get().equals("")) {
-			Join<CommandImpl, TaskImpl> taskJoin = from.join("task");
-			Predicate taskJoinPredicate = criteriaBuilder.equal(taskJoin.get("commandClsId").as(String.class), scheduledTaskDTO.getTaskCommand().get() );
-			predicates.add(taskJoinPredicate);
-
-			//for count 
-			Join<CommandImpl, TaskImpl> taskJoinCount = fromCount.join("task");
-			Predicate taskJoinPredicateCount = criteriaBuilderCount.equal(taskJoinCount.get("commandClsId").as(String.class), scheduledTaskDTO.getTaskCommand().get() );
-			predicatesCount.add(taskJoinPredicateCount);
-		}
-		
-		//add task not empty and policy empty condition
-		predicates.add(criteriaBuilder.isNotNull(from.get("task")));
-		predicatesCount.add(criteriaBuilderCount.isNotNull(fromCount.get("task")));
-		predicates.add(criteriaBuilder.isNull(from.get("policy")));
-		predicatesCount.add(criteriaBuilderCount.isNull(fromCount.get("policy")));
-		
-
-		//add command cron expression not null conditionet
-		Join<CommandImpl, TaskImpl> taskJoin = from.join("task");
-		Predicate taskJoinPredicate = criteriaBuilder.isNotNull(taskJoin.get("cronExpression").as(String.class));
-		Predicate taskJoinPredicateDeleted = criteriaBuilder.equal(taskJoin.get("deleted"), false);
-		predicates.add(criteriaBuilder.and(taskJoinPredicate, taskJoinPredicateDeleted));
-//		predicates.add(taskJoinPredicate);
-
-		//for count 
-		Join<CommandImpl, TaskImpl> taskJoinCount = fromCount.join("task");
-		Predicate taskJoinPredicateCount = criteriaBuilderCount.isNotNull(taskJoinCount.get("cronExpression").as(String.class));
-		Predicate taskJoinPredicateDeletedCount = criteriaBuilderCount.equal(taskJoinCount.get("deleted"), false);
-		predicatesCount.add(criteriaBuilderCount.and(taskJoinPredicateCount, taskJoinPredicateDeletedCount));
-//		predicatesCount.add(taskJoinPredicateCount);
-		
 		
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
 		criteriaQuery.orderBy(criteriaBuilder.desc(from.get("createDate")));
