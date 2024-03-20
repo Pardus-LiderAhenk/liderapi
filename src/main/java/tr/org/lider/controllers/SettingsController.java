@@ -294,6 +294,82 @@ public class SettingsController {
 		return null;
 	}
 	
+	@Operation(summary = "Save settings password", description = "", tags = { "settings" })
+	@ApiResponses(value = { 
+			  @ApiResponse(responseCode = "200", description = "Settings password has been saved"),
+			  @ApiResponse(responseCode = "403", description = "Could not save settings password. Bad request", 
+			    content = @Content(schema = @Schema(implementation = String.class))),
+			  @ApiResponse(responseCode = "500", description = "Could not save settings password.Internal server error.", 
+			    content = @Content(schema = @Schema(implementation = String.class)))})
+	@PostMapping(value = "/save/settings-password",produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> saveLdapPassword(String type, String newPassword) {
+	    try {
+	        ConfigParams configParams = configurationService.getConfigParams();
+            Map<String, Object> requestData = new HashMap<String, Object>();
+            ObjectMapper dataMapper = new ObjectMapper();
+
+	        if(SettingsPasswordType.EMAIL_SERVER_PASSWORD.getValue().equals(type)) {
+		         configParams.setMailPassword(newPassword);
+		         requestData.put("newPassword",configParams.getMailPassword());
+		         String jsonString = dataMapper.writeValueAsString(requestData);
+		         String log = "Ldap password has been saved";
+		         operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+		         configurationService.updateConfigParams(configParams);
+		         
+	        	
+	        }
+	        if(SettingsPasswordType.FILE_SERVER_PASSWORD.getValue().equals(type)) {
+		         configParams.setFileServerPassword(newPassword);
+		         requestData.put("newPassword",configParams.getFileServerPassword());
+		         String jsonString = dataMapper.writeValueAsString(requestData);
+		         String log = "File server password has been saved";
+		         operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+		         configurationService.updateConfigParams(configParams);
+		         
+	        	
+	        }
+	        if(SettingsPasswordType.XMPP_PASSWORD.getValue().equals(type)) {
+		         configParams.setXmppPassword(newPassword);
+		         requestData.put("newPassword",configParams.getXmppPassword());
+		         String jsonString = dataMapper.writeValueAsString(requestData);
+		         String log = "XMPP password has been saved";
+		         operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+		         configurationService.updateConfigParams(configParams);
+		         
+	        	
+	        }
+	        if(SettingsPasswordType.LDAP_PASSWORD.getValue().equals(type)) {
+		         configParams.setLdapPassword(newPassword);
+		         requestData.put("newPassword",configParams.getLdapPassword());
+		         String jsonString = dataMapper.writeValueAsString(requestData);
+		         String log = "Ldap password has been saved";
+		         operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+		         configurationService.updateConfigParams(configParams);
+		         
+	        	
+	        }
+	        if(SettingsPasswordType.AD_ADMIN_PASSWORD.getValue().equals(type)) {
+		         configParams.setAdAdminPassword(newPassword);
+		         requestData.put("newPassword",configParams.getAdAdminPassword());
+		         String jsonString = dataMapper.writeValueAsString(requestData);
+		         String log = "Ad admin password has been saved";
+		         operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+		         configurationService.updateConfigParams(configParams);
+		         
+	        }
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+			HttpHeaders headers = new HttpHeaders();
+	        return ResponseEntity
+	                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .headers(headers)
+    				.build();
+	    }
+	    return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(true);
+	}
 
 	@Operation(summary = "Update xmpp server setting", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
