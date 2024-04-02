@@ -53,6 +53,8 @@ public class TaskStatusMessageImpl implements ITaskStatusMessage {
 	private String from;
 
 	private Date timestamp;
+	
+	private String commandClsId;
 
 	@Override
 	public AgentMessageType getType() {
@@ -124,6 +126,15 @@ public class TaskStatusMessageImpl implements ITaskStatusMessage {
 
 	public void setTimestamp(Date timestamp) {
 		this.timestamp = timestamp;
+	}
+	
+	public void setCommandClsId(String commandClsId) {
+		this.commandClsId = commandClsId;
+	}
+
+	@Override
+	public String getCommandClsId() {
+		return commandClsId;
 	}
 
 }
