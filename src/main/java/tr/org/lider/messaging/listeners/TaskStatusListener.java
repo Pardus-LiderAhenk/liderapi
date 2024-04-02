@@ -82,6 +82,7 @@ public class TaskStatusListener implements StanzaListener, StanzaFilter {
 				mapper.setDateFormat(new SimpleDateFormat("dd-MM-yyyy HH:mm"));
 
 				TaskStatusMessageImpl message = mapper.readValue(msg.getBody(), TaskStatusMessageImpl.class);
+				
 				message.setFrom(msg.getFrom());
 
 				for (ITaskStatusSubscriber subscriber : subscribers) {

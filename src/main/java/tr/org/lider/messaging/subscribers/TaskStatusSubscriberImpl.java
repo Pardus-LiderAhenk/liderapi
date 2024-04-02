@@ -19,6 +19,7 @@ import tr.org.lider.entities.CommandExecutionResultImpl;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.PluginImpl;
 import tr.org.lider.message.service.IMessagingService;
+import tr.org.lider.message.service.WsMessageSender;
 import tr.org.lider.messaging.enums.ContentType;
 import tr.org.lider.messaging.enums.StatusCode;
 import tr.org.lider.messaging.messages.ITaskStatusMessage;
@@ -52,12 +53,17 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 
 	@Autowired
 	private IMessagingService messagingService;
+	
+	
+	@Autowired
+	private WsMessageSender messagingTemplate;
 
 
 	@Override
 	public void messageReceived(ITaskStatusMessage message) {
 
 		if (message != null) {
+			
 			logger.info("Task status subscriber received message from {}", message.getFrom());
 			String jid = message.getFrom().split("@")[0];
 
@@ -180,6 +186,10 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 								mapper.setDateFormat(new SimpleDateFormat("dd-MM-yyyy HH:mm"));
 								messagingService.sendChatMessage(mapper.writeValueAsString(notification),
 										notification.getRecipient());
+								
+								message.setCommandClsId(result.getCommandExecution().getCommand().getTask().getCommandClsId());
+								
+								messagingTemplate.sendMessage("/liderws/task", notification);
 
 							} catch (Exception e) {
 								logger.error(e.getMessage(), e);

@@ -62,5 +62,9 @@ public interface ITaskStatusMessage extends IAgentMessage {
 	 * @return indicate content type of response data.
 	 */
 	ContentType getContentType();
+	
+	String getCommandClsId();
+	
+	void setCommandClsId(String commandClsId);
 
 }

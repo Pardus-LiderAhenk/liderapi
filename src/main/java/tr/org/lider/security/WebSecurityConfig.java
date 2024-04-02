@@ -83,6 +83,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		.antMatchers("/tunnel").permitAll()
 		.antMatchers("/tunnel/**").permitAll()
 		.antMatchers("/api/lider-info/**").permitAll()
+		.antMatchers("/liderws/**").permitAll()
 		.antMatchers("/test2/**").hasAuthority("ROLE_ADMIN")
 		.anyRequest().authenticated()
 		.and()
