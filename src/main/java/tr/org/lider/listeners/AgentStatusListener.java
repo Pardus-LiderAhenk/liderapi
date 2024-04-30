@@ -39,7 +39,7 @@ public class AgentStatusListener implements IPresenceSubscriber {
 		if (!agents.isEmpty()) {
 			AgentImpl agent = agents.get(0);
 			agent.setEventDate(new Date());
-			//agent.setAgentStatus(AgentStatus.Active);
+			agent.setAgentStatus(AgentStatus.Active);
 			agentRepository.save(agent);
 		}
 		
