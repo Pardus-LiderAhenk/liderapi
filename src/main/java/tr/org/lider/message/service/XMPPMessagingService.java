@@ -79,7 +79,7 @@ import tr.org.lider.models.RegistrationTemplateType;
 import tr.org.lider.services.ConfigurationService;
 
 @Service
-@ConditionalOnProperty(prefix = "lider", name = "messaging", havingValue = "xmpp")
+@ConditionalOnProperty(prefix = "lider", name = "messaging", havingValue = "xmpp", matchIfMissing = true)
 public class XMPPMessagingService implements IMessagingService {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
