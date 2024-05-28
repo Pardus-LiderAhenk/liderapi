@@ -1,11 +1,8 @@
 package tr.org.lider.repositories;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -22,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
 
@@ -30,6 +28,7 @@ import tr.org.lider.entities.AgentPropertyImpl;
  * Filter can be applied over status(online, offline) registration date and agent properties
  * 
  * @author <a href="mailto:hasan.kara@pardus.org.tr">Hasan Kara</a>
+ * @author <a href="mailto:ebru.arslan@pardus.org.tr">Ebru Arslan</a>
  */
 
 @Service
@@ -38,26 +37,9 @@ public class AgentInfoCriteriaBuilder {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-
-	public Page<AgentImpl> filterAgents(
-			int pageNumber,
-			int pageSize,
-			Optional<String> sessionReportType,
-			Optional<Date> registrationStartDate,
-			Optional<Date> registrationEndDate,
-			Optional<String> status,
-			Optional<String> dn,
-			Optional<String> hostname,
-			Optional<String> macAddress,
-			Optional<String> ipAddress,
-			Optional<String> brand,
-			Optional<String> model,
-			Optional<String> processor,
-			Optional<String> osVersion,
-			Optional<String> agentVersion,
-			Optional<String> diskType,
-			List<String> listOfOnlineUsers) {
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
+	public Page<AgentImpl> filterAgents(AgentDTO agentDTO,List<String> listOfOnlineUsers){
+		
+		PageRequest pageable = PageRequest.of(agentDTO.getPageNumber() - 1, agentDTO.getPageSize());
 
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 		//for filtered result count
@@ -75,26 +57,26 @@ public class AgentInfoCriteriaBuilder {
 		List<Predicate> predicatesCount = new ArrayList<>();
 
 
-		if(dn.isPresent() && !dn.get().equals("")) {
-			predicates.add(cb.like(from.get("dn").as(String.class), "%" + dn.get() + "%"));
-			predicatesCount.add(cbCount.like(fromCount.get("dn").as(String.class), "%" + dn.get() + "%"));
+		if(agentDTO.getDn().get() != null && !agentDTO.getDn().get().equals("")) {
+			predicates.add(cb.like(from.get("dn").as(String.class), "%" + agentDTO.getDn().get() + "%"));
+			predicatesCount.add(cbCount.like(fromCount.get("dn").as(String.class), "%" + agentDTO.getDn().get() + "%"));
 		}
 
-		if (registrationStartDate.isPresent()) {
-			predicates.add(cb.greaterThanOrEqualTo(from.get("createDate"), registrationStartDate.get()));
-			predicatesCount.add(cbCount.greaterThanOrEqualTo(fromCount.get("createDate"), registrationStartDate.get()));
+		if (agentDTO.getRegistrationStartDate() != null) {
+			predicates.add(cb.greaterThanOrEqualTo(from.get("createDate"), agentDTO.getRegistrationStartDate().get()));
+			predicatesCount.add(cbCount.greaterThanOrEqualTo(fromCount.get("createDate"), agentDTO.getRegistrationStartDate().get()));
 		}
-		if (registrationEndDate.isPresent()) {
-			predicates.add(cb.lessThanOrEqualTo(from.get("createDate"), registrationEndDate.get()));
-			predicatesCount.add(cbCount.lessThanOrEqualTo(fromCount.get("createDate"), registrationEndDate.get()));
+		if (agentDTO.getRegistrationEndDate() != null) {
+			predicates.add(cb.lessThanOrEqualTo(from.get("createDate"), agentDTO.getRegistrationEndDate().get()));
+			predicatesCount.add(cbCount.lessThanOrEqualTo(fromCount.get("createDate"), agentDTO.getRegistrationEndDate().get()));
 		}
 
-		if(status.get().equals("ONLINE") ) {
+		if(agentDTO.getStatus().get().equals("ONLINE") ) {
 			predicates.add(cb.in(from.get("jid"))
 					.value(!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList(""))));
 			predicatesCount.add(cbCount.in(fromCount.get("jid"))
 					.value(!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList(""))));
-		} else if(status.get().equals("OFFLINE")) {
+		} else if(agentDTO.getStatus().get().equals("OFFLINE")) {
 			predicates.add(
 					cb.not(from.get("jid").in(
 							!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
@@ -103,149 +85,155 @@ public class AgentInfoCriteriaBuilder {
 							!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
 		}
 
-		if(hostname.isPresent() && !hostname.get().equals("")) {
-			predicates.add(cb.like(from.get("hostname").as(String.class), "%" + hostname.get() + "%"));
-			predicatesCount.add(cbCount.like(fromCount.get("hostname").as(String.class), "%" + hostname.get() + "%") );
+		if(agentDTO.getHostname().get() != null  && !agentDTO.getHostname().get().equals("")) {
+			predicates.add(cb.like(from.get("hostname").as(String.class), "%" + agentDTO.getHostname().get() + "%"));
+			predicatesCount.add(cbCount.like(fromCount.get("hostname").as(String.class), "%" + agentDTO.getHostname().get() + "%") );
 		}
 		
-		if(macAddress.isPresent() && !macAddress.get().equals("")) {
-			predicates.add(cb.like(from.get("macAddresses").as(String.class), "%" + macAddress.get() + "%"));
-			predicatesCount.add(cbCount.like(fromCount.get("macAddresses").as(String.class), "%" + macAddress.get() + "%") );
+		if(agentDTO.getMacAddress().get() != null && !agentDTO.getMacAddress().get().equals("")) {
+			predicates.add(cb.like(from.get("macAddresses").as(String.class), "%" + agentDTO.getMacAddress().get() + "%"));
+			predicatesCount.add(cbCount.like(fromCount.get("macAddresses").as(String.class), "%" + agentDTO.getMacAddress().get() + "%") );
 		}
 		
-		if(ipAddress.isPresent() && !ipAddress.get().equals("")) {
-			predicates.add(cb.like(from.get("ipAddresses").as(String.class), "%" + ipAddress.get() + "%"));
-			predicatesCount.add(cbCount.like(fromCount.get("ipAddresses").as(String.class), "%" + ipAddress.get() + "%") );
+		if(agentDTO.getIpAddress().get() != null && !agentDTO.getIpAddress().get().equals("")) {
+			predicates.add(cb.like(from.get("ipAddresses").as(String.class), "%" + agentDTO.getIpAddress().get() + "%"));
+			predicatesCount.add(cbCount.like(fromCount.get("ipAddresses").as(String.class), "%" + agentDTO.getIpAddress().get() + "%") );
 		}
 		
-		if(brand.isPresent() && !brand.get().equals("")) {
+		if(agentDTO.getBrand().get() != null && !agentDTO.getBrand().get().equals("")) {
 			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
 			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "hardware.baseboard.manufacturer");
-			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), brand.get());
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), agentDTO.getBrand().get());
 			predicates.add(cb.and(namePredicate, valuePredicate));
 
 			//for count 
 			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
 			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "hardware.baseboard.manufacturer");
-			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), brand.get());
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), agentDTO.getBrand().get());
 			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
 		}
 
-		if(model.isPresent() && !model.get().equals("")) {
+		if(agentDTO.getModel().get() != null && !agentDTO.getModel().get().equals("")) {
 			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
 			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "hardware.baseboard.productName");
-			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), model.get());
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), agentDTO.getModel().get());
 			predicates.add(cb.and(namePredicate, valuePredicate));
 
 			//for count 
 			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
 			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "hardware.baseboard.productName");
-			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), model.get());
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), agentDTO.getModel().get());
 			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
 		}
 
-		if(processor.isPresent() && !processor.get().equals("")) {
+		if(agentDTO.getProcessor().get() != null && !agentDTO.getProcessor().get().equals("")) {
 			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
 			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "processor");
-			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), processor.get());
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), agentDTO.getProcessor().get());
 			predicates.add(cb.and(namePredicate, valuePredicate));
 
 			//for count 
 			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
 			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "processor");
-			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), processor.get());
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), agentDTO.getProcessor().get());
 			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
 		}
 		
-		if(osVersion.isPresent() && !osVersion.get().equals("" ) && !osVersion.get().equals("null")) {
+		if(agentDTO.getOsVersion().get() !=  null && !agentDTO.getOsVersion().get().equals("" ) && !agentDTO.getOsVersion().get().equals("null")) {
 			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
 			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "os.version");
-			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), osVersion.get());
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), agentDTO.getOsVersion().get());
 			predicates.add(cb.and(namePredicate, valuePredicate));
 
 			//for count 
 			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
 			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "os.version");
-			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), osVersion.get());
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), agentDTO.getOsVersion().get());
 			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
 		}
 		
-		if(agentVersion.isPresent() && !agentVersion.get().equals("")) {
+		if(agentDTO.getAgentVersion().get() != null && !agentDTO.getAgentVersion().get().equals("")) {
 			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
 			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class), "agentVersion");
-			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), agentVersion.get());
+			Predicate valuePredicate = cb.like(properties.get("propertyValue").as(String.class), agentDTO.getAgentVersion().get());
 			predicates.add(cb.and(namePredicate, valuePredicate));
 
 			//for count 
 			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
 			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class), "agentVersion");
-			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), agentVersion.get());
+			Predicate valuePredicateCount = cbCount.like(propertiesCount.get("propertyValue").as(String.class), agentDTO.getAgentVersion().get());
 			predicatesCount.add(cbCount.and(namePredicateCount, valuePredicateCount));
 		}
 		
-		if(diskType.isPresent() && !diskType.get().equals("") && !diskType.get().equals("ALL")) {
+		if(agentDTO.getDiskType().get() != null && !agentDTO.getDiskType().get().equals("") && !agentDTO.getDiskType().get().equals("ALL")) {
 			
 			Join<AgentImpl, AgentPropertyImpl> properties = from.join("properties");
-			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class),diskType.get());
+			Predicate namePredicate = cb.like(properties.get("propertyName").as(String.class),agentDTO.getDiskType().get());
 			predicates.add(namePredicate);
 
 			//for count 
 			Join<AgentImpl, AgentPropertyImpl> propertiesCount = fromCount.join("properties");
-			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class),diskType.get());
+			Predicate namePredicateCount = cbCount.like(propertiesCount.get("propertyName").as(String.class),agentDTO.getDiskType().get());
 			predicatesCount.add(namePredicateCount);
 		}
 		
-		if(sessionReportType.isPresent() && !sessionReportType.get().equals("")) {
-//		if(sessionReportType != null) {
-			Date sessionFilterDate = null;
-			Date now = new Date();
-			if(sessionReportType.get().equals("LAST_ONE_MONTH_NO_SESSIONS")) { 
-				predicates.add(
-						cb.not(from.get("jid").in(
-								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
-				predicatesCount.add(
-						cb.not(fromCount.get("jid").in(
-								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
-				
-				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(1).toInstant());
-				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()).not());
-				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now).not());
-			} else if(sessionReportType.get().equals("LAST_TWO_MONTHS_NO_SESSIONS")) {
-				predicates.add(
-						cb.not(from.get("jid").in(
-								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
-				predicatesCount.add(
-						cbCount.not(fromCount.get("jid").in(
-								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
-				
-				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(2).toInstant());
-				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()).not());
-				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now).not());
-			} else if(sessionReportType.get().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
-				predicates.add(
-						cb.not(from.get("jid").in(
-								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
-				predicatesCount.add(
-						cbCount.not(fromCount.get("jid").in(
-								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
-				
-				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(3).toInstant());
-				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()).not());
-				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now).not());
-			} else if(sessionReportType.get().equals("LAST_ONE_MONTH_SESSIONS")) {
-				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(1).toInstant());
-				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()));
-				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now));
-			} else if(sessionReportType.get().equals("LAST_TWO_MONTHS_SESSIONS")) {
-				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(2).toInstant());
-				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()));
-				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now));
-			} else if(sessionReportType.get().equals("LAST_THREE_MONTHS_SESSIONS")) {
-				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(3).toInstant());
-				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()));
-				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now));
-			}
-
+		//Session time dropdown closed for frontend and backend
+//		if(sessionReportType.isPresent() && !sessionReportType.get().equals("")) {
+////		if(sessionReportType != null) {
+//			Date sessionFilterDate = null;
+//			Date now = new Date();
+//			if(sessionReportType.get().equals("LAST_ONE_MONTH_NO_SESSIONS")) { 
+//				predicates.add(
+//						cb.not(from.get("jid").in(
+//								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
+//				predicatesCount.add(
+//						cb.not(fromCount.get("jid").in(
+//								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
+//				
+//				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(1).toInstant());
+//				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()).not());
+//				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now).not());
+//			} else if(sessionReportType.get().equals("LAST_TWO_MONTHS_NO_SESSIONS")) {
+//				predicates.add(
+//						cb.not(from.get("jid").in(
+//								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
+//				predicatesCount.add(
+//						cbCount.not(fromCount.get("jid").in(
+//								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
+//				
+//				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(2).toInstant());
+//				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()).not());
+//				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now).not());
+//			} else if(sessionReportType.get().equals("LAST_THREE_MONTHS_NO_SESSIONS")) {
+//				predicates.add(
+//						cb.not(from.get("jid").in(
+//								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
+//				predicatesCount.add(
+//						cbCount.not(fromCount.get("jid").in(
+//								!CollectionUtils.isEmpty(listOfOnlineUsers)? listOfOnlineUsers : new ArrayList<String>(Arrays.asList("")))));
+//				
+//				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(3).toInstant());
+//				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()).not());
+//				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now).not());
+//			} else if(sessionReportType.get().equals("LAST_ONE_MONTH_SESSIONS")) {
+//				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(1).toInstant());
+//				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()));
+//				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now));
+//			} else if(sessionReportType.get().equals("LAST_TWO_MONTHS_SESSIONS")) {
+//				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(2).toInstant());
+//				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()));
+//				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now));
+//			} else if(sessionReportType.get().equals("LAST_THREE_MONTHS_SESSIONS")) {
+//				sessionFilterDate = Date.from(ZonedDateTime.now().minusMonths(3).toInstant());
+//				predicates.add(cb.between(from.get("lastLoginDate"), sessionFilterDate, new Date()));
+//				predicatesCount.add(cbCount.between(fromCount.get("lastLoginDate"), sessionFilterDate, now));
+//			}
+//
+//		}
+		
+		if(agentDTO.getAgentStatus().get() != null && !agentDTO.getAgentStatus().get().equals("")) {
+			predicates.add(cb.equal(from.get("agentStatus"), agentDTO.getAgentStatus().get()));
+			predicatesCount.add(cb.equal(fromCount.get("agentStatus"), agentDTO.getAgentStatus().get()));
 		}
 
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
@@ -253,16 +241,17 @@ public class AgentInfoCriteriaBuilder {
 		Long count = count(cbCount, predicatesCount, criteriaCount);
 
 		TypedQuery<AgentImpl> typedQuery = entityManager.createQuery(select);
-		typedQuery.setFirstResult((pageNumber - 1)*pageSize);
-		if(pageNumber*pageSize > count) {
-			typedQuery.setMaxResults((int) (count%pageSize));
+		typedQuery.setFirstResult((agentDTO.getPageNumber() - 1) * agentDTO.getPageSize());
+		if(agentDTO.getPageNumber() * agentDTO.getPageSize() > count) {
+			typedQuery.setMaxResults((int) (count%agentDTO.getPageSize()));
 		} else {
-			typedQuery.setMaxResults(pageSize);
+			typedQuery.setMaxResults(agentDTO.getPageSize());
 		}
-
+		
 		Page<AgentImpl> agents = new PageImpl<AgentImpl>(typedQuery.getResultList(), pageable, count);
 
 		return agents;
+		
 	}
 
 	/*

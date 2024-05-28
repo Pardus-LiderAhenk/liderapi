@@ -6,6 +6,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
@@ -17,6 +21,8 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
+import tr.org.lider.entities.AgentImpl;
+import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
@@ -25,17 +31,16 @@ import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
-import tr.org.lider.ldap.LdapSearchFilterAttribute;
-import tr.org.lider.ldap.SearchFilterEnum;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.messages.ExecuteTaskMessageImpl;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.messaging.messages.ILiderMessage;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
+import tr.org.lider.repositories.AgentRepository;
+import tr.org.lider.repositories.CommandExecutionRepository;
 import tr.org.lider.repositories.TaskRepository;
 import tr.org.lider.utils.IRestResponse;
 import tr.org.lider.utils.ResponseFactoryService;
 import tr.org.lider.utils.RestResponseStatus;
-import tr.org.lider.services.ConfigurationService;
 
 
 @Service
@@ -53,7 +58,7 @@ public class TaskService {
 	private ConfigurationService configService;
 
 	@Autowired
-	private XMPPClientImpl messagingService;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private CommandService commandService;
@@ -69,12 +74,25 @@ public class TaskService {
 	
 	@Autowired
 	private PluginTaskService pluginTaskService;
+	
+	@Autowired
+	private AgentRepository agentRepository;
+	
+	@Autowired
+	private CommandExecutionRepository commandExecutionRepository;
+	
+	@Autowired
+	private TaskSchedulerService taskSchedulerService;
+	
+	@PersistenceContext
+	private EntityManager entityManager;
 
-	public IRestResponse execute(PluginTask request) {
+
+	public IRestResponse execute(PluginTask request){
 
 		// Getting target entries 
 		/**
-		 * Getting target entries.. selected entries can be group ahhenk or organizational unit.
+		 * Getting target entries.. selected entries can be group ahenk or organizational unit.
 		 * targetEntries must be only Ahenk. 
 		 * getTargetList method finds all suitable ahenks from selected group or organizational unit
 		 * 
@@ -83,7 +101,7 @@ public class TaskService {
 
 		// Create & persist task
 		TaskImpl task= new TaskImpl(null, request.getPlugin(), request.getCommandId(), request.getParameterMap(), false,
-				request.getCronExpression(), new Date(), null);
+				request.getCronExpression(), new Date(), null, request.isTaskParts());
 		task = taskRepository.save(task);
 		String commandIdForLog = task.getCommandClsId();
 		List<PluginTask> pluginTask = pluginTaskService.findPluginTaskByCommandID(task.getCommandClsId());
@@ -91,13 +109,26 @@ public class TaskService {
 			commandIdForLog = pluginTask.get(0).getName();
 		}
 		String logMessage = "";
+		String fragmentationLogMessage = "";
 		if (request.getEntryList().get(0).getType().equals(DNType.GROUP)) {
-			logMessage = "[ "+ request.getEntryList().get(0).getDistinguishedName() + " ] istemci grubuna [ " + commandIdForLog + " ] görevi gönderildi.";
-		} else {
-			logMessage = "[ "+ request.getEntryList().get(0).get(configService.getAgentLdapJidAttribute()) +" ] istemciye [ " + commandIdForLog + " ] görevi gönderildi.";
+			if(task.isTaskParts() == true) {
+				fragmentationLogMessage = "[ " + commandIdForLog + " ] task was sent to the  [ "+ request.getEntryList().get(0).getDistinguishedName() + " ] client group in parts.";
+
+			}else {
+				
+				logMessage = "[ " + commandIdForLog + " ] task sent to  [ "+ request.getEntryList().get(0).getDistinguishedName() + " ] client group.";
+			}
+			
+		} 
+		else {
+			logMessage = "[ " + commandIdForLog + " ] task sent to  [ "+ request.getEntryList().get(0).getDistinguishedName() + " ] client group.";
 		}
 		try {
-			operationLogService.saveOperationLog(OperationType.EXECUTE_TASK, logMessage, task.getParameterMapBlob(), task.getId(), null, null);
+			if(task.isTaskParts() == true) {
+				operationLogService.saveOperationLog(OperationType.EXECUTE_TASK, fragmentationLogMessage, task.getParameterMapBlob(), task.getId(), null, null);
+			}
+			else
+				operationLogService.saveOperationLog(OperationType.EXECUTE_TASK, logMessage, task.getParameterMapBlob(), task.getId(), null, null);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -114,9 +145,9 @@ public class TaskService {
 		CommandImpl command=null;
 
 		try {
-			command= new CommandImpl(null, null, task, request.getDnList(), request.getDnType(), uidList,findCommandOwnerJid(), 
-					((PluginTask) request).getActivationDate(), 
-					null, new Date(), null, false, false);
+			command = new CommandImpl(null, null, task, request.getDnList(), request.getDnType(), uidList, findCommandOwnerJid(),
+					((PluginTask) request).getActivationDate(),null, new Date(), null, false, false);
+
 		} catch (JsonGenerationException e) {
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
@@ -127,75 +158,88 @@ public class TaskService {
 
 		if(command!=null)
 			commandService.addCommand(command);
+		
 
 		if (targetEntries != null && !targetEntries.isEmpty()) {
-
+			 
 			for (final LdapEntry entry : targetEntries) {
 
 				boolean isAhenk = ldapService.isAhenk(entry);
-
 				String uid = isAhenk ? entry.get(configService.getAgentLdapJidAttribute()) : null;
-
 				logger.info("DN type: {}, UID: {}", entry.getType().toString(), uid);
-
 				uid=uid.trim();
 
 				Boolean isOnline=messagingService.isRecipientOnline(getFullJid(uid));
-
-				CommandExecutionImpl execution=	new CommandExecutionImpl(null, 
-						command, uid, entry.getType(), entry.getDistinguishedName(),
-						new Date(), null, isOnline);
-
-				command.addCommandExecution(execution);
-
-				// Task message
-				ILiderMessage message = null;
-				if (isAhenk) {
-					// Set agent JID (the JID is UID of the LDAP entry)
-					if (uid == null || uid.isEmpty()) {
-						logger.error("JID was null. Ignoring task: {} for agent: {}",	new Object[] { task.toJson(), entry.getDistinguishedName() });
-						continue;
-					}
-					logger.info("Sending task to agent with JID: {}", uid);
-
-					String taskJsonString = null;
-					try {
-						taskJsonString = task.toJson();
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}
-
-					FileServerConf fileServerConf=request.getPlugin().isUsesFileTransfer() ? configService.getFileServerConf(uid.toLowerCase()) : null;
-					// uid=jid
-					message= new ExecuteTaskMessageImpl(taskJsonString, uid, new Date(), fileServerConf);
-
-					// TaskStatusUpdateListener in XMPPClientImpl class
-					try {
-						messagingService.sendMessage(message);
-					} catch (JsonGenerationException e) {
-						e.printStackTrace();
-					} catch (JsonMappingException e) {
-						e.printStackTrace();
-					} catch (NotConnectedException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
+				CommandExecutionImpl execution = new CommandExecutionImpl();
+				Boolean isTaskSend = false;
+				if(task.isTaskParts() == false) {
+					isTaskSend = true;
 				}
-				commandService.addCommandExecution(execution);
+				
+					execution=	new CommandExecutionImpl(null, command, uid, entry.getType(), entry.getDistinguishedName(),new Date(), null, isOnline, isTaskSend);
+					command.addCommandExecution(execution);
+					
+					// Task message
+					ILiderMessage message = null;
+					if (isAhenk) {
+						// Set agent JID (the JID is UID of the LDAP entry)
+						if (uid == null || uid.isEmpty()) {
+							logger.error("JID was null. Ignoring task: {} for agent: {}",	new Object[] { task.toJson(), entry.getDistinguishedName() });
+							continue;
+						}
+						logger.info("Sending task to agent w6ith JID: {}", uid);
+
+						String taskJsonString = null;
+						try {
+							taskJsonString = task.toJson();
+						} catch (Exception e) {
+							logger.error(e.getMessage(), e);
+						}
+
+						FileServerConf fileServerConf=request.getPlugin().isUsesFileTransfer() ? configService.getFileServerConf(uid.toLowerCase()) : null;
+						// uid=jid
+						message= new ExecuteTaskMessageImpl(taskJsonString, uid, new Date(), fileServerConf);
+
+						// TaskStatusUpdateListener in XMPPClientImpl class
+						try {
+							if(!task.isTaskParts()) {
+								messagingService.sendMessage(message);
+							}
+							
+						} catch (JsonGenerationException e) {
+							e.printStackTrace();
+						} catch (JsonMappingException e) {
+							e.printStackTrace();
+						} catch (NotConnectedException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+					}
+					commandService.addCommandExecution(execution);
 			}
 		}
 		return responseFactoryService.createResponse(RestResponseStatus.OK,"Task Basarı ile Gonderildi.");
 	}
-
+	
+	
 	private List<LdapEntry> getTargetList(PluginTask request) {
 		List<LdapEntry> targetEntries= new ArrayList<>();
 		List <LdapEntry> ldapEntryGroups = new ArrayList<>();
 		List<LdapEntry> selectedtEntries= request.getEntryList();
 		for (LdapEntry ldapEntry : selectedtEntries) {
 			if(ldapEntry.getType().equals(DNType.AHENK)) {
-				targetEntries.add(ldapEntry); 
+			    List<AgentImpl> agentList = agentRepository.findByJid(ldapEntry.getUid());
+
+			    if (agentList != null && !agentList.isEmpty()) {
+			        AgentStatus agentStatus = agentList.get(0).getAgentStatus();
+
+			        if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
+			            targetEntries.add(ldapEntry);
+			        }
+			    }
+				
 			}
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
 				List <String> dnList= ldapService.getGroupInGroupsTask(ldapEntry);
@@ -203,13 +247,23 @@ public class TaskService {
 				
 					for(LdapEntry ldapEntryGroup : ldapEntryGroups) {
 						String[] members= ldapEntryGroup.getAttributesMultiValues().get("member");
+						//member sayısı alınıyor
 						for (int i = 0; i < members.length; i++) {
 							String dn = members[i];
 							try {
 								List<LdapEntry> member= ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.OBJECT);
 								if(member!=null && member.size()>0 ) {
 									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0)))
-										targetEntries.add(member.get(0));
+										if(!agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Passive)) {
+											targetEntries.add(member.get(0));
+										}
+//									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0))) {
+//										AgentStatus agentStatus = agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus();
+//
+//										if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
+//										    targetEntries.add(member.get(0));
+//										}
+//									}										
 								}
 							} catch (LdapException e) {
 								// TODO Auto-generated catch block
@@ -254,6 +308,5 @@ public class TaskService {
 		List<Object[]> tasks = taskRepository.findExecutedTaskWithCount(AuthenticationService.getUserName());
 		return tasks;
 	}
-
 
 }

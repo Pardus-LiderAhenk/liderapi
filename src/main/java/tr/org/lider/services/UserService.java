@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -28,8 +31,10 @@ public class UserService implements UserDetailsService {
 	private AgentUserSessionRepository agentUserSessionRepository;
 	
 
-	public List<UserSessionImpl> getUserSessions(String userName) {
-		return agentUserSessionRepository.findByUsername(userName);
+	public Page<UserSessionImpl> getUserSessions(int pageNumber, int pageSize, String userName) {
+		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize, Sort.by("createDate").descending());
+		
+		return agentUserSessionRepository.findByUsername(userName, pageable);
 	}
 	
 	@Override

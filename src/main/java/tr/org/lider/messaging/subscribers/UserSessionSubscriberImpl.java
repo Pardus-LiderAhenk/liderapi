@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
+import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.entities.SessionEvent;
 import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.ldap.ILDAPService;
@@ -28,6 +29,7 @@ import tr.org.lider.messaging.messages.ILiderMessage;
 import tr.org.lider.messaging.messages.IUserSessionMessage;
 import tr.org.lider.messaging.messages.UserSessionResponseMessageImpl;
 import tr.org.lider.repositories.AgentRepository;
+import tr.org.lider.repositories.UserSessionRepository;
 import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
 
@@ -47,6 +49,9 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 
 	@Autowired
 	private AgentRepository agentRepository;
+	
+	@Autowired
+	private UserSessionRepository userSessionRepository;
 
 	@Autowired
 	private ConfigurationService configurationService;
@@ -71,9 +76,6 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 			// Add new user session info
 			UserSessionImpl userSession = new UserSessionImpl(null, null, message.getUsername(), message.getUserIp(),
 					getSessionEvent(message.getType()), new Date());
-			if (userSession.getUsername() != null) {
-				agent.addUserSession(userSession);
-			}
 			if (message.getType() == AgentMessageType.LOGIN
 					&& (message.getIpAddresses() == null || message.getIpAddresses().isEmpty())) {
 				logger.warn("Couldn't find IP addresses of the agent with JID: {}", uid);
@@ -155,7 +157,12 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 			}
 			// Merge records
 			agent.setLastLoginDate(new Date());
-			agentRepository.save(agent);
+			agent.setAgentStatus(AgentStatus.Active);
+			agent = agentRepository.save(agent);
+			if (userSession.getUsername() != null) {
+				userSession.setAgent(agent);
+				userSessionRepository.save(userSession);
+			}
 			// find user authority for sudo role
 			// if user has sudo role user get sudoRole on agent
 			if (message.getType() == AgentMessageType.LOGIN) {

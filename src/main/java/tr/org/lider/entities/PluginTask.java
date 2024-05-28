@@ -75,6 +75,9 @@ public class PluginTask implements Serializable {
 	@Transient
 	private Date activationDate;
 	
+	@Transient
+	private boolean taskParts;
+	
 	public PluginTask() {
 		
 	}
@@ -215,5 +218,12 @@ public class PluginTask implements Serializable {
 		this.isMulti = isMulti;
 	}
 	
+	public boolean isTaskParts() {
+		return taskParts;
+	}
+
+	public void setTaskParts(boolean taskParts) {
+		this.taskParts = taskParts;
+	}
 	
 }

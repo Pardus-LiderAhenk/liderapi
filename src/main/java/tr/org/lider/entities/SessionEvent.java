@@ -27,7 +27,8 @@ package tr.org.lider.entities;
  */
 public enum SessionEvent {
 
-	LOGIN(1), LOGOUT(2);
+	LOGIN(1), 
+	LOGOUT(2);
 
 	private int id;
 

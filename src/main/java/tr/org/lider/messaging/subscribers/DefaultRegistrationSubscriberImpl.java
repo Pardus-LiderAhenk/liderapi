@@ -36,18 +36,19 @@ import org.springframework.stereotype.Component;
 
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
+import tr.org.lider.entities.AgentStatus;
 import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.enums.AgentMessageType;
 import tr.org.lider.messaging.enums.StatusCode;
 import tr.org.lider.messaging.messages.ILiderMessage;
 import tr.org.lider.messaging.messages.IRegistrationResponseMessage;
 import tr.org.lider.messaging.messages.RegistrationMessageImpl;
 import tr.org.lider.messaging.messages.RegistrationResponseMessageImpl;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.ConfigurationService;
@@ -84,7 +85,7 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 
 
 	@Autowired
-	private XMPPClientImpl xmppClient;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private LDAPServiceImpl ldapService;
@@ -214,6 +215,8 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 							agent.getCreateDate(), 
 							new Date(),
 							false,
+							null,
+							AgentStatus.Active,
 							(Set<AgentPropertyImpl>) agent.getProperties(),
 							(Set<UserSessionImpl>) agent.getSessions(),directoryServer);
 
@@ -246,7 +249,7 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 						message.getHostname(), 
 						message.getIpAddresses(),  
 						message.getMacAddresses(),
-						new Date(), null, false, null, null,directoryServer);
+						new Date(), null, false,null,AgentStatus.Active, null, null,directoryServer);
 				if (message.getData() != null) {
 					for (Entry<String, Object> entryy : message.getData().entrySet()) {
 						if (entryy.getKey() != null && entryy.getValue() != null) {
@@ -315,7 +318,7 @@ public class DefaultRegistrationSubscriberImpl implements IRegistrationSubscribe
 			}
 
 
-			xmppClient.addClientToRoster(jid + "@"+configurationService.getXmppServiceName());
+			messagingService.addClientToRoster(jid + "@"+configurationService.getXmppServiceName());
 			return respMessage;
 
 		} else if (AgentMessageType.UNREGISTER == message.getType()) {

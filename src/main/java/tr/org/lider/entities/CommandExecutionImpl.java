@@ -94,12 +94,15 @@ public class CommandExecutionImpl implements Serializable {
 	@Column(name = "ONLINE")
 	private boolean online; // True if the agent is online during the task
 							// execution, false otherwise
+	
+	@Column(name = "COMMAND_SEND")
+	private Boolean commandSend = false;
 
 	public CommandExecutionImpl() {
 	}
 
 	public CommandExecutionImpl(Long id, CommandImpl command, String uid, DNType dnType, String dn, Date createDate,
-			List<CommandExecutionResultImpl> commandExecutionResults, boolean online) {
+			List<CommandExecutionResultImpl> commandExecutionResults, boolean online, Boolean commandSend) {
 		this.id = id;
 		this.command = command;
 		this.uid = uid;
@@ -108,6 +111,7 @@ public class CommandExecutionImpl implements Serializable {
 		this.createDate = createDate;
 		this.commandExecutionResults = commandExecutionResults;
 		this.online = online;
+		this.commandSend = commandSend;
 	}
 
 //	public CommandExecutionImpl(ICommandExecution commandExecution) {
@@ -172,7 +176,6 @@ public class CommandExecutionImpl implements Serializable {
 		}
 	}
 
-
 	public String getDn() {
 		return dn;
 	}
@@ -189,7 +192,6 @@ public class CommandExecutionImpl implements Serializable {
 	public void setCommandExecutionResults(List<CommandExecutionResultImpl> commandExecutionResults) {
 		this.commandExecutionResults = commandExecutionResults;
 	}
-
 
 	public void addCommandExecutionResult(CommandExecutionResultImpl commandExecutionResult) {
 		if (commandExecutionResults == null) {
@@ -219,7 +221,14 @@ public class CommandExecutionImpl implements Serializable {
 	public void setOnline(boolean online) {
 		this.online = online;
 	}
+	
+	public Boolean isCommanSend() {
+		return commandSend != null ? commandSend : true;
+	}
 
+	public void setCommanSend(Boolean commandSend) {
+	    this.commandSend = commandSend != null ? commandSend : true;
+	}
 
 	public String toJson() {
 		ObjectMapper mapper = new ObjectMapper();
@@ -234,7 +243,7 @@ public class CommandExecutionImpl implements Serializable {
 
 	public String toString() {
 		return "CommandExecutionImpl [id=" + id + ", uid=" + uid + ", dnType=" + dnType + ", dn=" + dn + ", createDate="
-				+ createDate + ", commandExecutionResults=" + commandExecutionResults + ", online=" + online + "]";
+				+ createDate + ", commandExecutionResults=" + commandExecutionResults + ", online=" + online + ", commandSend=" + commandSend +"]";
 	}
 
 }

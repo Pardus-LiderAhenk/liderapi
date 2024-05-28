@@ -11,12 +11,10 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +58,6 @@ import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 import org.apache.directory.ldap.client.api.LdapConnectionPool;
 import org.apache.directory.ldap.client.api.PoolableLdapConnectionFactory;
-import org.hibernate.validator.constraints.Length;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,8 +65,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import tr.org.lider.entities.CommandImpl;
+import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.enums.DomainType;
-import tr.org.lider.messaging.messages.XMPPClientImpl;
 import tr.org.lider.security.User;
 import tr.org.lider.services.AdService;
 import tr.org.lider.services.AuthenticationService;
@@ -95,7 +92,7 @@ public class LDAPServiceImpl implements ILDAPService {
 	//private ICacheService cacheService;
 
 	@Autowired
-	private XMPPClientImpl xmppClientImpl;
+	private IMessagingService messagingService;
 
 	@Autowired
 	private CommandService commandService;
@@ -787,7 +784,7 @@ public class LDAPServiceImpl implements ILDAPService {
 					LdapEntry ldapEntry= new LdapEntry(entry.getDn().toString(), attrs,attributesMultiValues, priviliges,convertObjectClass2DNType(entry.get("objectClass")));
 
 					if(ldapEntry.getType()==DNType.AHENK) {
-						ldapEntry.setOnline(xmppClientImpl.isRecipientOnline(ldapEntry.getUid()));
+						ldapEntry.setOnline(messagingService.isRecipientOnline(ldapEntry.getUid()));
 					}
 					result.add(ldapEntry);
 				}
@@ -927,7 +924,7 @@ public class LDAPServiceImpl implements ILDAPService {
 					ldapEntry.setModifyDateStr(crtDateModify);
 					
 					if(ldapEntry.getType()==DNType.AHENK) {
-						ldapEntry.setOnline(xmppClientImpl.isRecipientOnline(ldapEntry.getUid()));
+						ldapEntry.setOnline(messagingService.isRecipientOnline(ldapEntry.getUid()));
 					}
 					result.add(ldapEntry);
 				}

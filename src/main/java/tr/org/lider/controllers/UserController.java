@@ -12,6 +12,8 @@ import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -77,8 +79,6 @@ public class UserController {
 	@Autowired
 	private OperationLogService operationLogService;
 
-	private Object object;
-	
 	@Operation(summary = "Gets the ou detail of the selected entry.", description = "", tags = { "user" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Returns the ou detail of the selected entry. Successful"),
@@ -714,14 +714,20 @@ public class UserController {
 			  @ApiResponse(responseCode = "200", description = ""),
 			  @ApiResponse(responseCode = "417", description = "Could not get user session. Unexpected error occurred", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/user-session/uid/{uid}")
+	@GetMapping(value = "/user-session/page-number/{pageNumber}/page-size/{pageSize}/uid/{uid}")
 	//@RequestMapping(method=RequestMethod.POST, value = "/getUserSessions")
-	public ResponseEntity<List<UserSessionsModel>> getUserSessions(@PathVariable String uid) {
-		List<UserSessionsModel> userSessions=null;
+	public ResponseEntity<?> getUserSessions(
+			@PathVariable String uid,
+			@PathVariable int pageNumber,
+			@PathVariable int pageSize) {
+		List<UserSessionsModel> userSessions = null;
+		Page<UserSessionImpl> userSessionsDb = null;
+		PageImpl<?> userSessionsDb2 = null;
+		
 		try {
-			List<UserSessionImpl> userSessionsDb = userService.getUserSessions(uid);
-			userSessions=new ArrayList<>();
-			for (UserSessionImpl userSessionImpl : userSessionsDb) {
+			userSessionsDb = userService.getUserSessions(pageNumber, pageSize, uid);
+			userSessions = new ArrayList<>();
+			for (UserSessionImpl userSessionImpl : userSessionsDb.getContent()) {				
 				UserSessionsModel model = new UserSessionsModel();
 				model.setAgent(userSessionImpl.getAgent());
 				model.setCreateDate(userSessionImpl.getCreateDate());
@@ -731,6 +737,8 @@ public class UserController {
 				model.setUsername(userSessionImpl.getUsername());
 				userSessions.add(model);
 			}
+			userSessionsDb2 = new PageImpl<>(userSessions, userSessionsDb.getPageable(), userSessionsDb.getTotalElements());
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			HttpHeaders headers = new HttpHeaders();
@@ -739,9 +747,10 @@ public class UserController {
     				.headers(headers)
     				.build();
 		}
+
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(userSessions);
+				.body(userSessionsDb2);
 				
 	}
 	

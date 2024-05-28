@@ -98,12 +98,14 @@ public class ConfigParams {
 	private String mailPassword;
 	private String mailHost;
 	private Integer mailSmtpPort;
+	private Integer mailPort;
 	private Boolean mailSmtpAuth;
 	private Boolean mailSmtpStartTlsEnable;
 	private Boolean mailSmtpSslEnable;
 	private Integer mailSmtpConnTimeout;
 	private Integer mailSmtpTimeout;
 	private Integer mailSmtpWriteTimeout;
+	private Boolean mailTlsEnabled;
 
 	private Boolean mailSendOnTaskCompletion;
 	private Long mailCheckTaskCompletionPeriod;
@@ -138,6 +140,9 @@ public class ConfigParams {
 	private SudoRoleType sudoRoleType;
 	private String ahenkRepoAddress;
 	private String ahenkRepoKeyAddress;
+	private Boolean machineEventStatus;
+	private int machineEventDay;
+	private int clientSize;
 
 	//plugin settings
 	private Boolean allowVNCConnectionWithoutPermission;
@@ -146,7 +151,7 @@ public class ConfigParams {
 	private String pardusRepoAddress;
 	private String pardusRepoComponent;
 	private Boolean enableDelete4Directory;
-	
+
 	private RegistrationTemplateType selectedRegistrationType;
 	
 	public ConfigParams() {
@@ -203,6 +208,10 @@ public class ConfigParams {
 		this.ahenkRepoKeyAddress = "";
 		this.sudoRoleType = SudoRoleType.LDAP;
 		this.allowDynamicDNSUpdate = false;
+		this.machineEventStatus = false;
+		this.machineEventDay = 120;
+		this.clientSize = 1;
+		
 		
 		this.selectedRegistrationType = RegistrationTemplateType.DEFAULT;
 		this.enableDelete4Directory = false;
@@ -535,7 +544,23 @@ public class ConfigParams {
 	public void setMailAddress(String mailAddress) {
 		this.mailAddress = mailAddress;
 	}
+	
+	public Boolean getMailTlsEnabled() {
+		return mailTlsEnabled;
+	}
 
+	public void setMailTlsEnabled(Boolean mailTlsEnabled) {
+		this.mailTlsEnabled = mailTlsEnabled;
+	}
+
+	public Integer getMailPort() {
+		return mailPort;
+	}
+
+	public void setMailPort(Integer mailPort) {
+		this.mailPort = mailPort;
+	}
+	
 	public String getMailPassword() {
 		return mailPassword;
 	}
@@ -961,6 +986,30 @@ public class ConfigParams {
 
 	public void setXmppBoshAddress(String xmppBoshAddress) {
 		this.xmppBoshAddress = xmppBoshAddress;
+	}
+	
+	public Boolean getMachineEventStatus() {
+		return machineEventStatus;
+	}
+
+	public void setMachineEventStatus(Boolean machineEventStatus) {
+		this.machineEventStatus = machineEventStatus;
+	}
+
+	public int getMachineEventDay() {
+		return machineEventDay;
+	}
+
+	public void setMachineEventDay(int machineEventDay) {
+		this.machineEventDay = machineEventDay;
+	}
+	
+	public int getClientSize() {
+		return clientSize;
+	}
+
+	public void setClientSize(int clientSize) {
+		this.clientSize = clientSize;
 	}
 
 }

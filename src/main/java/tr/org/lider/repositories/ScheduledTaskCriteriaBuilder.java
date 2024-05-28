@@ -1,8 +1,6 @@
 package tr.org.lider.repositories;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +18,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import tr.org.lider.dto.ScheduledTaskDTO;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.TaskImpl;
 
@@ -35,10 +34,8 @@ public class ScheduledTaskCriteriaBuilder {
 	@PersistenceContext
 	EntityManager entityManager;
 	
-	public Page<CommandImpl> filterCommands(int pageNumber, int pageSize, 
-			Optional<String> taskCommand,
-			Optional<Date> startDate, Optional<Date> endDate) {
-		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
+	public Page<CommandImpl> filterCommands(ScheduledTaskDTO scheduledTaskDTO) {
+		PageRequest pageable = PageRequest.of(scheduledTaskDTO.getPageNumber() - 1, scheduledTaskDTO.getPageSize());
 
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 		//for filtered result count
@@ -54,25 +51,26 @@ public class ScheduledTaskCriteriaBuilder {
 		List<Predicate> predicates = new ArrayList<>();
 		//for filtered result count
 		List<Predicate> predicatesCount = new ArrayList<>();
+		
 	
-
-		if (startDate.isPresent()) {
-			predicates.add(criteriaBuilder.greaterThanOrEqualTo(from.get("createDate"), startDate.get()));
-			predicatesCount.add(criteriaBuilderCount.greaterThanOrEqualTo(fromCount.get("createDate"), startDate.get()));
-		}
-		if (endDate.isPresent()) {
-			predicates.add(criteriaBuilder.lessThanOrEqualTo(from.get("createDate"), endDate.get()));
-			predicatesCount.add(criteriaBuilderCount.lessThanOrEqualTo(fromCount.get("createDate"), endDate.get()));
+		if (scheduledTaskDTO.getStartDate() != null) {
+			predicates.add(criteriaBuilder.greaterThanOrEqualTo(from.get("createDate"), scheduledTaskDTO.getStartDate().get()));
+			predicatesCount.add(criteriaBuilderCount.greaterThanOrEqualTo(fromCount.get("createDate"), scheduledTaskDTO.getStartDate().get()));
 		}
 		
-		if(taskCommand.isPresent() && !taskCommand.get().equals("")) {
+		if (scheduledTaskDTO.getEndDate() != null) {
+			predicates.add(criteriaBuilder.lessThanOrEqualTo(from.get("createDate"), scheduledTaskDTO.getEndDate().get()));
+			predicatesCount.add(criteriaBuilderCount.lessThanOrEqualTo(fromCount.get("createDate"), scheduledTaskDTO.getEndDate().get()));
+		}
+		
+		if(scheduledTaskDTO.getTaskCommand() != null && !scheduledTaskDTO.getTaskCommand().get().equals("")) {
 			Join<CommandImpl, TaskImpl> taskJoin = from.join("task");
-			Predicate taskJoinPredicate = criteriaBuilder.equal(taskJoin.get("commandClsId").as(String.class), taskCommand.get() );
+			Predicate taskJoinPredicate = criteriaBuilder.equal(taskJoin.get("commandClsId").as(String.class), scheduledTaskDTO.getTaskCommand().get() );
 			predicates.add(taskJoinPredicate);
 
 			//for count 
 			Join<CommandImpl, TaskImpl> taskJoinCount = fromCount.join("task");
-			Predicate taskJoinPredicateCount = criteriaBuilderCount.equal(taskJoinCount.get("commandClsId").as(String.class), taskCommand.get() );
+			Predicate taskJoinPredicateCount = criteriaBuilderCount.equal(taskJoinCount.get("commandClsId").as(String.class), scheduledTaskDTO.getTaskCommand().get() );
 			predicatesCount.add(taskJoinPredicateCount);
 		}
 		
@@ -81,39 +79,42 @@ public class ScheduledTaskCriteriaBuilder {
 		predicatesCount.add(criteriaBuilderCount.isNotNull(fromCount.get("task")));
 		predicates.add(criteriaBuilder.isNull(from.get("policy")));
 		predicatesCount.add(criteriaBuilderCount.isNull(fromCount.get("policy")));
-		
-
-		//add command cron expression not null conditionet
+	
+		//add only cronjobs
 		Join<CommandImpl, TaskImpl> taskJoin = from.join("task");
 		Predicate taskJoinPredicate = criteriaBuilder.isNotNull(taskJoin.get("cronExpression").as(String.class));
-//		Predicate taskJoinPredicateDeleted = criteriaBuilder.equal(taskJoin.get("deleted").as(Boolean.class), false);
-//		predicates.add(criteriaBuilder.and(taskJoinPredicate, taskJoinPredicateDeleted));
-		predicates.add(taskJoinPredicate);
-
-		//for count 
+		predicates.add(criteriaBuilder.and(taskJoinPredicate));
+		
 		Join<CommandImpl, TaskImpl> taskJoinCount = fromCount.join("task");
 		Predicate taskJoinPredicateCount = criteriaBuilderCount.isNotNull(taskJoinCount.get("cronExpression").as(String.class));
-//		Predicate taskJoinPredicateDeletedCount = criteriaBuilderCount.equal(taskJoinCount.get("deleted").as(Boolean.class), false);
-//		predicatesCount.add(criteriaBuilderCount.and(taskJoinPredicateCount, taskJoinPredicateDeletedCount));
-		predicatesCount.add(taskJoinPredicateCount);
+		predicatesCount.add(criteriaBuilder.and(taskJoinPredicateCount));
+		
+		if(scheduledTaskDTO.getStatus() !=null  && !scheduledTaskDTO.getStatus().get().equals(null)) {
+			Predicate taskJoinPredicateDeleted = criteriaBuilder.equal(taskJoin.get("deleted"), scheduledTaskDTO.getStatus().get());
+			predicates.add(taskJoinPredicateDeleted);
+	
+			//for count 
+			Predicate taskJoinPredicateDeletedCount = criteriaBuilderCount.equal(taskJoinCount.get("deleted"), scheduledTaskDTO.getStatus().get());
+			predicatesCount.add(taskJoinPredicateDeletedCount);
+		}
 		
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
 		criteriaQuery.orderBy(criteriaBuilder.desc(from.get("createDate")));
 		Long count = count(criteriaBuilderCount, predicatesCount, criteriaCount);
 
 		TypedQuery<CommandImpl> typedQuery = entityManager.createQuery(select);
-		typedQuery.setFirstResult((pageNumber - 1)*pageSize);
-		if(pageNumber*pageSize > count) {
-			typedQuery.setMaxResults((int) (count%pageSize));
+		typedQuery.setFirstResult((scheduledTaskDTO.getPageNumber() - 1)*scheduledTaskDTO.getPageSize());
+		if(scheduledTaskDTO.getPageNumber()*scheduledTaskDTO.getPageSize() > count) {
+			typedQuery.setMaxResults((int) (count%scheduledTaskDTO.getPageSize()));
 		} else {
-			typedQuery.setMaxResults(pageSize);
+			typedQuery.setMaxResults(scheduledTaskDTO.getPageSize());
 		}
 		
 		Page<CommandImpl> commands = new PageImpl<CommandImpl>(typedQuery.getResultList(), pageable, count);
 
 		return commands;
 	}
-
+	
 	/*
 	 * get count of filtered data for paging
 	 */

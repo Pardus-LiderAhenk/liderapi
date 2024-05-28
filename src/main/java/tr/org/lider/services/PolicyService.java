@@ -99,7 +99,7 @@ public class PolicyService {
 				CommandImpl command = createCommanEntity(request, policy, dnListTemp);
 				String uid=targetEntry.get(configService.getAgentLdapIdAttribute()); // group uid is cn value.
 				CommandExecutionImpl commandExecutionImpl=	new CommandExecutionImpl(null, (CommandImpl) command, uid, targetEntry.getType(), targetEntry.getDistinguishedName(),
-						new Date(), null, false);
+						new Date(), null, false, false);
 				command.addCommandExecution(commandExecutionImpl);
 				if(command!=null )
 					commandService.addCommand(command);

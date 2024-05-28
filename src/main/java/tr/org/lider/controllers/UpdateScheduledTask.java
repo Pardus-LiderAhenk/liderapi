@@ -52,7 +52,7 @@ public class UpdateScheduledTask {
 				.body(response);
 	}
 	
-	@Operation(summary = "Update scheduled task", description = "", tags = { "update-scheduled" })
+	@Operation(summary = "Cancel scheduled task", description = "", tags = { "cancel-scheduled" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = ""),
 			  @ApiResponse(responseCode = "400", description = "Scheduled task id  not found", 

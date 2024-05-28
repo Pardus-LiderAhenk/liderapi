@@ -6,12 +6,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -26,12 +29,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import aj.org.objectweb.asm.Type;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationLogImpl;
+import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.messaging.enums.StatusCode;
+import tr.org.lider.utils.IUserSessionReport;
 
 @Service
 public class ExcelExportService {
@@ -92,8 +96,8 @@ public class ExcelExportService {
 		List<Integer> colWidthList = new ArrayList<Integer>();
 		List<String> headers = new ArrayList<String>();
 		
-		Collections.addAll(headers, "", "MAC", "Durumu");
-		Collections.addAll(colWidthList, 2500, 3500, 4500);
+		Collections.addAll(headers, "", "Bilgisayar Adı","DN", "Durumu","Aktif/Pasif");
+		Collections.addAll(colWidthList, 2500, 3500,8000, 4000,3000);
 		for (AgentImpl agent : agents) {
 			if(maxCountOfIPAddresses < agent.getIpAddresses().split(",").length) {
 				maxCountOfIPAddresses = agent.getIpAddresses().split(",").length;
@@ -178,6 +182,10 @@ public class ExcelExportService {
 			cell.setCellStyle(csBordered);
 			
 			cell = row.createCell(colCount++);
+			cell.setCellValue(agent.getDn());
+			cell.setCellStyle(csBordered);
+			
+			cell = row.createCell(colCount++);
 			if(agent.getIsOnline()) {
 				cell.setCellValue("Çevrimiçi");
 				cell.setCellStyle(csBordered);
@@ -185,6 +193,28 @@ public class ExcelExportService {
 				cell.setCellValue("Çevrimdışı");
 				cell.setCellStyle(csBordered);
 			}
+
+			
+			 if(agent.getAgentStatus() != null) {
+		        	Integer intValue = agent.getAgentStatus().getId();
+		        	
+		        	if(intValue == 0) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Pasif");
+			            cell.setCellStyle(csBordered);
+		        	}
+		        	else if(intValue == 1) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Aktif");
+			            cell.setCellStyle(csBordered);
+		        	}	
+		        	else if(intValue == 2) {
+		        		cell = row.createCell(colCount++);
+			            cell.setCellValue("Askıda");
+			            cell.setCellStyle(csBordered);
+		        	}
+		        
+		        }
 
 			for (int i = 0; i < maxCountOfMacAddresses; i++) {
 				try {
@@ -385,7 +415,10 @@ public class ExcelExportService {
 				cell.setCellStyle(csBordered);
 			
 			cell = row.createCell(colCount++);
-			cell.setCellValue("HAYIR");
+			if(command.getTask().getCronExpression() != null) {
+				cell.setCellValue("EVET");
+			}else
+				cell.setCellValue("HAYIR");
 			cell.setCellStyle(csBordered);
 			
 			colCount= 0;
@@ -411,7 +444,7 @@ public class ExcelExportService {
 	public byte[] generateOperationLogReport(List<OperationLogImpl> logs) {
 		int rowCount = 0;
 		String exportFile = getFileWriteLocation() 
-				+ "Task Raporu_" 
+				+ "Sistem Güncesi Raporu_" 
 				+ new SimpleDateFormat("ddMMyyyyHH:mm:ss.SSS").format(new Date())
 				+ ".xlsx";
 		XSSFWorkbook wb = new XSSFWorkbook();
@@ -450,7 +483,7 @@ public class ExcelExportService {
 		csCenter.setAlignment(HorizontalAlignment.CENTER);
 		csCenter.setFont(ftArial);
 
-		XSSFSheet sheet = wb.createSheet("Detaylı İstemci Raporu");
+		XSSFSheet sheet = wb.createSheet("Sistem Güncesi Raporu");
 		
 		//Add header
 		Row row = null; 
@@ -520,7 +553,176 @@ public class ExcelExportService {
 
 	}
 	
-	
+	public byte[] generateUserSessionReport(List<IUserSessionReport> users) {
+		int rowCount = 0;
+		String exportFile = getFileWriteLocation() 
+				+ "Oturum Raporu_" 
+				+ new SimpleDateFormat("ddMMyyyyHH:mm:ss.SSS").format(new Date())
+				+ ".xlsx";
+		XSSFWorkbook wb = new XSSFWorkbook();
+
+		Font fontTextColourRed = wb.createFont();
+		fontTextColourRed.setColor(IndexedColors.RED.getIndex());
+
+		Font ftArial = wb.createFont();
+		ftArial.setFontName("Arial");
+
+		Font fontTextBold = wb.createFont();
+		fontTextBold.setBold(true);
+		fontTextBold.setFontName("Arial");
+		fontTextBold.setFontHeightInPoints((short) 10);
+
+		CellStyle csBoldAndBordered = wb.createCellStyle();
+		csBoldAndBordered.setFont(fontTextBold);
+		csBoldAndBordered.setBorderBottom(BorderStyle.THIN);
+		csBoldAndBordered.setBorderTop(BorderStyle.THIN);
+		csBoldAndBordered.setBorderLeft(BorderStyle.THIN);
+		csBoldAndBordered.setBorderRight(BorderStyle.THIN);
+		
+		CellStyle csBordered = wb.createCellStyle();
+		csBordered.setBorderBottom(BorderStyle.THIN);
+		csBordered.setBorderTop(BorderStyle.THIN);
+		csBordered.setBorderLeft(BorderStyle.THIN);
+		csBordered.setBorderRight(BorderStyle.THIN);
+
+		CellStyle csTextColourRed = wb.createCellStyle();
+		csTextColourRed.setFont(fontTextColourRed);
+
+		CellStyle csTextBold= wb.createCellStyle();
+		csTextBold.setFont(fontTextBold);
+
+		CellStyle csCenter = wb.createCellStyle();
+		csCenter.setAlignment(HorizontalAlignment.CENTER);
+		csCenter.setFont(ftArial);
+
+		XSSFSheet sheet = wb.createSheet("Kullanıcı Oturum Raporu");
+
+		//Add header
+		Row row = null; 
+		Cell cell = null;
+
+		
+		List<Integer> colWidthList = new ArrayList<Integer>();
+		List<String> headers = new ArrayList<String>();
+		
+		int counter = 1;
+		int maxCountOfMacAddresses = 0;
+		int maxCountOfIPAddresses = 0;
+		
+		
+		
+		Collections.addAll(headers, " ", "Kullanıcı Adı","Aktif/Pasif","Oturum Tipi", "Tarih", "Bilgisayar Adı");
+		Collections.addAll(colWidthList, 1500, 4000,3000, 4500 ,4500, 4000);
+		
+		for (IUserSessionReport user : users) {
+			if(maxCountOfIPAddresses < user.getIpAddresses().split(",").length) {
+				maxCountOfIPAddresses = user.getIpAddresses().split(",").length;
+			}
+			if(maxCountOfMacAddresses < user.getMacAddresses().split(",").length) {
+				maxCountOfMacAddresses = user.getMacAddresses().split(",").length;
+			}
+		}
+
+		for (int i = 0; i < maxCountOfMacAddresses; i++) {
+			headers.add("MAC Adresi " + String.valueOf(i+1));
+			colWidthList.add(5000);
+		}
+
+		for (int i = 0; i < maxCountOfIPAddresses; i++) {
+			headers.add("IP Adresi " + String.valueOf(i+1));
+			colWidthList.add(5000);
+		}
+		
+		row = sheet.createRow(rowCount++);
+		for (int i = 0; i < headers.size(); i++) {
+			sheet.setColumnWidth(i, colWidthList.get(i));
+			cell = row.createCell(i);
+			cell.setCellValue(headers.get(i));
+			cell.setCellStyle(csBoldAndBordered);
+		}
+		
+		for (IUserSessionReport user: users) {
+			int colCount = 0;
+			row = sheet.createRow(rowCount++);  
+			cell = row.createCell(colCount++);
+			cell.setCellValue(String.valueOf(counter++));
+			cell.setCellStyle(csBordered);
+			
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(user.getUsername());
+			cell.setCellStyle(csBordered);
+			
+			if(user.getAgentStatus().equals("0")) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Pasif");
+	            cell.setCellStyle(csBordered);
+			}
+			else if(user.getAgentStatus().equals("1")) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Aktif");
+	            cell.setCellStyle(csBordered);
+			}
+			
+			if(user.getSessionEvent() == 1) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Oturum Açıldı");
+	            cell.setCellStyle(csBordered);
+			}
+			else if(user.getSessionEvent() == 2) {
+				cell = row.createCell(colCount++);
+	            cell.setCellValue("Oturum 	Kapatıldı");
+	            cell.setCellStyle(csBordered);
+			}
+			
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getCreateDate()));
+			cell.setCellStyle(csBordered);
+			
+			
+			cell = row.createCell(colCount++);
+			cell.setCellValue(user.getHostname());
+			cell.setCellStyle(csBordered);
+			
+			for (int i = 0; i < maxCountOfMacAddresses; i++) {
+				try {
+					cell = row.createCell(colCount++);
+					cell.setCellValue(user.getMacAddresses().split(",")[i].replace("'", "").trim());
+					cell.setCellStyle(csBordered);
+				} catch (Exception e) {
+					cell.setCellValue("");
+					cell.setCellStyle(csBordered);
+				}
+			}
+
+			for (int i = 0; i < maxCountOfIPAddresses; i++) {
+				try {
+					cell = row.createCell(colCount++);
+					cell.setCellValue(user.getIpAddresses().split(",")[i].replace("'", "").trim());
+					cell.setCellStyle(csBordered);
+				} catch (Exception e) {
+					cell.setCellValue("");			
+					cell.setCellStyle(csBordered);
+				}
+			}
+			
+			
+			colCount= 0;
+			
+		}
+
+		try {
+			FileOutputStream outputStream = new FileOutputStream(exportFile);
+			wb.write(outputStream);
+			wb.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return fileToByteCode(exportFile);
+	}
 	
 
 	private String getFileWriteLocation() {
