@@ -184,11 +184,10 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 
 								ObjectMapper mapper = new ObjectMapper();
 								mapper.setDateFormat(new SimpleDateFormat("dd-MM-yyyy HH:mm"));
-								messagingService.sendChatMessage(mapper.writeValueAsString(notification),
-										notification.getRecipient());
+//								messagingService.sendChatMessage(mapper.writeValueAsString(notification),
+//										notification.getRecipient());
 								
 								message.setCommandClsId(result.getCommandExecution().getCommand().getTask().getCommandClsId());
-								
 								messagingTemplate.sendMessage("/liderws/task", notification);
 
 							} catch (Exception e) {

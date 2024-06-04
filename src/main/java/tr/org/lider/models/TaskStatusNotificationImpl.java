@@ -32,7 +32,7 @@ import tr.org.lider.entities.CommandExecutionResultImpl;
  * will be created when a task status message is received by Task Manager.
  *
  */
-@JsonIgnoreProperties(ignoreUnknown = true, value = { "recipient" })
+@JsonIgnoreProperties(ignoreUnknown = true, value = {  })
 public class TaskStatusNotificationImpl implements Serializable {
 
 	private static final long serialVersionUID = 6226506876404468113L;
