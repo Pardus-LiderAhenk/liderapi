@@ -1,6 +1,7 @@
 package tr.org.lider.controllers;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,20 +41,21 @@ public class ScriptController {
 	@Autowired
 	private ScriptService scriptService;
 	
-	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION", "ROLE_COMPUTERS" })
-	@Operation(summary = "Get script list", description = "", tags = { "script" })
-	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Returns script list. Successful"),
-			  @ApiResponse(responseCode = "417", description = "Could not get script list. Unexpected error occurred", 
-			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/list/page-size/{pageSize}/page-number/{pageNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Secured({ "ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION", "ROLE_COMPUTERS" })
+	@Operation(summary = "Get script list with filters", description = "Returns a list of scripts with optional filters", tags = {"script" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Returns script list. Successful"),
+			@ApiResponse(responseCode = "417", description = "Could not get script list. Unexpected error occurred", 
+				content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/list/page-size/{pageSize}/page-number/{pageNumber}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Page<ScriptTemplate>> scriptList(
-			@PathVariable int pageSize, @PathVariable int pageNumber
-			) {
+			@PathVariable int pageSize,
+			@PathVariable int pageNumber,
+			@RequestBody Map<String, String> params) {
+
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(scriptService.list(pageNumber, pageSize));
-				
+				.body(scriptService.list(pageNumber, pageSize, params));
 	}
 	
 //	get script list all as no pagging

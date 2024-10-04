@@ -3,6 +3,7 @@ package tr.org.lider.services;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -45,9 +46,10 @@ public class ScriptService {
 		return scriptRepository.findAllByDeleted(false);
 	}
 	
-	public Page<ScriptTemplate> list(int pageNumber, int pageSize){
+	public Page<ScriptTemplate> list(int pageNumber, int pageSize, Map<String, String> params) {
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
-		return scriptRepository.findByDeletedOrderByCreateDateDesc(pageable, false);
+		String scriptName = params.get("scriptName");
+		return scriptRepository.findByLabelContainingIgnoreCaseAndDeletedOrderByCreateDateDesc(pageable, scriptName, false);
 	}
 
 	public ScriptTemplate add(ScriptTemplate script) {
