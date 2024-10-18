@@ -2788,6 +2788,10 @@ public class LDAPServiceImpl implements ILDAPService {
 			}
 		return false;
 	}
+
+	public Boolean authenticate(String adIpAddress, String adPort, String adAdminUserName, String adAdminPassword) {
+		return adService.authenticate(adIpAddress, adPort, adAdminUserName, adAdminPassword);
+	}
 } 
 	
 

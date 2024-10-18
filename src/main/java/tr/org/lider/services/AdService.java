@@ -1,5 +1,6 @@
 package tr.org.lider.services;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.security.Principal;
 import java.security.PrivateKey;
@@ -29,6 +30,7 @@ import org.apache.directory.api.ldap.model.entry.Entry;
 import org.apache.directory.api.ldap.model.entry.Modification;
 import org.apache.directory.api.ldap.model.entry.ModificationOperation;
 import org.apache.directory.api.ldap.model.entry.Value;
+import org.apache.directory.api.ldap.model.exception.LdapAuthenticationException;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.AddRequest;
 import org.apache.directory.api.ldap.model.message.AddRequestImpl;
@@ -46,6 +48,7 @@ import org.apache.directory.api.ldap.model.name.Dn;
 import org.apache.directory.ldap.client.api.LdapConnection;
 import org.apache.directory.ldap.client.api.LdapConnectionConfig;
 import org.apache.directory.ldap.client.api.LdapConnectionPool;
+import org.apache.directory.ldap.client.api.LdapNetworkConnection;
 import org.apache.directory.ldap.client.api.PoolableLdapConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -933,5 +936,33 @@ public class AdService implements ILDAPService{
 				}
 			}
 		return false;
+	}
+
+	public boolean authenticate(String adIpAddress, String adPort, String adAdminUserFullDN, String adAdminPassword) {
+		LdapConnection connection = null;
+		try {
+			connection = new LdapNetworkConnection(adIpAddress, Integer.parseInt(adPort));
+			connection.bind(adAdminUserFullDN, adAdminPassword);
+			return true;
+		} catch (LdapAuthenticationException e) {
+			logger.error("LDAP Authentication failed. Error: " + e.getMessage());
+			return false;
+		} catch (LdapException e) {
+			e.printStackTrace();
+			return false;
+		} finally {
+			if (connection != null) {
+				try {
+					try {
+						connection.unBind();
+					} catch (LdapException e) {
+						e.printStackTrace();
+					}
+					connection.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

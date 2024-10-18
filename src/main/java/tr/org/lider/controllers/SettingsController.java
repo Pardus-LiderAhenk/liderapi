@@ -138,6 +138,7 @@ public class SettingsController {
 		configParams.setAdDomainName(settingsDTO.getAdDomainName());
 		configParams.setAdAdminUserName(settingsDTO.getAdAdminUserName());
 		configParams.setAdAdminUserFullDN(settingsDTO.getAdAdminUserFullDN());
+		configParams.setAdAdminPassword(settingsDTO.getAdAdminPassword());
 		configParams.setAdHostName(settingsDTO.getAdHostName());
 		configParams.setAdUseSSL(settingsDTO.getAdUseSSL());
 		configParams.setAdUseTLS(settingsDTO.getAdUseTLS());
@@ -152,6 +153,7 @@ public class SettingsController {
 		requestData.put("adDomainName",configParams.getAdDomainName());
 		requestData.put("adAdminUserName",configParams.getAdAdminUserName());
 		requestData.put("adAdminUserFullDN",configParams.getAdAdminUserFullDN());
+		requestData.put("adAdminPassword", configParams.getAdAdminPassword());
 		requestData.put("adHostName",configParams.getAdHostName());
 		requestData.put("adUseSSL",configParams.getAdUseSSL());
 		requestData.put("adUseTLS",configParams.getAdUseTLS());
