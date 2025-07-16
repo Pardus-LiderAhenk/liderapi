@@ -47,6 +47,7 @@ import tr.org.lider.security.JwtResponse;
 import tr.org.lider.security.LoginParams;
 import tr.org.lider.security.User;
 import tr.org.lider.services.OperationLogService;
+import tr.org.lider.services.ConfigurationService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -70,6 +71,9 @@ public class AuthController {
 
 	@Autowired
 	private JwtProvider jwtProvider;
+
+	@Autowired
+	private ConfigurationService configurationService;
 
 	@Value("${jwt.secret}")
 	private String jwtSecret;
@@ -98,6 +102,7 @@ public class AuthController {
 			Cache<String, String> cache = cacheManager.getCache("userCache");
 			cache.put(jwt, tokenData);
 			operationLogService.saveOperationLog(OperationType.LOGIN,"User logged in",null);
+			configurationService.destroyConfigParams();
 			return ResponseEntity.ok(new JwtResponse(jwt, userPrincipal.getName(), userPrincipal.getSurname()));
 		} catch (BadCredentialsException e) {
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but username or password is wrong. Returned: " + HttpStatus.NOT_FOUND);
