@@ -42,7 +42,6 @@ public class UserService implements UserDetailsService {
 		User user = null;
 		LdapEntry ldapEntry = null;
 		try {
-			configurationService.destroyConfigParams();
 			String filter= "(&(objectClass=pardusAccount)(objectClass=pardusLider)(liderPrivilege=ROLE_USER)(uid=$1))".replace("$1", userName);
 			List<LdapEntry> ldapEntries  = ldapService.findSubEntries(filter,
 					new String[] { "*" }, SearchScope.SUBTREE);
