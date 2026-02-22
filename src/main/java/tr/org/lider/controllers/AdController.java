@@ -45,6 +45,8 @@ import tr.org.lider.models.PolicyResponse;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.NotificationBodyBuilder;
+import tr.org.lider.services.NotificationDispatchService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.PolicyService;
 
@@ -76,6 +78,9 @@ public class AdController {
 
 	@Autowired
 	private CustomPasswordEncoder customPasswordEncoder;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 
 	@Operation(summary = "Get Ldap list domain entry", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ldap list exists"),
@@ -202,9 +207,14 @@ public class AdController {
 			String rdn = "CN=" + selectedEntry.getCn() + "," + selectedEntry.getParentName();
 			service.addEntry(rdn, attributes);
 			selectedEntry = service.getEntryDetail(rdn);
-			operationLogService.saveOperationLog(OperationType.CREATE,
-					selectedEntry.getCn() + ", USER has been added " + rdn + " [Active Directroy]", null);
-//				return responseFactoryService.createResponse(RestResponseStatus.OK,"Kullanıcı Başarı ile oluşturuldu.");
+			String adLog = selectedEntry.getCn() + ", USER has been added " + rdn + " [Active Directroy]";
+			operationLogService.saveOperationLog(OperationType.CREATE, adLog, null);
+			notificationDispatchService.dispatch("user.ad.created",
+					"AD Kullanıcı Oluşturuldu: " + selectedEntry.getCn(),
+					new NotificationBodyBuilder()
+						.field("Oluşturulan Kullanıcı", selectedEntry.getCn())
+						.field("DN", rdn)
+						.build());
 			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
 			e.printStackTrace();
@@ -669,8 +679,13 @@ public class AdController {
 			}
 			selectedEntry = service.findSubEntries(selectedEntry.getDistinguishedName(), "(objectclass=*)",
 					new String[] { "*" }, SearchScope.OBJECT).get(0);
-			operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD,
-					selectedEntry.getDistinguishedName() + " password has been changed [Active Directory]", null);
+			String pwLog = selectedEntry.getDistinguishedName() + " password has been changed [Active Directory]";
+			operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD, pwLog, null);
+			notificationDispatchService.dispatch("user.ad.password.changed",
+					"AD Kullanıcı Parolası Değiştirildi: " + selectedEntry.getDistinguishedName(),
+					new NotificationBodyBuilder()
+						.field("Kullanıcı", selectedEntry.getDistinguishedName())
+						.build());
 
 			return new ResponseEntity<LdapEntry>(selectedEntry, HttpStatus.OK);
 		} catch (LdapException e) {
@@ -693,8 +708,13 @@ public class AdController {
 			logger.info("AD Deleting entry. Dn: {}", selectedEntry.getDistinguishedName());
 			service.deleteEntry(selectedEntry.getDistinguishedName());
 
-			operationLogService.saveOperationLog(OperationType.DELETE,
-					selectedEntry + " entry has been deleted from " + "[Active Directroy]", null);
+			String deleteLog = selectedEntry.getDistinguishedName() + " entry has been deleted from [Active Directory]";
+			operationLogService.saveOperationLog(OperationType.DELETE, deleteLog, null);
+			notificationDispatchService.dispatch("user.ad.deleted",
+					"AD Kayıt Silindi: " + selectedEntry.getDistinguishedName(),
+					new NotificationBodyBuilder()
+						.field("Silinen Kayıt", selectedEntry.getDistinguishedName())
+						.build());
 			return new ResponseEntity<LdapEntry>(HttpStatus.OK);
 		} catch (LdapException e) {
 			return new ResponseEntity<LdapEntry>(HttpStatus.EXPECTATION_FAILED);

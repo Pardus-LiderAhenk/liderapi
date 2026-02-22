@@ -41,6 +41,9 @@ public class ScheduledTaskService {
 	
 	@Autowired
 	private TaskRepository taskRepository;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 	
 	public ResponseEntity<CommandImpl> updateScheduledTask(Long id, String cronExpression) {
 
@@ -87,6 +90,13 @@ public class ScheduledTaskService {
 		task.setCronExpression(cronExpression);
 		taskRepository.save(task);
 		CommandImpl updatedCommand = commandService.getCommand(id);
+		notificationDispatchService.dispatch("task.scheduled.updated",
+				"Zamanlanmış Görev Güncellendi",
+				new NotificationBodyBuilder()
+						.field("Görev", command.getTask().getCommandClsId())
+						.field("Yeni Cron İfadesi", cronExpression)
+						.field("Hedef", logMessage)
+						.build());
 		return new ResponseEntity<CommandImpl>(updatedCommand, HttpStatus.OK); 
 	}
 	
@@ -135,6 +145,12 @@ public class ScheduledTaskService {
 		task.setDeleted(true);
 		taskRepository.save(task);
 		CommandImpl canceledCommand = commandService.getCommand(id);
+		notificationDispatchService.dispatch("task.scheduled.cancelled",
+				"Zamanlanmış Görev İptal Edildi",
+				new NotificationBodyBuilder()
+						.field("Görev", command.getTask().getCommandClsId())
+						.field("Hedef", logMessage)
+						.build());
 		return new ResponseEntity<CommandImpl>(canceledCommand, HttpStatus.OK); 
 	}
 }

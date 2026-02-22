@@ -50,6 +50,8 @@ import tr.org.lider.models.UserSessionsModel;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.CommandService;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.NotificationBodyBuilder;
+import tr.org.lider.services.NotificationDispatchService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.UserService;    
 
@@ -78,6 +80,9 @@ public class UserController {
 	
 	@Autowired
 	private OperationLogService operationLogService;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 
 	@Operation(summary = "Gets the ou detail of the selected entry.", description = "", tags = { "user" })
 	@ApiResponses(value = { 
@@ -266,6 +271,12 @@ public class UserController {
 				e.printStackTrace();
 				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).headers(headers).build();
 			}
+			notificationDispatchService.dispatch("user.created",
+					new NotificationBodyBuilder()
+						.field("Oluşturulan Kullanıcı", selectedEntry.getUid())
+						.field("DN", selectedEntry.getDistinguishedName())
+						.build(),
+					log);
 			
 			return ResponseEntity
 					.status(HttpStatus.OK)
@@ -328,7 +339,11 @@ public class UserController {
 	    				.headers(headers)
 	    				.build();
 			}
-				
+			notificationDispatchService.dispatch("user.deleted",
+					new NotificationBodyBuilder()
+						.field("Silinen Kullanıcı", userLdapEntry.getDistinguishedName())
+						.build(),
+					log);
 			
 			return ResponseEntity
 					.status(HttpStatus.OK)
@@ -401,6 +416,12 @@ public class UserController {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			notificationDispatchService.dispatch("user.updated",
+					new NotificationBodyBuilder()
+						.field("Güncellenen Kullanıcı", selectedEntry.getUid())
+						.field("DN", selectedEntry.getDistinguishedName())
+						.build(),
+					log);
 			
 			return ResponseEntity
 					.status(HttpStatus.OK)
@@ -442,6 +463,11 @@ public class UserController {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			notificationDispatchService.dispatch("user.password.changed",
+					new NotificationBodyBuilder()
+						.field("Kullanıcı", selectedEntry.getUid())
+						.build(),
+					log);
 			
 			return ResponseEntity
 					.status(HttpStatus.OK)
@@ -769,6 +795,13 @@ public class UserController {
 			ldapService.moveEntry(sourceDN, destinationDN);
 			String log = sourceDN + " has been moved to " + destinationDN;
 			operationLogService.saveOperationLog(OperationType.MOVE, log, null, null, null, null);
+			notificationDispatchService.dispatch("user.moved",
+					new NotificationBodyBuilder()
+						.field("Taşınan Kullanıcı", uid)
+						.field("Kaynak", sourceDN)
+						.field("Hedef", destinationDN)
+						.build(),
+					log);
 			LdapEntry ldapEntry = ldapService.getEntryDetail(newUserDN);
 			
 			return ResponseEntity

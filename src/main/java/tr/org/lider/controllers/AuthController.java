@@ -46,6 +46,9 @@ import tr.org.lider.security.JwtProvider;
 import tr.org.lider.security.JwtResponse;
 import tr.org.lider.security.LoginParams;
 import tr.org.lider.security.User;
+import tr.org.lider.services.AuthenticationService;
+import tr.org.lider.services.NotificationBodyBuilder;
+import tr.org.lider.services.NotificationDispatchService;
 import tr.org.lider.services.OperationLogService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -70,6 +73,9 @@ public class AuthController {
 
 	@Autowired
 	private JwtProvider jwtProvider;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 
 	@Value("${jwt.secret}")
 	private String jwtSecret;
@@ -98,19 +104,48 @@ public class AuthController {
 			Cache<String, String> cache = cacheManager.getCache("userCache");
 			cache.put(jwt, tokenData);
 			operationLogService.saveOperationLog(OperationType.LOGIN,"User logged in",null);
+			notificationDispatchService.dispatch("user.login",
+					"Kullanıcı Giriş Yaptı: " + loginParams.getUsername(),
+					new NotificationBodyBuilder()
+							.field("Kullanıcı", loginParams.getUsername())
+							.build());
 			return ResponseEntity.ok(new JwtResponse(jwt, userPrincipal.getName(), userPrincipal.getSurname()));
 		} catch (BadCredentialsException e) {
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but username or password is wrong. Returned: " + HttpStatus.NOT_FOUND);
+			notificationDispatchService.dispatch("user.login.failed",
+					"Başarısız Giriş Denemesi: " + loginParams.getUsername(),
+					new NotificationBodyBuilder()
+							.field("Denenen Kullanıcı", loginParams.getUsername())
+							.field("Sebep", "Kullanıcı adı veya parola hatalı")
+							.build());
 			return new ResponseEntity<String>("Username or password is wrong", HttpStatus.NOT_FOUND);
 		} catch (LockedException e) {
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but user account is locked. Returned: " + HttpStatus.LOCKED);
+			notificationDispatchService.dispatch("user.login.failed",
+					"Başarısız Giriş Denemesi: " + loginParams.getUsername(),
+					new NotificationBodyBuilder()
+							.field("Denenen Kullanıcı", loginParams.getUsername())
+							.field("Sebep", "Hesap kilitli")
+							.build());
 			return new ResponseEntity<String>("User account is locked", HttpStatus.LOCKED);
 		} catch(DisabledException e) {
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but user account is disabled. Returned: " + HttpStatus.FORBIDDEN);
+			notificationDispatchService.dispatch("user.login.failed",
+					"Başarısız Giriş Denemesi: " + loginParams.getUsername(),
+					new NotificationBodyBuilder()
+							.field("Denenen Kullanıcı", loginParams.getUsername())
+							.field("Sebep", "Hesap devre dışı")
+							.build());
 			return new ResponseEntity<String>("User account is disabled", HttpStatus.FORBIDDEN);
 		} catch(Exception e) {
 			logger.error(e.getMessage());
 			logger.warn("Username: " + loginParams.getUsername() + " requested to login but other exception occured. Returned: " + HttpStatus.SEE_OTHER);
+			notificationDispatchService.dispatch("user.login.failed",
+					"Başarısız Giriş Denemesi: " + loginParams.getUsername(),
+					new NotificationBodyBuilder()
+							.field("Denenen Kullanıcı", loginParams.getUsername())
+							.field("Sebep", "Beklenmeyen hata")
+							.build());
 			return new ResponseEntity<String>("Login failed", HttpStatus.SEE_OTHER);
 		}
 	}
@@ -122,7 +157,13 @@ public class AuthController {
 			    content = @Content(schema = @Schema(implementation = String.class))) })
 	@PostMapping(value = "/logout")
 	public ResponseEntity<String> logout(Model model, Authentication authentication) {
+		String username = AuthenticationService.getUserName();
 		operationLogService.saveOperationLog(OperationType.LOGOUT,"User logout", null);
+		notificationDispatchService.dispatch("user.logout",
+				"Kullanıcı Çıkış Yaptı: " + username,
+				new NotificationBodyBuilder()
+						.field("Kullanıcı", username)
+						.build());
 		return new ResponseEntity<String>("logout", HttpStatus.OK);
 	}
 }

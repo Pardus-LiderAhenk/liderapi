@@ -53,6 +53,8 @@ import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.models.PolicyResponse;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.NotificationBodyBuilder;
+import tr.org.lider.services.NotificationDispatchService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.models.PolicyExecutionRequestImpl;
 import tr.org.lider.services.PolicyService;
@@ -82,6 +84,9 @@ public class UserGroupsController {
 	
 	@Autowired
 	private PolicyService policyService;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 	
 	//gets tree of groups of names which just has user members
 	@Operation(summary = "Gets tree of groups", description = "", tags = { "user-groups" })
@@ -444,6 +449,13 @@ public class UserGroupsController {
 		}
 		String log = "Entry has been moved from " + sourceDN + " to " + destinationDN ;
 		operationLogService.saveOperationLog(OperationType.MOVE, log, jsonString.getBytes(), null, null, null);
+		notificationDispatchService.dispatch("user.group.moved",
+				"Kullanıcı Grubu Taşındı",
+				new NotificationBodyBuilder()
+					.field("Grup", sourceDN)
+					.field("Kaynak", sourceDN)
+					.field("Hedef", destinationDN)
+					.build());
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(true);
@@ -554,6 +566,11 @@ public class UserGroupsController {
 				String jsonString = dataMapper.writeValueAsString(requestData);
 				String log = "Entry name has been deleted " + dn;
 				operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
+				notificationDispatchService.dispatch("user.group.deleted",
+						"Kullanıcı Grubu Silindi: " + dn,
+						new NotificationBodyBuilder()
+							.field("Silinen Grup", dn)
+							.build());
 				
 				return new ResponseEntity<String[]>(new String[] {"Grup başarıyla silindi"}, HttpStatus.OK);
 			} else {
@@ -657,6 +674,11 @@ public class UserGroupsController {
 		}
 		String log = "New user group has been created " + entry.getDistinguishedName();
 		operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
+		notificationDispatchService.dispatch("user.group.created",
+				"Kullanıcı Grubu Oluşturuldu: " + entry.getDistinguishedName(),
+				new NotificationBodyBuilder()
+					.field("Grup", entry.getDistinguishedName())
+					.build());
 		
 //		try {
 //			//when single dn comes spring boot takes it as multiple arrays

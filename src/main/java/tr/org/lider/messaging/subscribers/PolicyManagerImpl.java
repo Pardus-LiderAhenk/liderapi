@@ -112,13 +112,13 @@ public class PolicyManagerImpl implements IPolicyStatusSubscriber {
 					try {
 						// Save command execution with result
 						result = commandExecutionResultRepository.save(result);
-						// Throw an event if the task processing finished
-						if (StatusCode.getTaskEndingStates().contains(message.getResponseCode())) {
-							messagingService.sendChatMessage(message.getResponseMessage(),  commandExecution.getCommand().getCommandOwnerUid());
-						}
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
+					// Throw an event if the task processing finished
+					if (StatusCode.getTaskEndingStates().contains(message.getResponseCode())) {
+						messagingService.sendChatMessage(message.getResponseMessage(),  commandExecution.getCommand().getCommandOwnerUid());
 					}
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+				}
 				}
 			}
 		}

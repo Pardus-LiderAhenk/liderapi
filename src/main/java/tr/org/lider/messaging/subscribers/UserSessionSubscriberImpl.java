@@ -32,6 +32,8 @@ import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.repositories.UserSessionRepository;
 import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.NotificationBodyBuilder;
+import tr.org.lider.services.NotificationDispatchService;
 
 /**
  * <p>
@@ -61,6 +63,9 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 	
 	@Autowired
 	private AdService adService;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 
 	@Override
 	public ILiderMessage messageReceived(IUserSessionMessage message) throws Exception {
@@ -163,6 +168,14 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 				userSession.setAgent(agent);
 				userSessionRepository.save(userSession);
 			}
+			if (message.getType() == AgentMessageType.LOGIN) {
+				notificationDispatchService.dispatch("user.session.login",
+						"Kullanıcı Oturumu Açıldı: " + message.getUsername(),
+						new NotificationBodyBuilder()
+								.field("Kullanıcı", message.getUsername())
+								.field("İstemci", uid)
+								.build());
+			}
 			// find user authority for sudo role
 			// if user has sudo role user get sudoRole on agent
 			if (message.getType() == AgentMessageType.LOGIN) {
@@ -179,7 +192,12 @@ public class UserSessionSubscriberImpl implements IUserSessionSubscriber {
 				}
 			} else {
 				logger.info("Get message type is LOGUT from agent");
-				//				ldapService.updateEntry(agent.getDn(), "userLastLogin", "logout");
+				notificationDispatchService.dispatch("user.session.logout",
+						"Kullanıcı Oturumu Kapandı: " + message.getUsername(),
+						new NotificationBodyBuilder()
+								.field("Kullanıcı", message.getUsername())
+								.field("İstemci", uid)
+								.build());
 				return null;
 			}
 

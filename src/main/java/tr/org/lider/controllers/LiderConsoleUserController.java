@@ -28,6 +28,8 @@ import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.NotificationBodyBuilder;
+import tr.org.lider.services.NotificationDispatchService;
 import tr.org.lider.services.OperationLogService;
 
 /**
@@ -55,6 +57,9 @@ public class LiderConsoleUserController {
 	
 	@Autowired
 	private CustomPasswordEncoder customPasswordEncoder;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 	
 	@Autowired
 	private CustomPasswordEncoder encoder;
@@ -104,6 +109,11 @@ public class LiderConsoleUserController {
 				ldapService.updateEntry(selectedEntry.getDistinguishedName(), "userPassword", "{ARGON2}" + customPasswordEncoder.encode(selectedEntry.getUserPassword()));
 			}
 			operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD,"Lider Arayüz kullanıcı parolası güncellendi.",null);
+			notificationDispatchService.dispatch("system.lider_user.password.changed",
+					"Lider Kullanıcı Parolası Değiştirildi: " + selectedEntry.getDistinguishedName(),
+					new NotificationBodyBuilder()
+						.field("Kullanıcı", selectedEntry.getDistinguishedName())
+						.build());
 			return ResponseEntity
 					.status(HttpStatus.OK)
 					.body(true);
@@ -143,6 +153,11 @@ public class LiderConsoleUserController {
 			}
 			selectedEntry = ldapService.findSubEntries(selectedEntry.getDistinguishedName(), "(objectclass=*)", new String[] {"*"}, SearchScope.OBJECT).get(0);
 			operationLogService.saveOperationLog(OperationType.UPDATE,"Lider Arayüz kullanıcı bilgileri güncellendi.",null);
+			notificationDispatchService.dispatch("system.lider_user.updated",
+					"Lider Kullanıcı Bilgileri Güncellendi: " + selectedEntry.getDistinguishedName(),
+					new NotificationBodyBuilder()
+						.field("Kullanıcı", selectedEntry.getDistinguishedName())
+						.build());
 
 			return ResponseEntity
 					.status(HttpStatus.OK)
