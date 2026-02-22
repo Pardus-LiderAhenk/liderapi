@@ -20,8 +20,10 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.core.Ordered;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -35,6 +37,7 @@ import tr.org.lider.security.CustomPasswordEncoder;
 @EntityScan(basePackages = {"tr.org.lider"})
 @ComponentScan(basePackages = {"tr.org.lider"})
 @EnableCaching
+@EnableAsync
 public class Lider2Application extends SpringBootServletInitializer {
 
 	Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -69,6 +72,11 @@ public class Lider2Application extends SpringBootServletInitializer {
 		return props;
 	}
 	
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
+
 	@SuppressWarnings("rawtypes")
 	@Bean
     public FilterRegistrationBean simpleCorsFilter() {  
