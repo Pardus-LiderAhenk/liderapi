@@ -194,15 +194,15 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 										result.getCommandExecution().getCommand().getTask().getCommandClsId());
 								messagingTemplate.sendMessage("/liderws/task", notification);
 
-							String pluginName = p.getName() + " (" + p.getVersion() + ")";
+								String pluginName = p.getName() + " (" + p.getVersion() + ")";
 								String taskLabel = result.getCommandExecution().getCommand().getTask()
 										.getCommandClsId();
 								String agentDn = result.getCommandExecution().getDn();
 								if (StatusCode.TASK_ERROR.equals(message.getResponseCode())
 										|| StatusCode.TASK_KILLED.equals(message.getResponseCode())) {
 									notificationDispatchService.dispatch(
-											"agent.task.failed",
-											"Görev Başarısız: " + pluginName,
+											"task.failed",
+											"Gönderilen Görev Başarısız Sonuçlandı: " + pluginName,
 											new NotificationBodyBuilder()
 													.field("Görev", taskLabel)
 													.field("Plugin", pluginName)
@@ -212,7 +212,7 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 								} else {
 									notificationDispatchService.dispatch(
 											"task.completed",
-											"Görev Tamamlandı: " + pluginName,
+											"Gönderilen Görev Başarıyla Tamamlandı: " + pluginName,
 											new NotificationBodyBuilder()
 													.field("Görev", taskLabel)
 													.field("Plugin", pluginName)

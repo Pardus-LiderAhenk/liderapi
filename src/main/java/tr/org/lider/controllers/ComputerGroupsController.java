@@ -149,7 +149,7 @@ public class ComputerGroupsController {
 			}
 			String log = selectedEntry.getDistinguishedName() + " group has been created";
 			operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
-			notificationDispatchService.dispatch("agent.ou.created", "Agent OU Oluşturuldu",
+			notificationDispatchService.dispatch("agent.ou.created", "İstemci OU Oluşturuldu",
 					new NotificationBodyBuilder()
 							.field("OU", selectedEntry.getDistinguishedName())
 							.build());
@@ -188,10 +188,10 @@ public class ComputerGroupsController {
 				String log = dn + " group has been deleted";
 				operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null,
 						null);
-			notificationDispatchService.dispatch("agent.ou.deleted", "Agent OU Silindi",
-					new NotificationBodyBuilder()
-							.field("Silinen OU", dn)
-							.build());
+				notificationDispatchService.dispatch("agent.ou.deleted", "İstemci OU Silindi",
+						new NotificationBodyBuilder()
+								.field("Silinen OU", dn)
+								.build());
 
 				return ResponseEntity
 						.status(HttpStatus.OK)
@@ -352,7 +352,7 @@ public class ComputerGroupsController {
 		}
 		String log = "New computer group has been created " + entry.getDistinguishedName();
 		operationLogService.saveOperationLog(OperationType.CREATE, log, jsonString.getBytes(), null, null, null);
-		notificationDispatchService.dispatch("agent.group.created", "Agent Grup Oluşturuldu",
+		notificationDispatchService.dispatch("agent.group.created", "İstemci Grubu Oluşturuldu",
 				new NotificationBodyBuilder()
 						.field("Grup", entry.getDistinguishedName())
 						.build());
@@ -463,7 +463,7 @@ public class ComputerGroupsController {
 		}
 		String log = "Computers has been added to " + entry.getDistinguishedName();
 		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
-		notificationDispatchService.dispatch("agent.group.updated", "Agent Grup Güncellendi",
+		notificationDispatchService.dispatch("agent.group.updated", "İstemci Grubu Güncellendi",
 				new NotificationBodyBuilder()
 						.field("Grup", entry.getDistinguishedName())
 						.build());
@@ -545,7 +545,7 @@ public class ComputerGroupsController {
 		}
 		String log = dnList.get(0) + " has been deleted from " + dn;
 		operationLogService.saveOperationLog(OperationType.DELETE, log, jsonString.getBytes(), null, null, null);
-		notificationDispatchService.dispatch("agent.group.deleted", "Agent Grup Üyesi Silindi",
+		notificationDispatchService.dispatch("agent.group.deleted", "İstemci Grubu Silindi",
 				new NotificationBodyBuilder()
 						.field("Grup", dn)
 						.field("Silinen Üye", dnList.get(0))
@@ -586,7 +586,7 @@ public class ComputerGroupsController {
 		}
 		String log = "Entry has been moved from " + sourceDN + " to " + destinationDN;
 		operationLogService.saveOperationLog(OperationType.MOVE, log, jsonString.getBytes(), null, null, null);
-		notificationDispatchService.dispatch("agent.group.moved", "Agent Taşındı",
+		notificationDispatchService.dispatch("agent.group.moved", "İstemci Grubu Taşındı",
 				new NotificationBodyBuilder()
 						.field("Kaynak", sourceDN)
 						.field("Hedef", destinationDN)
