@@ -43,7 +43,11 @@ import tr.org.lider.ldap.OLCAccessRule;
 import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.messaging.enums.SettingsPasswordType;
 import tr.org.lider.models.ConfigParams;
+import tr.org.lider.models.notification.NotificationServiceConfig;
+import tr.org.lider.models.notification.NotificationServiceTestResult;
+import tr.org.lider.models.notification.NotificationSettings;
 import tr.org.lider.security.CustomPasswordEncoder;
+import tr.org.lider.services.AppriseNotificationService;
 import tr.org.lider.services.AuthenticationService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
@@ -81,7 +85,10 @@ public class SettingsController {
 
 	@Autowired
 	private CustomPasswordEncoder customPasswordEncoder;
-	
+
+	@Autowired
+	private AppriseNotificationService appriseNotificationService;
+
 	@Operation(summary = "Get configurations", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Returns parameters configuration"),
@@ -92,6 +99,19 @@ public class SettingsController {
 		return ResponseEntity
 				.status(HttpStatus.OK)
 				.body(configurationService.getConfigParamasNoPassword());
+	}
+
+	@Operation(summary = "Get notification settings", description = "", tags = { "settings" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Returns notification settings"),
+			@ApiResponse(responseCode = "417", description = "Could not get notification settings. Unexpected error occured.",
+					content = @Content(schema = @Schema(implementation = String.class))) })
+	@GetMapping(value = "/notification-settings", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<NotificationSettings> getNotificationSettings() {
+		ConfigParams configParams = configurationService.getConfigParams();
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(configParams.getNotificationSettings());
 	}
 
 	
@@ -573,6 +593,58 @@ public class SettingsController {
 				
 	}
 
+	@Operation(summary = "Update notification settings", description = "", tags = { "settings" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Notification settings updated."),
+			@ApiResponse(responseCode = "417", description = "Could not update notification settings. Unexpected error occured.",
+					content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/update/notification-settings", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<NotificationSettings> updateNotificationSettings(@RequestBody NotificationSettings settingsDTO) {
+		ConfigParams configParams = configurationService.getConfigParams();
+		configParams.setNotificationSettings(settingsDTO);
+
+		Map<String, Object> requestData = new HashMap<String, Object>();
+		requestData.put("notificationSettings", settingsDTO);
+
+		ObjectMapper dataMapper = new ObjectMapper();
+		String jsonString = null;
+		HttpHeaders headers = new HttpHeaders();
+		try {
+			jsonString = dataMapper.writeValueAsString(requestData);
+		} catch (JsonProcessingException e1) {
+			logger.error("Error occured while mapping request data to json. Error: " + e1.getMessage());
+			return ResponseEntity
+					.status(HttpStatus.EXPECTATION_FAILED)
+					.headers(headers)
+					.build();
+		}
+		String log = "Notification settings has been updated";
+		operationLogService.saveOperationLog(OperationType.UPDATE, log, jsonString.getBytes(), null, null, null);
+
+		ConfigParams updatedConfigParams = configurationService.updateConfigParams(configParams);
+		return ResponseEntity
+				.status(HttpStatus.OK)
+				.body(updatedConfigParams.getNotificationSettings());
+	}
+
+	@Operation(summary = "Test Apprise notification service", description = "", tags = { "settings" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Returns test result"),
+			@ApiResponse(responseCode = "417", description = "Unexpected error occured.",
+					content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/test/notification-service", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<NotificationServiceTestResult> testNotificationService(
+			@RequestBody NotificationServiceConfig serviceConfig) {
+		try {
+			NotificationServiceTestResult result = appriseNotificationService.testService(
+					serviceConfig, "Liderahenk Test", "Bu bir test bildirimidir.");
+			return ResponseEntity.status(HttpStatus.OK).body(result);
+		} catch (Exception e) {
+			logger.error("Error testing notification service: " + e.getMessage());
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).build();
+		}
+	}
+
 	//add roles to user. 
 	@Operation(summary = "Edit user roles in ldap entries", description = "", tags = { "settings" })
 	@ApiResponses(value = { 
@@ -605,7 +677,8 @@ public class SettingsController {
 				}
 			}
 			//if user edited own console roles redirect to logout
-			if(AuthenticationService.getDn().equals(dn)) {
+			String currentUserDn = AuthenticationService.getDn();
+			if(currentUserDn != null && currentUserDn.equals(dn)) {
 				authentication.setAuthenticated(false);
 				return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 			} else {
@@ -662,7 +735,8 @@ public class SettingsController {
 				}
 			}
 			//if user deleted own console roles redirect to logout
-			if(AuthenticationService.getDn().equals(dn)) {
+			String currentUserDn = AuthenticationService.getDn();
+			if(currentUserDn != null && currentUserDn.equals(dn)) {
 				authentication.setAuthenticated(false);
 				return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 			} else {

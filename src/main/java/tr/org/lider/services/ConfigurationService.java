@@ -21,6 +21,7 @@ import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.messaging.messages.FileServerConf;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.RegistrationTemplateType;
+import tr.org.lider.models.notification.NotificationSettings;
 import tr.org.lider.repositories.ConfigRepository;
 
 /**
@@ -56,6 +57,9 @@ public class ConfigurationService {
 		Optional<ConfigImpl> configImpl = findByName("liderConfigParams");
 		if(configImpl.isPresent()) {
 			try {
+				if (cParams.getNotificationSettings() == null) {
+					cParams.setNotificationSettings(new NotificationSettings());
+				}
 				ObjectMapper mapper = new ObjectMapper();
 				String jsonString = mapper.writeValueAsString(cParams);
 				configImpl.get().setValue(jsonString);
@@ -63,6 +67,9 @@ public class ConfigurationService {
 				configParams = mapper.readValue(updatedConfigImpl.getValue(), ConfigParams.class);
 				configParams.setAllowVNCConnectionWithoutPermission(getAllowVNCConnectionWithoutPermission());
 				configParams.setAllowDynamicDNSUpdate(getAllowDynamicDNSUpdate());
+				if (configParams.getNotificationSettings() == null) {
+					configParams.setNotificationSettings(new NotificationSettings());
+				}
 				return configParams;
 			} catch (JsonProcessingException e) {
 				logger.error("Error occured while updating configuration parameters.");
@@ -108,6 +115,9 @@ public class ConfigurationService {
 				if(findByName("liderConfigParams").isPresent()) {
 					configParams = mapper.readValue(findByName("liderConfigParams").get().getValue(), ConfigParams.class);
 					configParams.setAllowVNCConnectionWithoutPermission(getAllowVNCConnectionWithoutPermission());
+					if (configParams.getNotificationSettings() == null) {
+						configParams.setNotificationSettings(new NotificationSettings());
+					}
 					configParams.setXmppBoshAddress("http://"+configParams.getXmppHost()+":5280/bosh");
 					return configParams;
 				} else {
