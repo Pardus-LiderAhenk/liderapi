@@ -41,7 +41,9 @@ import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.EmailService;
 import tr.org.lider.services.ForgotPasswordService;
-import tr.org.lider.services.OperationLogService;;
+import tr.org.lider.services.NotificationBodyBuilder;
+import tr.org.lider.services.NotificationDispatchService;
+import tr.org.lider.services.OperationLogService;
 
 /**
  * 
@@ -68,6 +70,9 @@ public class ForgotPasswordController {
 	
 	@Autowired
 	private OperationLogService operationLogService;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 
 	@Value("${lider.url}")
 	private String liderURL;
@@ -132,6 +137,11 @@ public class ForgotPasswordController {
 					HttpStatus.NOT_FOUND);
 		}
 		if(isEmailSent) {
+			notificationDispatchService.dispatch("user.password.forgot",
+					"Şifre Sıfırlama Talebi: " + username,
+					new NotificationBodyBuilder()
+						.field("Kullanıcı", username)
+						.build());
 			return new ResponseEntity<List<String>>(Arrays.asList("Parola yenileme linki email adresinize gönderildi."), 
 					HttpStatus.OK);
 		} else {

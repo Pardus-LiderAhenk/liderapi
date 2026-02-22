@@ -8,11 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import tr.org.lider.messaging.enums.DomainType;
 import tr.org.lider.messaging.enums.Protocol;
 import tr.org.lider.messaging.enums.SudoRoleType;
 import tr.org.lider.messaging.messages.FileServerConf;
+import tr.org.lider.models.notification.NotificationCatalogDefaults;
+import tr.org.lider.models.notification.NotificationSettings;
 
 /**
  * Model for configuration parameters.
@@ -24,6 +28,7 @@ import tr.org.lider.messaging.messages.FileServerConf;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigParams {
 	private static Logger logger = LoggerFactory.getLogger(ConfigurationService.class);
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	// Lider configuration
 	private String liderLocale;
@@ -153,6 +158,8 @@ public class ConfigParams {
 	private Boolean enableDelete4Directory;
 
 	private RegistrationTemplateType selectedRegistrationType;
+
+	private NotificationSettings notificationSettings = NotificationCatalogDefaults.createDefaultSettings();
 	
 	public ConfigParams() {
 		super();
@@ -215,6 +222,7 @@ public class ConfigParams {
 		
 		this.selectedRegistrationType = RegistrationTemplateType.DEFAULT;
 		this.enableDelete4Directory = false;
+		this.notificationSettings = NotificationCatalogDefaults.createDefaultSettings();
 	}
 
 	public String getLiderLocale() {
@@ -959,6 +967,35 @@ public class ConfigParams {
 
 	public void setEnableDelete4Directory(Boolean enableDelete4Directory) {
 		this.enableDelete4Directory = enableDelete4Directory;
+	}
+
+	public NotificationSettings getNotificationSettings() {
+		notificationSettings = NotificationCatalogDefaults.applyDefaults(notificationSettings);
+		return notificationSettings;
+	}
+
+	@JsonSetter("notificationSettings")
+	public void setNotificationSettings(Object notificationSettings) {
+		NotificationSettings normalized = null;
+		if (notificationSettings instanceof NotificationSettings) {
+			normalized = (NotificationSettings) notificationSettings;
+		} else if (notificationSettings instanceof String) {
+			String rawValue = ((String) notificationSettings).trim();
+			if (!rawValue.isEmpty()) {
+				try {
+					normalized = OBJECT_MAPPER.readValue(rawValue, NotificationSettings.class);
+				} catch (Exception e) {
+					normalized = null;
+				}
+			}
+		} else if (notificationSettings != null) {
+			try {
+				normalized = OBJECT_MAPPER.convertValue(notificationSettings, NotificationSettings.class);
+			} catch (IllegalArgumentException e) {
+				normalized = null;
+			}
+		}
+		this.notificationSettings = NotificationCatalogDefaults.applyDefaults(normalized);
 	}
 
 	public FileServerConf getFileServerConf(String jid) {

@@ -83,6 +83,9 @@ public class TaskService {
 	
 	@Autowired
 	private TaskSchedulerService taskSchedulerService;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 	
 	@PersistenceContext
 	private EntityManager entityManager;
@@ -220,6 +223,23 @@ public class TaskService {
 					commandService.addCommandExecution(execution);
 			}
 		}
+		if (task.getCronExpression() != null && !task.getCronExpression().isEmpty()) {
+			notificationDispatchService.dispatch("task.scheduled.created",
+					"Zamanlanmış Görev Oluşturuldu: " + commandIdForLog,
+					new NotificationBodyBuilder()
+							.field("Görev", commandIdForLog)
+							.field("Hedef", logMessage)
+							.field("Cron İfadesi", task.getCronExpression())
+							.build());
+		} else {
+			notificationDispatchService.dispatch("task.executed",
+					"Görev Gönderildi: " + commandIdForLog,
+					new NotificationBodyBuilder()
+							.field("Görev", commandIdForLog)
+							.field("Hedef", logMessage)
+							.build());
+		}
+
 		return responseFactoryService.createResponse(RestResponseStatus.OK,"Task Basarı ile Gonderildi.");
 	}
 	

@@ -28,8 +28,9 @@ import tr.org.lider.repositories.AgentRepository;
 import tr.org.lider.repositories.CommandExecutionRepository;
 import tr.org.lider.repositories.CommandExecutionResultRepository;
 import tr.org.lider.services.ConfigurationService;
+import tr.org.lider.services.NotificationBodyBuilder;
+import tr.org.lider.services.NotificationDispatchService;
 import tr.org.lider.utils.FileCopyUtils;
-
 
 /**
  * handle task result and send result to lider console
@@ -53,17 +54,18 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 
 	@Autowired
 	private IMessagingService messagingService;
-	
-	
+
 	@Autowired
 	private WsMessageSender messagingTemplate;
 
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 
 	@Override
 	public void messageReceived(ITaskStatusMessage message) {
 
 		if (message != null) {
-			
+
 			logger.info("Task status subscriber received message from {}", message.getFrom());
 			String jid = message.getFrom().split("@")[0];
 
@@ -97,7 +99,8 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 					// agents on agents!
 					try {
 
-						List<CommandExecutionImpl> executions = commanExecutionRepository.findCommandExecutionByTaskAndUid(jid, message.getTaskId());
+						List<CommandExecutionImpl> executions = commanExecutionRepository
+								.findCommandExecutionByTaskAndUid(jid, message.getTaskId());
 
 						CommandExecutionImpl commandExecution = null;
 
@@ -172,9 +175,9 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 									new Object[] { message.getTaskId(), message.getResponseCode(), recipient });
 
 							try {
-								if(result.getResponseData()!=null) {
-								result.setResponseDataStr(new String(result.getResponseData()));}
-								
+								if (result.getResponseData() != null) {
+									result.setResponseDataStr(new String(result.getResponseData()));
+								}
 
 								PluginImpl p = result.getCommandExecution().getCommand().getTask().getPlugin();
 								TaskStatusNotificationImpl notification = new TaskStatusNotificationImpl(recipient,
@@ -184,11 +187,39 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 
 								ObjectMapper mapper = new ObjectMapper();
 								mapper.setDateFormat(new SimpleDateFormat("dd-MM-yyyy HH:mm"));
-//								messagingService.sendChatMessage(mapper.writeValueAsString(notification),
-//										notification.getRecipient());
-								
-								message.setCommandClsId(result.getCommandExecution().getCommand().getTask().getCommandClsId());
+								// messagingService.sendChatMessage(mapper.writeValueAsString(notification),
+								// notification.getRecipient());
+
+								message.setCommandClsId(
+										result.getCommandExecution().getCommand().getTask().getCommandClsId());
 								messagingTemplate.sendMessage("/liderws/task", notification);
+
+								String pluginName = p.getName() + " (" + p.getVersion() + ")";
+								String taskLabel = result.getCommandExecution().getCommand().getTask()
+										.getCommandClsId();
+								String agentDn = result.getCommandExecution().getDn();
+								if (StatusCode.TASK_ERROR.equals(message.getResponseCode())
+										|| StatusCode.TASK_KILLED.equals(message.getResponseCode())) {
+									notificationDispatchService.dispatch(
+											"task.failed",
+											"Gönderilen Görev Başarısız Sonuçlandı: " + pluginName,
+											new NotificationBodyBuilder()
+													.field("Görev", taskLabel)
+													.field("Plugin", pluginName)
+													.field("İstemci", agentDn)
+													.field("Hata Mesajı", message.getResponseMessage())
+													.build());
+								} else {
+									notificationDispatchService.dispatch(
+											"task.completed",
+											"Gönderilen Görev Başarıyla Tamamlandı: " + pluginName,
+											new NotificationBodyBuilder()
+													.field("Görev", taskLabel)
+													.field("Plugin", pluginName)
+													.field("İstemci", agentDn)
+													.field("Durum", message.getResponseCode().toString())
+													.build());
+								}
 
 							} catch (Exception e) {
 								logger.error(e.getMessage(), e);

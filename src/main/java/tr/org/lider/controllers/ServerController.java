@@ -33,6 +33,8 @@ import tr.org.lider.constant.LiderConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.RegistrationTemplateImpl;
 import tr.org.lider.entities.ServerImpl;
+import tr.org.lider.services.NotificationBodyBuilder;
+import tr.org.lider.services.NotificationDispatchService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.RemoteSshService;
 import tr.org.lider.services.ServerService;
@@ -52,6 +54,9 @@ public class ServerController {
 	
 	@Autowired
 	private OperationLogService operationLogService;
+
+	@Autowired
+	private NotificationDispatchService notificationDispatchService;
 	
 	@Operation()
 	@ApiResponses(value = { 
@@ -69,6 +74,11 @@ public class ServerController {
 		
 		String log =  "Server with IP "+ server.getIp() + " has been added";
 		operationLogService.saveOperationLog(OperationType.CREATE, log,null,null,null,null);
+		notificationDispatchService.dispatch("system.server.created",
+				"Sunucu Eklendi: " + server.getIp(),
+				new NotificationBodyBuilder()
+					.field("Sunucu IP", server.getIp())
+					.build());
 			
 			if(serverService.isServerReachable(server.getIp(), server.getPassword(), server.getUser())== true) {
 				server.setStatus(true);
@@ -184,6 +194,11 @@ public class ServerController {
 			Optional<ServerImpl> deletedServer = serverService.findServerByID(id);
 			String log =  "Server with IP "+ deletedServer.get().getIp() + " was deleted";
 			operationLogService.saveOperationLog(OperationType.DELETE, log,null,null,null,null);
+			notificationDispatchService.dispatch("system.server.deleted",
+					"Sunucu Silindi: " + deletedServer.get().getIp(),
+					new NotificationBodyBuilder()
+						.field("Sunucu IP", deletedServer.get().getIp())
+						.build());
 			serverService.delete(id);
 					
 		} 
