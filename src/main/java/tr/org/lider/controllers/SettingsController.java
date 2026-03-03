@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
@@ -35,6 +35,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.RoleImpl;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -56,7 +57,7 @@ import tr.org.lider.services.RoleService;
  * 
  */
 
-@Secured({"ROLE_ADMIN", "ROLE_SERVER_SETTINGS", "ROLE_CONSOLE_ACCESS_SETTINGS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_SERVER_SETTINGS, RoleConstants.ROLE_CONSOLE_ACCESS_SETTINGS})
 @RestController
 @RequestMapping("/api/lider/settings")
 @Tag(name = "Setting Controller", description = "Settings Controller")

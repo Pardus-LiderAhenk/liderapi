@@ -12,9 +12,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CustomPasswordEncoder implements PasswordEncoder {
-	
-	Argon2PasswordEncoder passwordEncoder = new Argon2PasswordEncoder();
-	
+
+//	Argon2PasswordEncoder passwordEncoder = new Argon2PasswordEncoder();
+    Argon2PasswordEncoder passwordEncoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
 	@Override
 	public String encode(CharSequence rawPassword) {
 		return passwordEncoder.encode(String.valueOf(rawPassword));

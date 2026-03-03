@@ -3,16 +3,18 @@ package tr.org.lider.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.context.annotation.Lazy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandExecutionResultImpl;
 import tr.org.lider.entities.CommandImpl;
@@ -20,6 +22,7 @@ import tr.org.lider.entities.TaskImpl;
 import tr.org.lider.repositories.CommandExecutionRepository;
 import tr.org.lider.repositories.CommandExecutionResultRepository;
 import tr.org.lider.repositories.CommandRepository;
+import tr.org.lider.security.User;
 
 @Service
 public class CommandService {
@@ -34,6 +37,10 @@ public class CommandService {
 
 	@Autowired
 	private CommandExecutionResultRepository commandExecutionResultRepository;
+
+	@Autowired
+	@Lazy
+	private UserService userService;
 
 	public List<CommandImpl> findAllCommands() {
 		return commandRepository.findAll() ;
@@ -63,9 +70,6 @@ public class CommandService {
 		return commandRepository. findAllPolicyByDn(dn);
 	}
 	
-	
-	
-	
 	// command execution CRUD operations
 	public CommandExecutionImpl getCommandExecution(Long id) {
 		return commandExecutionRepository.findOne(id);
@@ -90,7 +94,19 @@ public class CommandService {
 	public List<CommandImpl> getExecutedTasks(String dn) {
 		List<CommandImpl> listCommand;
 		List<CommandExecutionImpl> listCommandExecution;
-		List<Object[]> result = commandRepository.findCommandsOfAgent(dn);
+
+		String username = AuthenticationService.getUserName();
+		User userDetails = userService.loadUserByUsername(username);
+
+		List<Object[]> result;
+
+		if (userDetails.getRoles().contains(RoleConstants.ROLE_ADMIN)) {
+			result = commandRepository.findCommandsOfAgent(dn, null);
+		} 
+		else {
+			result = commandRepository.findCommandsOfAgent(dn, username);
+		}
+
 		if(result != null) {
 			listCommand = new ArrayList<CommandImpl>();
 

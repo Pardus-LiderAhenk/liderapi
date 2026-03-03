@@ -28,6 +28,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.models.PackageInfo;
@@ -43,7 +44,7 @@ import tr.org.lider.services.OperationLogService;
  *
  */
 
-@Secured({"ROLE_ADMIN", "ROLE_COMPUTERS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_COMPUTERS })
 @RestController
 @RequestMapping("/api/packages")
 @Tag(name = "Packages", description="Packages Rest Service")

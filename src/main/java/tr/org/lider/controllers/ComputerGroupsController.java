@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.naming.ldap.LdapName;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +42,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.OperationType;
@@ -60,7 +62,7 @@ import tr.org.lider.services.OperationLogService;;
  * 
  */
 
-//@RequestMapping("/lider/computer_groups")
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_COMPUTER_GROUPS, RoleConstants.ROLE_COMPUTERS })
 @RestController
 @RequestMapping("/api/lider/computer-groups")
 @Tag(name = "Computer Groups", description = "Computer Group Rest Service")
@@ -211,7 +213,7 @@ public class ComputerGroupsController {
 			  @ApiResponse(responseCode = "200", description = "Computers added to ldap list."),
 			  @ApiResponse(responseCode = "417", description = "Computers could not be added to the ldap list. Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/computers}")
+	@GetMapping(value = "/computers")
 	public ResponseEntity<List<LdapEntry>> getComputers() {
 		List<LdapEntry> retList = new ArrayList<LdapEntry>();
 		retList.add(ldapService.getLdapComputersTree());
@@ -225,7 +227,7 @@ public class ComputerGroupsController {
 			  @ApiResponse(responseCode = "200", description = "Ahenk list received."),
 			  @ApiResponse(responseCode = "417", description = "Could not get list ahenk.Unexpected error occured.", 
 			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@PostMapping(value = "/ahenks}")
+	@PostMapping(value = "/ahenks")
 	public ResponseEntity<List<LdapEntry>>  getAhenks(HttpServletRequest request,Model model, @RequestBody LdapEntry[] selectedEntryArr) {
 		List<LdapEntry> ahenkList=new ArrayList<>();
 		for (LdapEntry ldapEntry : selectedEntryArr) {

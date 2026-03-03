@@ -12,64 +12,91 @@ import tr.org.lider.models.ConfigParams;
 public class JwtResponse {
     private String token;
     private String type = "Bearer";
-    private String name = "";
-    private String surname = "";
-    private User user ;
-    private ConfigParams configParams ;
+    private String username = "";
+    private User user;
+    private ConfigParams configParams;
+    private Boolean isTwoFactorEnabled;
+	private Integer otpExpiryDuration;
+    private String refreshToken;
 
-    public JwtResponse(String token, String name, String surname) {
+    public JwtResponse(String token, String username, String refreshToken) {
         this.token = token;
-        this.name = name;
-        this.surname = surname;
+        this.username = username;
+        this.refreshToken = refreshToken;
     }
+
     public JwtResponse(String token, User user, ConfigParams configParams) {
-    	this.token = token;
-    	this.user = user;
-    	this.configParams=configParams;
+        this.token = token;
+        this.user = user;
+        this.configParams = configParams;
     }
 
-	public String getToken() {
-		return token;
+    public JwtResponse(Boolean isTwoFactorEnabled, Integer otpExpiryDuration) {
+		this.isTwoFactorEnabled = isTwoFactorEnabled;
+		this.otpExpiryDuration = otpExpiryDuration;
 	}
 
-	public void setToken(String token) {
-		this.token = token;
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public ConfigParams getConfigParams() {
+        return configParams;
+    }
+
+    public void setConfigParams(ConfigParams configParams) {
+        this.configParams = configParams;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+     public Boolean getIsTwoFactorEnabled() {
+        return this.isTwoFactorEnabled;
+    }
+
+	public void setIsTwoFactorEnabled(Boolean isTwoFactorEnabled) {
+		this.isTwoFactorEnabled = isTwoFactorEnabled;
 	}
 
-	public String getType() {
-		return type;
-	}
+    public Integer getOtpExpiryDuration() {
+        return otpExpiryDuration;
+    }
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getSurname() {
-		return surname;
-	}
-
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
-	public User getUser() {
-		return user;
-	}
-	public void setUser(User user) {
-		this.user = user;
-	}
-	public ConfigParams getConfigParams() {
-		return configParams;
-	}
-	public void setConfigParams(ConfigParams configParams) {
-		this.configParams = configParams;
-	}
-
+    public void setOtpExpiryDuration(Integer otpExpiryDuration) {
+        this.otpExpiryDuration = otpExpiryDuration;
+    }
 }

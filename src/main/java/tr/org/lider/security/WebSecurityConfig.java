@@ -1,95 +1,91 @@
 package tr.org.lider.security;
 
-/**
- * Lider spring security configuration
- * 
- * @author <a href="mailto:hasan.kara@pardus.org.tr">Hasan Kara</a>
- * 
- */
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.Collections;
 
 @Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-@EntityScan(basePackages = {"tr.org.lider"})
-@ComponentScan(basePackages = {"tr.org.lider"})
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableMethodSecurity(securedEnabled = true)
+public class WebSecurityConfig {
 
-	@Autowired
-	private JwtAuthEntryPoint unauthorizedHandler;
+    @Autowired
+    private JwtAuthEntryPoint unauthorizedHandler;
 
-	@Autowired 
-	private CustomAuthenticationProvider authenticationProvider;
-	
-	@Bean
-	public JwtAuthTokenFilter authenticationJwtTokenFilter() {
-		return new JwtAuthTokenFilter();
-	}
 
-	@Override
-	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.authenticationProvider(authenticationProvider);
-	}
-	
-//	@Override
-//	public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-//		authenticationManagerBuilder
-//		.userDetailsService(userService)
-//		.passwordEncoder(passwordEncoder());
-//	}
+    @Bean
+    public JwtAuthTokenFilter authenticationJwtTokenFilter() {
+        return new JwtAuthTokenFilter();
+    }
 
-	@Bean
-	@Override
-	public AuthenticationManager authenticationManagerBean() throws Exception {
-		return super.authenticationManagerBean();
-	}
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.cors(corsConfig -> corsConfig.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOriginPatterns(Collections.singletonList("*"));
+                    config.setAllowedMethods(Collections.singletonList("*"));
+                    config.setAllowCredentials(true);
+                    config.setAllowedHeaders(Collections.singletonList("*"));
+                    config.setMaxAge(3600L);
+                    return config;
+                }))
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		http
-		.cors()
-		.and()
-		.csrf()
-		.disable()
-		.authorizeRequests()
-		.antMatchers("/api/auth/**").permitAll()
-		.antMatchers("/test/hello/**").permitAll()
-		.antMatchers("/api/forgot-password/**").permitAll()
-		.antMatchers("/actuator/**").permitAll()
-		.antMatchers("/api-docs/**").permitAll()
-		.antMatchers("/swagger-ui/**").permitAll()
-		.antMatchers("/v3/api-docs/**").permitAll()
-		.antMatchers("/index.html/**").permitAll()
-		.antMatchers("/css/**").permitAll()
-		.antMatchers("/js/**").permitAll()
-		.antMatchers("/img/**").permitAll()
-		.antMatchers("/fonts/**").permitAll()
-		.antMatchers("/favicon.ico").permitAll()
-		.antMatchers("/favicon.png").permitAll()
-		.antMatchers("/tunnel").permitAll()
-		.antMatchers("/tunnel/**").permitAll()
-		.antMatchers("/api/lider-info/**").permitAll()
-		.antMatchers("/liderws/**").permitAll()
-		.antMatchers("/test2/**").hasAuthority("ROLE_ADMIN")
-		.anyRequest().authenticated()
-		.and()
-		.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                "/",
+                                "/api/auth/signin",
+                                "/api/auth/verify-otp",
+                                "/api/auth/refresh-token",
+                                "/api/forgot-password/**",
+                                "/index.html/**",
+                                "/css/**",
+                                "/js/**",
+                                "/img/**",
+                                "/fonts/**",
+                                "/favicon.ico",
+                                "/favicon.png",
+//                                "/tunnel",
+//                                "/tunnel/**",
+                                "/api/lider-info/**",
+                                "/liderws/**")
+                        .permitAll()
+                        .requestMatchers("/tunnel").hasAnyRole("ADMIN", "REMOTE_ACCESS")
+                        .requestMatchers("/tunnel/**").hasAnyRole("ADMIN", "REMOTE_ACCESS")
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        .requestMatchers("/api-docs/**").hasRole("ADMIN")
+                        .requestMatchers("/swagger-ui/**").hasRole("ADMIN")
+                        .requestMatchers("/v3/api-docs/**").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(unauthorizedHandler));
 
-		http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-	}
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
+    }
 }

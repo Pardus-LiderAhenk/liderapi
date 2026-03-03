@@ -562,6 +562,15 @@ public class ConfigurationService {
 	public int getClientSize() {
 		return getConfigParams().getClientSize();
 	}
+
+	public Integer getOtpExpiryDuration() {
+		return getConfigParams().getOtpExpiryDuration();
+	}
+
+	public Boolean getIsTwoFactorEnabled() {
+		return getConfigParams().getIsTwoFactorEnabled();
+	}
+	
 	
 	//	public String getEmailHost() {
 	//		return getConfigParams().getEmailHost();

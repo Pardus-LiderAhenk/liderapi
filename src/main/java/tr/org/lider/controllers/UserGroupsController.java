@@ -1,6 +1,5 @@
 package tr.org.lider.controllers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.naming.ldap.LdapName;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
@@ -32,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,8 +41,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import tr.org.lider.entities.CommandExecutionImpl;
-import tr.org.lider.entities.CommandImpl;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -64,7 +61,7 @@ import tr.org.lider.services.PolicyService;
  * @author <a href="mailto:hasan.kara@pardus.org.tr">Hasan Kara</a>
  * 
  */
-@Secured({"ROLE_ADMIN", "ROLE_USER_GROUPS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_USER_GROUPS })
 @RestController
 @RequestMapping("/api/lider/user-groups")
 @Tag(name = "User Groups", description = "User Groups Rest Service" )

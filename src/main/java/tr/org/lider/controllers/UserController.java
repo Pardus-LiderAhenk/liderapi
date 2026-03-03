@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.slf4j.Logger;
@@ -18,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +38,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.UserSessionImpl;
@@ -51,9 +53,10 @@ import tr.org.lider.security.CustomPasswordEncoder;
 import tr.org.lider.services.CommandService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
-import tr.org.lider.services.UserService;    
+import tr.org.lider.services.UserService;
 
 
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_USERS })
 @RestController
 @RequestMapping("/api/lider/user")
 @Tag(name = "User", description = "User Rest Service")

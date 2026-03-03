@@ -1,4 +1,4 @@
-//package tr.com.lider;
+package tr.com;//package tr.com.lider;
 //
 //import org.junit.jupiter.api.Test;
 //import org.springframework.boot.test.context.SpringBootTest;

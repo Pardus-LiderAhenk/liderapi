@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.security.access.annotation.Secured;
 
 import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,7 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.PluginTask;
 import tr.org.lider.services.PluginService;
-
+import tr.org.lider.constant.RoleConstants;
 
 /**
  * 
@@ -28,6 +29,7 @@ import tr.org.lider.services.PluginService;
  * @author M. Edip YILDIZ
  *
  **/
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_COMPUTER_GROUPS, RoleConstants.ROLE_COMPUTERS })
 @RestController
 @Tag(name = "Plugin Pages" ,description = "Plugin Pages Rest Service")
 public class PluginPagesController {

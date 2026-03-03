@@ -16,6 +16,7 @@ import org.ehcache.jsr107.Eh107Configuration;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tr.org.lider.guacamole.GuacamoleConnectionInfo;
 
 @Configuration
 @EnableCaching
@@ -40,6 +41,17 @@ public class EhCacheConfig {
         cacheManager.createCache("userCache",
             Eh107Configuration.fromEhcacheCacheConfiguration(configurationBuilder.withService(asynchronousListener)));
 
+
+        final CacheConfigurationBuilder<String, GuacamoleConnectionInfo> guacCacheConfig =
+                CacheConfigurationBuilder.newCacheConfigurationBuilder(
+                                String.class, GuacamoleConnectionInfo.class,
+                                ResourcePoolsBuilder.heap(1000))
+                        .withExpiry(ExpiryPolicyBuilder.timeToLiveExpiration(Duration.ofSeconds(60)));
+
+        cacheManager.createCache("guacamoleConnections",
+                Eh107Configuration.fromEhcacheCacheConfiguration(guacCacheConfig.withService(asynchronousListener)));
+
         return cacheManager;
+
     }
 }

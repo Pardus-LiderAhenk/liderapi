@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Locale;
 
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
@@ -48,9 +48,6 @@ public class TaskService {
 
 	Logger logger = LoggerFactory.getLogger(TaskService.class);
 
-//	@Autowired
-//	private ConfigurationService configurationService;
-	
 	@Autowired
 	private LDAPServiceImpl ldapService;
 
@@ -98,6 +95,12 @@ public class TaskService {
 		 * 
 		 */
 		List<LdapEntry> targetEntries = getTargetList(request);
+
+        if (targetEntries.isEmpty()) {
+            return responseFactoryService.createResponse(
+                    RestResponseStatus.ERROR,
+                    "Yetkili olmadığınız bir hedefe görev gönderemezsiniz. İstemci bulunamadı.");
+        }
 
 		// Create & persist task
 		TaskImpl task= new TaskImpl(null, request.getPlugin(), request.getCommandId(), request.getParameterMap(), false,
@@ -165,9 +168,9 @@ public class TaskService {
 			for (final LdapEntry entry : targetEntries) {
 
 				boolean isAhenk = ldapService.isAhenk(entry);
-				String uid = isAhenk ? entry.get(configService.getAgentLdapJidAttribute()) : null;
+				String uid = isAhenk ? entry.getUid() : null;
 				logger.info("DN type: {}, UID: {}", entry.getType().toString(), uid);
-				uid=uid.trim();
+                uid = uid != null ? uid.trim() : null;
 
 				Boolean isOnline=messagingService.isRecipientOnline(getFullJid(uid));
 				CommandExecutionImpl execution = new CommandExecutionImpl();
@@ -175,11 +178,9 @@ public class TaskService {
 				if(task.isTaskParts() == false) {
 					isTaskSend = true;
 				}
-				
 					execution=	new CommandExecutionImpl(null, command, uid, entry.getType(), entry.getDistinguishedName(),new Date(), null, isOnline, isTaskSend);
 					command.addCommandExecution(execution);
 					
-					// Task message
 					ILiderMessage message = null;
 					if (isAhenk) {
 						// Set agent JID (the JID is UID of the LDAP entry)
@@ -197,7 +198,6 @@ public class TaskService {
 						}
 
 						FileServerConf fileServerConf=request.getPlugin().isUsesFileTransfer() ? configService.getFileServerConf(uid.toLowerCase()) : null;
-						// uid=jid
 						message= new ExecuteTaskMessageImpl(taskJsonString, uid, new Date(), fileServerConf);
 
 						// TaskStatusUpdateListener in XMPPClientImpl class
@@ -236,7 +236,15 @@ public class TaskService {
 			        AgentStatus agentStatus = agentList.get(0).getAgentStatus();
 
 			        if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
-			            targetEntries.add(ldapEntry);
+                        try {
+                            if (ldapService.getEntry(ldapEntry.getDistinguishedName(), new String[] {}) != null &&
+                                    !ldapService.search(configService.getAgentLdapJidAttribute(), ldapEntry.getUid(),
+                                            new String[]{configService.getAgentLdapJidAttribute()}).isEmpty()) {
+                                targetEntries.add(ldapEntry);
+                            }
+                        } catch (LdapException e) {
+                            throw new RuntimeException(e);
+                        }
 			        }
 			    }
 				
@@ -244,33 +252,30 @@ public class TaskService {
 			if(ldapEntry.getType().equals(DNType.GROUP)) {
 				List <String> dnList= ldapService.getGroupInGroupsTask(ldapEntry);
 				ldapEntryGroups = ldapService.getLdapDnStringToEntry(dnList);
-				
 					for(LdapEntry ldapEntryGroup : ldapEntryGroups) {
-						String[] members= ldapEntryGroup.getAttributesMultiValues().get("member");
-						//member sayısı alınıyor
-						for (int i = 0; i < members.length; i++) {
-							String dn = members[i];
-							try {
-								List<LdapEntry> member= ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[] { "*" }, SearchScope.OBJECT);
-								if(member!=null && member.size()>0 ) {
-									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0)))
-										if(!agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Passive)) {
-											targetEntries.add(member.get(0));
-										}
-//									if(!ldapService.isExistInLdapEntry(targetEntries, member.get(0))) {
-//										AgentStatus agentStatus = agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus();
-//
-//										if (agentStatus != null && agentStatus.equals(AgentStatus.Active)) {
-//										    targetEntries.add(member.get(0));
-//										}
-//									}										
-								}
-							} catch (LdapException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-					}
+                        try {
+                            if (ldapService.getEntry(ldapEntry.getDistinguishedName(), new String[] {}) != null) {
+                                String[] members = ldapEntryGroup.getAttributesMultiValues().get("member");
+                                for (int i = 0; i < members.length; i++) {
+                                    String dn = members[i];
+                                    try {
+                                        List<LdapEntry> member = ldapService.findSubEntries(dn, "(objectclass=pardusDevice)", new String[]{"*"}, SearchScope.OBJECT);
+                                        if (member != null && member.size() > 0) {
+                                            if (!ldapService.isExistInLdapEntry(targetEntries, member.get(0)))
+                                                if (!agentRepository.findByJid(member.get(0).getUid()).get(0).getAgentStatus().equals(AgentStatus.Passive)) {
+                                                    targetEntries.add(member.get(0));
+                                                }
+                                        }
+                                    } catch (LdapException e) {
+                                        // TODO Auto-generated catch block
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        } catch (LdapException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
 			}
 			if(ldapEntry.getType().equals(DNType.ORGANIZATIONAL_UNIT)) {
 

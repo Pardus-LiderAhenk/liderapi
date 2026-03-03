@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -37,6 +39,7 @@ import tr.org.lider.services.OperationLogService;
  *
  */
 
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_USER })
 @RestController
 @RequestMapping("/api/lider-console")
 @Tag(name = "console-user", description = "Console User Rest Service")
@@ -59,7 +62,6 @@ public class LiderConsoleUserController {
 	@Autowired
 	private CustomPasswordEncoder encoder;
 	
-//	LIDER_CONSOLE USER
 //	return lider console profile from ldap
 	
 	@Operation(summary = "Gets profile info", description = "", tags = { "console-user" })

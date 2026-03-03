@@ -3,14 +3,14 @@ package tr.org.lider.entities;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -39,7 +39,7 @@ public class ConfigImpl implements Serializable{
 	private String name;
 
 	@Lob
-	@Column(name = "VALUE")
+    @Column(name = "VALUE",columnDefinition = "TEXT")
 	private String value;
 
 	@Temporal(TemporalType.TIMESTAMP)

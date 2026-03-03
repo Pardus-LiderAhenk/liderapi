@@ -22,7 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 import javax.naming.InvalidNameException;
 import javax.naming.ldap.LdapName;
 import javax.net.ssl.KeyManager;
@@ -427,29 +427,33 @@ public class LDAPServiceImpl implements ILDAPService {
 	}
 
 	@Override
-	public void updateEntry(String entryDn, String attribute, String value) throws LdapException {
-		logger.info("Replacing attribute " + attribute + " value " + value);
-		LdapConnection connection = null;
+    public void updateEntry(String entryDn, String attribute, String value) throws LdapException {
+        if (attribute.equals("userPassword")) {
+            logger.info("Updated attribute " + attribute );
+        }else {
+            logger.info("Replacing attribute " + attribute + " value " + value);
+        }
+        LdapConnection connection = null;
 
-		connection = getConnection();
-		Entry entry = null;
-		try {
-			entry = connection.lookup(entryDn);
-			if (entry != null) {
-				if (entry.get(attribute) != null) {
-					Value<?> oldValue = entry.get(attribute).get();
-					entry.remove(attribute, oldValue);
-				}
-				entry.add(attribute, value);
-				connection.modify(entry, ModificationOperation.REPLACE_ATTRIBUTE);
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			throw new LdapException(e);
-		} finally {
-			releaseConnection(connection);
-		}
-	}
+        connection = getConnection();
+        Entry entry = null;
+        try {
+            entry = connection.lookup(entryDn);
+            if (entry != null) {
+                if (entry.get(attribute) != null) {
+                    Value<?> oldValue = entry.get(attribute).get();
+                    entry.remove(attribute, oldValue);
+                }
+                entry.add(attribute, value);
+                connection.modify(entry, ModificationOperation.REPLACE_ATTRIBUTE);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new LdapException(e);
+        } finally {
+            releaseConnection(connection);
+        }
+    }
 
 	public void updateConsoleUserPassword(String entryDn, String attribute, String value) throws LdapException {
 		logger.info("Replacing attribute " + attribute + " value ***");

@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.ConkyTemplate;
 import tr.org.lider.services.ConkyService;
 
@@ -40,7 +41,7 @@ public class ConkyController {
 	private ConkyService conkyService;
 	
 //	get conky list with pagging
-	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION", "ROLE_COMPUTERS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_CONKY_DEFINITION, RoleConstants.ROLE_COMPUTERS })
 	@Operation(summary = "Get conky list", description = "", tags = { "conky-service" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Returns conky list. Successful"),
@@ -57,7 +58,7 @@ public class ConkyController {
 	}
 	
 //	get conky list all as no pagging
-	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION", "ROLE_COMPUTERS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_CONKY_DEFINITION, RoleConstants.ROLE_COMPUTERS })
 	@Operation(summary = "Get conky list all", description = "", tags = { "conky-service" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Returns conky list all. Successful"),
@@ -71,7 +72,7 @@ public class ConkyController {
 				.body(conkyService.listAll());
 	}
 
-	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_CONKY_DEFINITION })
 	@Operation(summary = "Add conky service", description = "", tags = { "conky-service" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Added conky service. Successful"),
@@ -84,8 +85,8 @@ public class ConkyController {
 				.status(HttpStatus.OK)
 				.body(conkyService.add(template));
 	}
-	
-	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
+
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_CONKY_DEFINITION })
 	@Operation(summary = "Delete conky service", description = "", tags = { "conky-service" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Deleted conky service. Successful"),
@@ -98,8 +99,8 @@ public class ConkyController {
 				.status(HttpStatus.OK)
 				.body(conkyService.delete(id));
 	}
-	
-	@Secured({"ROLE_ADMIN", "ROLE_CONKY_DEFINITION" })
+
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_CONKY_DEFINITION })
 	@Operation(summary = "Update conky", description = "", tags = { "conky-service" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Updated conky. Successful"),

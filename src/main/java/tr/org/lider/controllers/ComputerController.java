@@ -16,6 +16,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,6 +34,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
 import tr.org.lider.entities.OperationType;
@@ -56,6 +59,7 @@ import tr.org.lider.utils.IRestResponse;;
 /**
  * Controller for computer url requests 
  */
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_COMPUTER_GROUPS, RoleConstants.ROLE_COMPUTERS })
 @RestController
 @RequestMapping("/api/lider/computer")
 @Tag(name="Computer Management",description = "Computer Management Rest Service")
@@ -431,7 +435,8 @@ public class ComputerController {
 				
 	}
 
-	@Operation(summary = "Move agent", description = "", tags = { "computer-management" })
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT_MANAGEMENT')")
+    @Operation(summary = "Move agent", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Moved to agent"),
 			  @ApiResponse(responseCode = "417", description = "Could not move agent. Unexpected error occured.", 
@@ -501,7 +506,8 @@ public class ComputerController {
 
 	}
 
-	@Operation(summary = "Delete agent by id", description = "", tags = { "computer-management" })
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT_MANAGEMENT')")
+    @Operation(summary = "Delete agent by id", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Agent by id deleted"),
 			  @ApiResponse(responseCode = "404", description = "Agent id not found", 
@@ -570,7 +576,8 @@ public class ComputerController {
 	}
 
 
-	@Operation(summary = "Rename agent ", description = "", tags = { "computer-management" })
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_CLIENT_MANAGEMENT')")
+    @Operation(summary = "Rename agent ", description = "", tags = { "computer-management" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Updated agent name"),
 			  @ApiResponse(responseCode = "417", description = "Could not rename agent. Unexpected error occured", 

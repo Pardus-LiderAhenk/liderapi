@@ -15,6 +15,6 @@ public class CustomCacheEventLogger implements CacheEventListener<Object, Object
 	@Override
 	public void onEvent(CacheEvent<? extends Object, ? extends Object> cacheEvent) {
 		logger.info("Cache event = {}, Key = {},  Old value = {}, New value = {}", cacheEvent.getType(),
-                cacheEvent.getKey(), cacheEvent.getOldValue(), "***");
+                "***", cacheEvent.getOldValue(), "***");
 	}
 }

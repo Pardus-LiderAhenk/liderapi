@@ -5,14 +5,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -36,7 +36,8 @@ public class ExecutedTaskCriteriaBuilder {
 	
 	public Page<CommandImpl> filterCommands(int pageNumber, int pageSize, 
 			Optional<String> taskCommand,
-			Optional<Date> startDate, Optional<Date> endDate) {
+			Optional<Date> startDate, Optional<Date> endDate,
+			String username) {
 		PageRequest pageable = PageRequest.of(pageNumber - 1, pageSize);
 
 		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
@@ -80,6 +81,11 @@ public class ExecutedTaskCriteriaBuilder {
 		predicatesCount.add(criteriaBuilderCount.isNotNull(fromCount.get("task")));
 		predicates.add(criteriaBuilder.isNull(from.get("policy")));
 		predicatesCount.add(criteriaBuilderCount.isNull(fromCount.get("policy")));
+
+		if (username != null && !username.equals("")) {
+			predicates.add(criteriaBuilder.equal(from.get("commandOwnerUid"), username));
+	    	predicatesCount.add(criteriaBuilderCount.equal(fromCount.get("commandOwnerUid"), username));
+		}
 		
 		
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));

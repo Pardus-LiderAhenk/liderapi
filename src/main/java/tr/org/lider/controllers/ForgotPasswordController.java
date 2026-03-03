@@ -15,14 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,9 +37,10 @@ import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.services.ConfigurationService;
-import tr.org.lider.services.EmailService;
+import tr.org.lider.mail.EmailService;
 import tr.org.lider.services.ForgotPasswordService;
-import tr.org.lider.services.OperationLogService;;
+import tr.org.lider.services.OperationLogService;
+import tr.org.lider.security.CustomPasswordEncoder;
 
 /**
  * 
@@ -68,6 +67,9 @@ public class ForgotPasswordController {
 	
 	@Autowired
 	private OperationLogService operationLogService;
+
+	@Autowired
+    private CustomPasswordEncoder customPasswordEncoder;
 
 	@Value("${lider.url}")
 	private String liderURL;
@@ -125,7 +127,7 @@ public class ForgotPasswordController {
 				forgotPasswordService.deleteByUsername(username);
 			}
 			String userEmail = ldapEntry.getAttributes().get("mail");
-			isEmailSent = emailService.sendmail(username, userEmail, fullURL);
+			isEmailSent = emailService.sendPasswordResetEmail(username, userEmail, fullURL);
 		}
 		else {
 			return new ResponseEntity<List<String>>(Arrays.asList("Kullanıcı adı bulunamadı."), 
@@ -228,33 +230,36 @@ public class ForgotPasswordController {
 				}
 				try {
 					//change password history
-					for (int i = 0; i < 5; i++) {
-						int p = (int)((Math.random() * 1234) + 1111);
-						ldapService.updateConsoleUserPassword(ldapEntry.getDistinguishedName(), "userPassword", String.valueOf(p));
-					}
-					ldapService.updateConsoleUserPassword(ldapEntry.getDistinguishedName(), "userPassword", password);
+                    for (int i = 0; i < 5; i++) {
+                        int p = (int) ((Math.random() * 1234) + 1111);
+                        ldapService.updateEntry(ldapEntry.getDistinguishedName(), "userPassword", "{ARGON2}" + customPasswordEncoder.encode(String.valueOf(p)));
+                    }
+
+                    ldapService.updateEntry(ldapEntry.getDistinguishedName(), "userPassword", "{ARGON2}" + customPasswordEncoder.encode(password));
 				} catch (LdapException e) {
 					logger.error("Error occured while updating user password. Error: " + e.getMessage());
-					return new ResponseEntity<List<String>>(Arrays.asList("Parola değiştirilirken hata oluştu, lütfen tekrar deneyiniz."), 
+					return new ResponseEntity<List<String>>(
+							Arrays.asList("Parola değiştirilirken hata oluştu, lütfen tekrar deneyiniz."),
 							HttpStatus.EXPECTATION_FAILED);
 				}
-				//delete forgot password key
+				// delete forgot password key
 				forgotPasswordService.deleteByUsername(fp.get().getUsername());
-				
+
 				Map<String, Object> requestData = new HashMap<String, Object>();
-				requestData.put("username",ldapEntry.getDistinguishedName());
-				requestData.put("email",ldapEntry.getMail());
+				requestData.put("username", ldapEntry.getDistinguishedName());
+				requestData.put("email", ldapEntry.getMail());
 				ObjectMapper dataMapper = new ObjectMapper();
-				String jsonString = null ; 
+				String jsonString = null;
 				try {
 					jsonString = dataMapper.writeValueAsString(requestData);
 				} catch (JsonProcessingException e1) {
-					logger.error("Error occured while mapping request data to json. Error: " +  e1.getMessage());
+					logger.error("Error occured while mapping request data to json. Error: " + e1.getMessage());
 				}
 				String log = ldapEntry.getDistinguishedName() + " password has been changed";
-				operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD, log, jsonString.getBytes(), null, null, null);
-//				
-				return new ResponseEntity<List<String>>(Arrays.asList("Parolanız başarılı bir şekilde yenilendi. Şimdi giriş yapabilirsiniz."), 
+				operationLogService.saveOperationLog(OperationType.CHANGE_PASSWORD, log, jsonString.getBytes(), null,
+						null, null);
+				return new ResponseEntity<List<String>>(
+						Arrays.asList("Parolanız başarılı bir şekilde yenilendi. Şimdi giriş yapabilirsiniz."),
 						HttpStatus.OK);
 			}
 		}

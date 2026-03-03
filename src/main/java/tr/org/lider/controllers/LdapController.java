@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.annotation.Secured;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,7 +28,7 @@ import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
 import tr.org.lider.message.service.IMessagingService;
 import tr.org.lider.services.ConfigurationService;
-
+import tr.org.lider.constant.RoleConstants;
 
 /**
  * 
@@ -35,6 +36,7 @@ import tr.org.lider.services.ConfigurationService;
  * @author M. Edip YILDIZ
  *
  */
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_USER})
 @RestController()
 @RequestMapping("/api/lider/ldap")
 @Tag(name = "ldap-service", description = "Ldap Rest Service")

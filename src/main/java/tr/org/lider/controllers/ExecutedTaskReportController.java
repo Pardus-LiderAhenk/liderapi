@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandExecutionResultImpl;
 import tr.org.lider.entities.CommandImpl;
@@ -32,7 +33,7 @@ import tr.org.lider.services.ExcelExportService;
 import tr.org.lider.services.ExecutedTaskReportService;
 import tr.org.lider.services.PluginTaskService;
 
-@Secured({"ROLE_ADMIN", "ROLE_EXECUTED_TASK" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_EXECUTED_TASK })
 @RestController
 @RequestMapping("api/lider/executed-task-report")
 public class ExecutedTaskReportController {

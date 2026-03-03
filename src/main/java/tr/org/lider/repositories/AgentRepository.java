@@ -2,7 +2,7 @@ package tr.org.lider.repositories;
 
 import java.util.Date;
 import java.util.List;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
@@ -21,7 +21,7 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 	
 	List<AgentImpl> findByDn(String dn);
 	
-	List<AgentImpl> findByAgentStatus(String agentStatus);
+//	List<AgentImpl> findByAgentStatus(String agentStatus);
 	
 	@Query(value = "SELECT a FROM AgentImpl a LEFT JOIN a.sessions s WHERE s.username = ?1")
 	List<AgentImpl> findBySessionUsername(String username);
@@ -58,12 +58,30 @@ public interface AgentRepository extends BaseJpaRepository<AgentImpl, Long>{
 			+ "where a.last_login_date >:startDate", nativeQuery = true)
 	int getCountByLastLoginToday(@Param("startDate") Date startDate);
 	
-	@Query(value="SELECT s.sessionEvent as sessionEvent, s.username as username, s.createDate as createDate, a.agentStatus as agentStatus, a.hostname as hostname, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses " +
-			"FROM UserSessionImpl s " +
-	        "LEFT JOIN AgentImpl a ON s.agent = a.id " +
-	        "WHERE a.id = :agentID " +
-	        "AND (:sessionTypeId IS NULL OR :sessionTypeId NOT IN (1, 2) OR s.sessionEvent = :sessionTypeId) " +
-	        "ORDER BY s.createDate ASC")
-	Page<IUserSessionReport> findUserSessionAllByAgent(@Param("agentID") Long agentID, @Param("sessionTypeId") int sessionTypeId, Pageable pageable);
+//	@Query(value="SELECT s.sessionEvent as sessionEvent, s.username as username, s.createDate as createDate, a.agentStatus as agentStatus, a.hostname as hostname, a.ipAddresses as ipAddresses, a.macAddresses as macAddresses " +
+//			"FROM UserSessionImpl s " +
+//	        "LEFT JOIN AgentImpl a ON s.agent = a.id " +
+//	        "WHERE a.id = :agentID " +
+//	        "AND (:sessionTypeId IS NULL OR :sessionTypeId NOT IN (1, 2) OR s.sessionEvent = :sessionTypeId) " +
+//	        "ORDER BY s.createDate ASC")
+//	Page<IUserSessionReport> findUserSessionAllByAgent(@Param("agentID") Long agentID, @Param("sessionTypeId") int sessionTypeId, Pageable pageable);
+
+    @Query(value="SELECT s.sessionEvent as sessionEvent, " +
+            "s.username as username, " +
+            "s.createDate as createDate, " +
+            "a.agentStatus as agentStatus, " +
+            "a.hostname as hostname, " +
+            "a.ipAddresses as ipAddresses, " +
+            "a.macAddresses as macAddresses " +
+            "FROM UserSessionImpl s " +
+            "LEFT JOIN s.agent a " +
+            "WHERE a.id = :agentID " +
+            "AND (:sessionTypeId IS NULL OR :sessionTypeId NOT IN (1, 2) OR s.sessionEvent = :sessionTypeId) " +
+            "ORDER BY s.createDate ASC")
+    Page<IUserSessionReport> findUserSessionAllByAgent(@Param("agentID") Long agentID,
+                                                       @Param("sessionTypeId") int sessionTypeId,
+                                                       Pageable pageable);
+
+
 }
 

@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.dto.AgentSessionDTO;
 import tr.org.lider.entities.AgentImpl;
@@ -30,7 +31,7 @@ import tr.org.lider.services.ExcelExportService;
 import tr.org.lider.services.UserSessionReportService;
 import tr.org.lider.utils.IUserSessionReport;
 
-@Secured({"ROLE_ADMIN", "ROLE_USER_SESSION_REPORT" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_USER_SESSION_REPORT })
 @RestController
 @RequestMapping("/api/lider/agent-session")
 @Tag(name = "Agent session service", description = "Agent Sesion Report controller")

@@ -25,9 +25,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.PolicyImpl;
-import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.models.PolicyExecutionRequestImpl;
 import tr.org.lider.models.PolicyResponse;
 import tr.org.lider.services.PolicyExceptionService;
@@ -39,7 +39,7 @@ import tr.org.lider.services.PolicyService;
  * @author <a href="mailto:tuncay.colak@tubitak.gov.tr">Tuncay ÇOLAK</a>
  *
  */
-@Secured({"ROLE_ADMIN", "ROLE_COMPUTERS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_POLICY })
 @RestController
 @RequestMapping("/api/policy")
 @Tag(name = "Policy" , description = "Policy Rest Service")

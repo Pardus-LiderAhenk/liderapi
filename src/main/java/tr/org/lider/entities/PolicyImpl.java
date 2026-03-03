@@ -24,19 +24,19 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import jakarta.persistence.Transient;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -69,11 +69,18 @@ public class PolicyImpl implements Serializable {
 	@Column(name = "DELETED")
 	private boolean deleted = false;
 
-	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-	@JoinTable(name = "C_POLICY_PROFILE", joinColumns = {
-			@JoinColumn(name = "POLICY_ID", nullable = false, updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "PROFILE_ID", nullable = false, updatable = false) })
-	private Set<ProfileImpl> profiles = new HashSet<ProfileImpl>(); // unidirectional
+//	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+//	@JoinTable(name = "C_POLICY_PROFILE", joinColumns = {
+//			@JoinColumn(name = "POLICY_ID", nullable = false, updatable = false) }, inverseJoinColumns = {
+//					@JoinColumn(name = "PROFILE_ID", nullable = false, updatable = false) })
+//	private Set<ProfileImpl> profiles = new HashSet<ProfileImpl>(); // unidirectional
+
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(name = "C_POLICY_PROFILE", joinColumns = {
+            @JoinColumn(name = "POLICY_ID", nullable = false, updatable = false,insertable = false) }, inverseJoinColumns = {
+            @JoinColumn(name = "PROFILE_ID", nullable = false, updatable = false,insertable = false) })
+    private Set<ProfileImpl> profiles = new HashSet<ProfileImpl>(); // unidirectional
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATE_DATE", nullable = false, updatable = false)
