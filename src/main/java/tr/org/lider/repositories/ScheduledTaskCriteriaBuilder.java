@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -96,6 +96,11 @@ public class ScheduledTaskCriteriaBuilder {
 			//for count 
 			Predicate taskJoinPredicateDeletedCount = criteriaBuilderCount.equal(taskJoinCount.get("deleted"), scheduledTaskDTO.getStatus().get());
 			predicatesCount.add(taskJoinPredicateDeletedCount);
+		}
+
+		if (scheduledTaskDTO.getUsername() != null && !scheduledTaskDTO.getUsername().equals("")) {
+			predicates.add(criteriaBuilder.equal(from.get("commandOwnerUid"), scheduledTaskDTO.getUsername()));
+	    	predicatesCount.add(criteriaBuilderCount.equal(fromCount.get("commandOwnerUid"), scheduledTaskDTO.getUsername()));
 		}
 		
 		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));

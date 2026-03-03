@@ -33,12 +33,13 @@ public class User implements Serializable, UserDetails {
 	private String SID;
 	private String RID;
 	private List<String> roles;
+	private String mail;
 	
 	public User() {
 		super();
 	}
 
-	public User(String username, String password, String name, String surname, String dn, List<String> roles) {
+	public User(String username, String password, String name, String surname, String dn, List<String> roles, String mail) {
 		super();
 		this.username = username;
 		this.password = password;
@@ -46,6 +47,7 @@ public class User implements Serializable, UserDetails {
 		this.surname = surname;
 		this.dn = dn;
 		this.roles = roles;
+		this.mail = mail;
 	}
 
 	public String getName() {
@@ -159,4 +161,11 @@ public class User implements Serializable, UserDetails {
 		RID = rID;
 	}
 
+	public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
 }

@@ -25,12 +25,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.dto.AgentDTO;
 import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.services.AgentService;
 import tr.org.lider.services.ExcelExportService;
 
-@Secured({"ROLE_ADMIN", "ROLE_AGENT_INFO" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_AGENT_INFO})
 @RestController
 @RequestMapping("/api/lider/agent-info")
 @Tag(name = "Agent service", description = "Agent controller")

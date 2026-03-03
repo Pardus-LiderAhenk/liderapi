@@ -188,7 +188,7 @@ public class TaskStatusSubscriberImpl implements ITaskStatusSubscriber {
 //										notification.getRecipient());
 								
 								message.setCommandClsId(result.getCommandExecution().getCommand().getTask().getCommandClsId());
-								messagingTemplate.sendMessage("/liderws/task", notification);
+								messagingTemplate.sendMessage("/liderws/task/" + recipient, notification);
 
 							} catch (Exception e) {
 								logger.error(e.getMessage(), e);

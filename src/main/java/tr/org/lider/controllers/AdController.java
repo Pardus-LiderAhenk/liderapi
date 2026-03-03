@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
@@ -17,9 +17,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.annotation.Secured;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -47,12 +45,14 @@ import tr.org.lider.services.AdService;
 import tr.org.lider.services.ConfigurationService;
 import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.PolicyService;
+import tr.org.lider.constant.RoleConstants;
 
 /**
  * 
  * @author M. Edip YILDIZ
  *
  */
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_AD_SYNC})
 @RestController
 @RequestMapping("/api/ad")
 @Tag(name = "Ad", description = "Ad Rest Service")
@@ -895,4 +895,35 @@ public class AdController {
 		return entry.get(0).getType();
 	}
 
+	@Operation(summary = "Check AD connection", description = "Check AD connection")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "AD password verified successfully."),
+		@ApiResponse(responseCode = "401", description = "Unauthorized - invalid AD credentials.", content = @Content(schema = @Schema(implementation = String.class))),
+		@ApiResponse(responseCode = "406", description = "Not Acceptable - missing or empty fields.", content = @Content(schema = @Schema(implementation = String.class))),
+		@ApiResponse(responseCode = "417", description = "Could not connect AD. Unexpected error occurred.", content = @Content(schema = @Schema(implementation = String.class)))})
+	@PostMapping(value = "/check-ad-connection", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<Boolean> checkADConnection(
+			@RequestParam String adIpAddress,
+			@RequestParam String adPort,
+			@RequestParam String adAdminUserFullDN,
+			@RequestParam String adAdminPassword) {
+		try {
+			logger.info("Checking AD connection for " + adAdminUserFullDN);
+			
+			if (adIpAddress == null || adIpAddress.isEmpty() || adPort == null || adPort.isEmpty() || adAdminUserFullDN == null || adAdminUserFullDN.isEmpty() || adAdminPassword == null || adAdminPassword.isEmpty()) {
+				return new ResponseEntity<Boolean>(false, HttpStatus.NOT_ACCEPTABLE);
+			}
+
+			Boolean isAuthenticated = ldapService.authenticate(adIpAddress, adPort, adAdminUserFullDN, adAdminPassword);
+
+			if (isAuthenticated) {
+				return new ResponseEntity<Boolean>(true, HttpStatus.OK);
+			} else {
+				return new ResponseEntity<Boolean>(false, HttpStatus.UNAUTHORIZED);
+			}
+		} catch (Exception e) {
+			logger.error("Could not connect AD. Unexpected error occured.", e);
+			return new ResponseEntity<Boolean>(false, HttpStatus.EXPECTATION_FAILED);
+		}
+	}
 }

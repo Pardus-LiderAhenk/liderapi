@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.naming.ldap.LdapName;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
@@ -39,6 +39,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -54,7 +55,7 @@ import tr.org.lider.services.OperationLogService;
  * @author <a href="mailto:hasan.kara@pardus.org.tr">Hasan Kara</a>
  * 
  */
-@Secured({"ROLE_ADMIN", "ROLE_SUDO_GROUPS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_SUDO_GROUPS })
 @RestController
 @RequestMapping("/api/lider/sudo-groups")
 @Tag(name = "Sudo Groups", description = "Sudo Groups Rest Service")

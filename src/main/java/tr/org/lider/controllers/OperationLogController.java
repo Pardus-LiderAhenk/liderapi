@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.dto.OperationLogDTO;
 import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.OperationType;
@@ -50,7 +51,7 @@ public class OperationLogController {
 	@Autowired
 	private ExcelExportService excelService;
 	
-		
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_USER })
 	@Operation(summary = "Lider login history", description = "", tags = { "operation-log" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Find all login history for lider",
@@ -64,6 +65,7 @@ public class OperationLogController {
 				.body(logService.getLoginLogsByLiderConsole(operationLogDTO));
 	}
 	
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_OPERATION_LOG })
 	@Operation(summary = "Get operation log type", description = "", tags = { "operation-log" })
 	@ApiResponses(value = { 
       	  @ApiResponse(responseCode = "200", description = "Get operation log type.",
@@ -76,8 +78,8 @@ public class OperationLogController {
 				.status(HttpStatus.OK)
 				.body(OperationType.values());
 	}
-	
-	@Secured({"ROLE_ADMIN", "ROLE_OPERATION_LOG"})
+
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_OPERATION_LOG })
 	@Operation(summary = "Lider usage history.", description = "", tags = { "operation-log" })
 	@ApiResponses(value = { 
       	  @ApiResponse(responseCode = "200", description = "Get usage history for lider.",
@@ -90,8 +92,8 @@ public class OperationLogController {
 				.status(HttpStatus.OK)
 				.body(logService.getOperationLogsByFilter(operationLogDTO));
 	}
-	
-	@Secured({"ROLE_ADMIN", "ROLE_OPERATION_LOG"})
+
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_OPERATION_LOG })
 	@Operation(summary = "Get selected log", description = "", tags = { "operation-log" })
 	@ApiResponses(value = { 
       	  @ApiResponse(responseCode = "200", description = "Get selected log.",

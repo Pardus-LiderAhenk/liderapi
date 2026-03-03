@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.bind.DatatypeConverter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.xml.bind.DatatypeConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.PluginTask;
 import tr.org.lider.models.ConfigParams;
 import tr.org.lider.services.ConfigurationService;
@@ -39,7 +40,7 @@ import tr.org.lider.utils.IRestResponse;
  *
  */
 
-@Secured({"ROLE_ADMIN", "ROLE_COMPUTERS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_COMPUTERS })
 @RestController
 @RequestMapping("/api/file-transfer/task")
 @Tag(name="File Transfer Task",description="File Transfer Rest Service")

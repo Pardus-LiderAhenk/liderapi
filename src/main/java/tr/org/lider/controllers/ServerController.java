@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.constant.LiderConstants;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.RegistrationTemplateImpl;
 import tr.org.lider.entities.ServerImpl;
@@ -37,6 +39,7 @@ import tr.org.lider.services.OperationLogService;
 import tr.org.lider.services.RemoteSshService;
 import tr.org.lider.services.ServerService;
 
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_SERVER_INFORMATION })
 @RestController
 @RequestMapping("/api/server")
 @Tag(name = "Server", description = "Server Rest Service")

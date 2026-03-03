@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.RegistrationTemplateImpl;
 import tr.org.lider.models.RegistrationTemplateType;
@@ -42,7 +43,7 @@ import tr.org.lider.services.OperationLogService;
  * @author <a href="mailto:hasan.kara@pardus.org.tr">Hasan Kara</a>
  * 
  */
-@Secured({"ROLE_ADMIN", "ROLE_REGISTRATION_TEMPLATE" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_REGISTRATION_TEMPLATE })
 @RestController
 @RequestMapping("/api")
 @Tag(name = "Registration Template", description = "Registration Template Rest Service")

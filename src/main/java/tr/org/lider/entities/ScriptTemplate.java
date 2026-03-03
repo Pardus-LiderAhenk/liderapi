@@ -3,20 +3,24 @@ package tr.org.lider.entities;
 import java.io.Serializable;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Entity class for script templates.
@@ -25,6 +29,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name = "P_SCRIPT_TEMPLATE")
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ScriptTemplate implements Serializable {
 
 	private static final long serialVersionUID = 5867302652909954893L;
@@ -58,24 +66,21 @@ public class ScriptTemplate implements Serializable {
 	@Column(name = "DELETED")
 	private boolean deleted;
 
-	public ScriptTemplate() {
-	}
+	@Column(name = "CREATED_BY", length = 255)
+	private String createdBy;
 
-	public ScriptTemplate(ScriptType scriptType, String label, String contents, Date createDate, Date modifyDate, Boolean deleted) {
+	@Column(name = "IS_PUBLISHED")
+	private Boolean isPublished;
+
+	public ScriptTemplate(ScriptType scriptType, String label, String contents, Date createDate, Date modifyDate, Boolean deleted, String createdBy, Boolean isPublished) {
 		setScriptType(scriptType);
 		this.label = label;
 		this.contents = contents;
 		this.createDate = createDate;
 		this.modifyDate = modifyDate;
 		this.deleted = deleted;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
+		this.createdBy = createdBy;
+		this.isPublished = isPublished;
 	}
 
 	public ScriptType getScriptType() {
@@ -89,46 +94,4 @@ public class ScriptTemplate implements Serializable {
 			this.scriptType = scriptType.getId();
 		}
 	}
-
-	public String getLabel() {
-		return label;
-	}
-
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	public String getContents() {
-		return contents;
-	}
-
-	public void setContents(String contents) {
-		this.contents = contents;
-	}
-
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
-
-	public Date getModifyDate() {
-		return modifyDate;
-	}
-
-	public void setModifyDate(Date modifyDate) {
-		this.modifyDate = modifyDate;
-	}
-	
-	public boolean getDeleted() {
-		return deleted;
-	}
-
-	public void setDeleted(Boolean deleted) {
-		this.deleted = deleted;
-	}
-
 }
-

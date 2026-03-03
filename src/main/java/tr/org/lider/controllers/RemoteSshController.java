@@ -9,10 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.annotation.Secured;
 
 import com.jcraft.jsch.Session;
 
@@ -23,6 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.services.RemoteSshService;
+import tr.org.lider.constant.RoleConstants;
 
 /**
  * 
@@ -30,6 +30,7 @@ import tr.org.lider.services.RemoteSshService;
  * @author M. Edip YILDIZ
  *
  */
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_COMPUTERS })
 @RestController
 @RequestMapping("/api/remote-ssh")
 @Tag(name = "", description = "" )

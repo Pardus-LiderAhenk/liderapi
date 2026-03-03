@@ -1,6 +1,7 @@
 package tr.org.lider.controllers;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.ScriptTemplate;
 import tr.org.lider.services.ScriptService;
 
@@ -39,25 +41,26 @@ public class ScriptController {
 
 	@Autowired
 	private ScriptService scriptService;
-	
-	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION", "ROLE_COMPUTERS" })
-	@Operation(summary = "Get script list", description = "", tags = { "script" })
-	@ApiResponses(value = { 
-			  @ApiResponse(responseCode = "200", description = "Returns script list. Successful"),
-			  @ApiResponse(responseCode = "417", description = "Could not get script list. Unexpected error occurred", 
-			    content = @Content(schema = @Schema(implementation = String.class))) })
-	@GetMapping(value = "/list/page-size/{pageSize}/page-number/{pageNumber}", produces = MediaType.APPLICATION_JSON_VALUE)
+
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_COMPUTERS, RoleConstants.ROLE_SCRIPT_DEFINITION, RoleConstants.ROLE_SCRIPT })
+	@Operation(summary = "Get script list with filters", description = "Returns a list of scripts with optional filters", tags = {"script" })
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Returns script list. Successful"),
+			@ApiResponse(responseCode = "417", description = "Could not get script list. Unexpected error occurred", 
+				content = @Content(schema = @Schema(implementation = String.class))) })
+	@PostMapping(value = "/list/page-size/{pageSize}/page-number/{pageNumber}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Page<ScriptTemplate>> scriptList(
-			@PathVariable int pageSize, @PathVariable int pageNumber
-			) {
+			@PathVariable int pageSize,
+			@PathVariable int pageNumber,
+			@RequestBody Map<String, String> params) {
+
 		return ResponseEntity
 				.status(HttpStatus.OK)
-				.body(scriptService.list(pageNumber, pageSize));
-				
+				.body(scriptService.list(pageNumber, pageSize, params));
 	}
 	
 //	get script list all as no pagging
-	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION", "ROLE_COMPUTERS" })
+    @Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_COMPUTERS, RoleConstants.ROLE_SCRIPT_DEFINITION, RoleConstants.ROLE_SCRIPT })
 	@Operation(summary = "Get script list all", description = "", tags = { "script" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Returns script list all. Successful"),
@@ -72,9 +75,9 @@ public class ScriptController {
 				
 	}
 
-	
 
-	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION" })
+
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_SCRIPT_DEFINITION, RoleConstants.ROLE_SCRIPT })
 	@Operation(summary = "Add script", description = "", tags = { "script" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Added script. Successful"),
@@ -86,8 +89,8 @@ public class ScriptController {
 				.status(HttpStatus.OK)
 				.body(scriptService.add(script));			
 	}
-	
-	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION" })
+
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_SCRIPT_DEFINITION, RoleConstants.ROLE_SCRIPT })
 	@Operation(summary = "Delete script", description = "", tags = { "script" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Deleted script. Successful"),
@@ -100,8 +103,8 @@ public class ScriptController {
 				.body(scriptService.delete(id));
 				
 	}
-	
-	@Secured({"ROLE_ADMIN", "ROLE_SCRIPT_DEFINITION" })
+
+	@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_SCRIPT_DEFINITION, RoleConstants.ROLE_SCRIPT })
 	@Operation(summary = "Update script", description = "", tags = { "script" })
 	@ApiResponses(value = { 
 			  @ApiResponse(responseCode = "200", description = "Updated script. Successful"),

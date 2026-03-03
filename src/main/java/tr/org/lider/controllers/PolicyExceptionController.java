@@ -34,11 +34,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.OperationType;
 import tr.org.lider.entities.PolicyExceptionImpl;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
-//import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
 import tr.org.lider.ldap.LdapSearchFilterAttribute;
 import tr.org.lider.ldap.SearchFilterEnum;
@@ -55,7 +55,7 @@ import tr.org.lider.services.PolicyService;
  * @author <a href="mailto:tuncay.colak@tubitak.gov.tr">Tuncay ÇOLAK</a>
  *
  */
-@Secured({"ROLE_ADMIN", "ROLE_COMPUTERS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_POLICY })
 @RestController
 @RequestMapping("/api/policy-exception")
 @Tag(name = "Policy Exception" , description = "Policy Exception Rest Service")

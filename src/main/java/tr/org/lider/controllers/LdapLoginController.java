@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.slf4j.Logger;
@@ -30,6 +30,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.PluginTask;
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LDAPServiceImpl;
@@ -47,7 +48,7 @@ import tr.org.lider.utils.IRestResponse;
  *
  */
 
-@Secured({"ROLE_ADMIN", "ROLE_COMPUTERS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_COMPUTERS, RoleConstants.ROLE_LOGIN_MANAGER})
 @RestController
 @RequestMapping("/api/ldap-login")
 @Tag(name = "ldap-login-service", description = "Ldap Login Rest Service")

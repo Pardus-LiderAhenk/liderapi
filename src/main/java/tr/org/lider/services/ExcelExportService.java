@@ -6,15 +6,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -33,7 +30,6 @@ import tr.org.lider.entities.AgentImpl;
 import tr.org.lider.entities.AgentPropertyImpl;
 import tr.org.lider.entities.CommandImpl;
 import tr.org.lider.entities.OperationLogImpl;
-import tr.org.lider.entities.UserSessionImpl;
 import tr.org.lider.messaging.enums.StatusCode;
 import tr.org.lider.utils.IUserSessionReport;
 

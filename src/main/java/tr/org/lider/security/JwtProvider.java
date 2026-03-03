@@ -36,9 +36,15 @@ public class JwtProvider {
 
 	public String generateJwtToken(Authentication authentication) {
 
-		User user = (User) authentication.getDetails();
+		User user;
+		if (authentication.getDetails() instanceof User) {
+			user = (User) authentication.getDetails();
+		} else {
+			user = (User) authentication.getPrincipal();
+		}
+		
 		return Jwts.builder()
-				.setSubject((user.getUsername()))
+				.setSubject(user.getUsername())
 				.setIssuedAt(new Date())
 				.setExpiration(new Date((new Date()).getTime() + jwtExpiration*1000))
 				.signWith(SignatureAlgorithm.HS512, jwtSecret)
@@ -47,7 +53,7 @@ public class JwtProvider {
 
 	public boolean validateJwtToken(String authToken) {
 		try {
-			Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
+			Jwts.parser().setSigningKey(jwtSecret).build().parseClaimsJws(authToken);
 			return true;
 		} catch (SignatureException e) {
 			logger.error("Invalid JWT signature -> Message: {} ", e.getMessage());
@@ -76,6 +82,7 @@ public class JwtProvider {
 	public String getUserNameFromJwtToken(String token) {
 		return Jwts.parser()
 				.setSigningKey(jwtSecret)
+                .build()
 				.parseClaimsJws(token)
 				.getBody().getSubject();
 	}
@@ -83,6 +90,7 @@ public class JwtProvider {
 	public Date getJwtExpireDate(String token) {
 		return Jwts.parser()
 				.setSigningKey(jwtSecret)
+                .build()
 				.parseClaimsJws(token)
 				.getBody().getExpiration();
 	}

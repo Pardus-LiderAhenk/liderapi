@@ -5,16 +5,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 import tr.org.lider.ldap.DNType;
 import tr.org.lider.ldap.LdapEntry;
@@ -53,6 +53,9 @@ public class PluginTask implements Serializable {
 	
 	@Column(name = "state")
 	private int state;
+
+    @Column(name = "role")
+    private String role;
 	
 	@Transient
 	private DNType dnType;
@@ -83,8 +86,7 @@ public class PluginTask implements Serializable {
 	}
 
 	public PluginTask(String name, String page, String description, String command_id, Boolean is_multi, PluginImpl plugin,
-			Integer state) {
-		// TODO Auto-generated constructor stub
+			Integer state, String role) {
 		this.name = name;
 		this.page = page;
 		this.description = description;
@@ -92,9 +94,19 @@ public class PluginTask implements Serializable {
 		this.isMulti = is_multi;
 		this.plugin = plugin;
 		this.state = state;
-		
-		
+        this.role = role;
 	}
+
+    public void updateFrom(PluginTask source) {
+        this.name = source.getName();
+        this.page = source.getPage();
+        this.description = source.getDescription();
+        this.commandId = source.getCommandId();
+        this.isMulti = source.getIsMulti();
+        this.plugin = source.getPlugin();
+        this.state = source.getState();
+        this.role = source.getRole();
+    }
 
 	public Long getId() {
 		return id;
@@ -225,5 +237,13 @@ public class PluginTask implements Serializable {
 	public void setTaskParts(boolean taskParts) {
 		this.taskParts = taskParts;
 	}
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 	
 }

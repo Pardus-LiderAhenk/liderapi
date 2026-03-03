@@ -153,6 +153,10 @@ public class ConfigParams {
 	private Boolean enableDelete4Directory;
 
 	private RegistrationTemplateType selectedRegistrationType;
+
+	// 2FA settings
+	private Boolean isTwoFactorEnabled;
+	private Integer otpExpiryDuration;
 	
 	public ConfigParams() {
 		super();
@@ -215,6 +219,9 @@ public class ConfigParams {
 		
 		this.selectedRegistrationType = RegistrationTemplateType.DEFAULT;
 		this.enableDelete4Directory = false;
+
+		this.isTwoFactorEnabled = false;
+		this.otpExpiryDuration = 300000;
 	}
 
 	public String getLiderLocale() {
@@ -1010,6 +1017,22 @@ public class ConfigParams {
 
 	public void setClientSize(int clientSize) {
 		this.clientSize = clientSize;
+	}
+
+	public Integer getOtpExpiryDuration() {
+		return otpExpiryDuration;
+	}
+
+	public void setOtpExpiryDuration(Integer otpExpiryDuration) {
+		this.otpExpiryDuration = otpExpiryDuration;
+	}
+
+	public Boolean getIsTwoFactorEnabled() {
+		return isTwoFactorEnabled;
+	}
+
+	public void setIsTwoFactorEnabled(Boolean isTwoFactorEnabled) {
+		this.isTwoFactorEnabled = isTwoFactorEnabled;
 	}
 
 }

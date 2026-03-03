@@ -1,10 +1,9 @@
 package tr.org.lider;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.apache.directory.api.ldap.model.exception.LdapException;
 import org.apache.directory.api.ldap.model.message.SearchScope;
@@ -15,16 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.Ordered;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.ldap.LdapEntry;
@@ -70,20 +63,20 @@ public class Lider2Application extends SpringBootServletInitializer {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	@Bean
-    public FilterRegistrationBean simpleCorsFilter() {  
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();  
-        CorsConfiguration config = new CorsConfiguration();  
-        config.setAllowCredentials(true); 
-        // * URL below needs to match the Vue client URL and port *
-        config.setAllowedOrigins(Collections.singletonList(liderURL));
-        config.setAllowedMethods(Collections.singletonList("*"));  
-        config.setAllowedHeaders(Collections.singletonList("*"));  
-        source.registerCorsConfiguration("/**", config);  
-        FilterRegistrationBean bean = new FilterRegistrationBean<>(new CorsFilter(source));
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);  
-        return bean;  
-    }
+//	@Bean
+//    public FilterRegistrationBean simpleCorsFilter() {
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowCredentials(true);
+//        // * URL below needs to match the Vue client URL and port *
+//        config.setAllowedOrigins(Collections.singletonList(liderURL));
+//        config.setAllowedMethods(Collections.singletonList("*"));
+//        config.setAllowedHeaders(Collections.singletonList("*"));
+//        source.registerCorsConfiguration("/**", config);
+//        FilterRegistrationBean bean = new FilterRegistrationBean<>(new CorsFilter(source));
+//        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+//        return bean;
+//    }
 	
 	@PostConstruct
 	public void init() {		

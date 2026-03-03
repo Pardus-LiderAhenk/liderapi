@@ -7,6 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,9 +20,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.constant.LiderConstants;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.services.RemoteSshService;
 import tr.org.lider.services.ServerInformationService;
 
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_SERVER_INFORMATION })
 @RestController
 @RequestMapping("/api/server-information")
 @Tag(name="Server-Information", description = "Server Information Rest Service")

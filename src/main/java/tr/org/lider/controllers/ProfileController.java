@@ -26,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.entities.PluginImpl;
 import tr.org.lider.entities.ProfileImpl;
 import tr.org.lider.services.PluginService;
@@ -38,7 +39,7 @@ import tr.org.lider.services.ProfileService;
  *
  */
 
-@Secured({"ROLE_ADMIN", "ROLE_COMPUTERS" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_POLICY })
 @RestController
 @RequestMapping("/api/profile")
 @Tag(name = "", description = "")

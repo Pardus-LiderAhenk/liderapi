@@ -9,10 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.security.access.annotation.Secured;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.entities.OperationLogImpl;
 import tr.org.lider.entities.PluginProfile;
 import tr.org.lider.services.PluginService;
-
+import tr.org.lider.constant.RoleConstants;
 /**
  * Plugin profile pages rendered
  * 
@@ -31,7 +29,8 @@ import tr.org.lider.services.PluginService;
  * 
  */
 
-@RestController
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_POLICY })
+ @RestController
 @Tag(name = "Plugin Profil Pages",description = "Plugin Pfofil Rest Service")
 public class PluginProfilePagesController {
 	

@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.MBeanServer;

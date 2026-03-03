@@ -2,7 +2,7 @@ package tr.org.lider.repositories;
 
 import java.util.List;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,13 +22,14 @@ public interface CommandRepository extends BaseJpaRepository<CommandImpl, Long>{
 	
 
 	@Query("SELECT c.task, ce, c.commandOwnerUid, c.id "
-			+ "FROM CommandImpl c "
-			+ "LEFT OUTER JOIN c.commandExecutions ce "
-			+ "LEFT OUTER JOIN c.task t "
-			+ "WHERE ce.dn =?1 "
-			+ "AND c.task IS NOT NULL "
-			+ "ORDER BY c.createDate DESC")
-	List<Object[]> findCommandsOfAgent(String dn);
+    		+ "FROM CommandImpl c "
+    		+ "LEFT OUTER JOIN c.commandExecutions ce "
+    		+ "LEFT OUTER JOIN c.task t "
+    		+ "WHERE ce.dn = :dn "
+    		+ "AND c.task IS NOT NULL "
+    		+ "AND (:username IS NULL OR c.commandOwnerUid = :username) "
+    		+ "ORDER BY c.createDate DESC")
+	List<Object[]> findCommandsOfAgent(@Param("dn") String dn, @Param("username") String username);
 	
 	@Query("SELECT c "
 			+ "FROM CommandImpl c "

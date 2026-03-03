@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import tr.org.lider.constant.RoleConstants;
 import tr.org.lider.dto.ScheduledTaskDTO;
 import tr.org.lider.entities.CommandExecutionImpl;
 import tr.org.lider.entities.CommandExecutionResultImpl;
@@ -33,7 +34,7 @@ import tr.org.lider.services.ExcelExportService;
 import tr.org.lider.services.PluginTaskService;
 import tr.org.lider.services.ScheduledTaskReportService;
 
-@Secured({ "ROLE_ADMIN", "ROLE_EXECUTED_TASK" })
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_EXECUTED_TASK })
 @RestController
 @RequestMapping("/api/lider/scheduled-task-report")
 @Tag(name = "Scheduled Task Report", description = "Scheduled Task Report Service")

@@ -1,5 +1,7 @@
 package tr.org.lider.dto;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.util.Date;
 
 public class UserSessionDTO {
@@ -12,7 +14,9 @@ public class UserSessionDTO {
 	private int pageNumber;
 	private int pageSize;
 	private String sessionType;
-	private  Date  startDate;
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
+	private Date startDate;
+    @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
 	private Date endDate;
 
 	public UserSessionDTO(String username, Date createDate, String hostname, String ipAddresses) {

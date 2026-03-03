@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.annotation.Secured;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,8 +20,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import tr.org.lider.ldap.LDAPServiceImpl;
 import tr.org.lider.security.User;
+import tr.org.lider.constant.RoleConstants;
 
-
+@Secured({RoleConstants.ROLE_ADMIN, RoleConstants.ROLE_USER })
 @RestController
 @RequestMapping("/api/lider")
 @Tag(name = "Language Controller", description = "Language Controller")

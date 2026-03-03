@@ -3,11 +3,13 @@ package tr.org.lider.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import tr.org.lider.constant.RoleConstants;
+import tr.org.lider.constant.RoleTypeConstants;
 import tr.org.lider.entities.RoleImpl;
 import tr.org.lider.repositories.RoleRepository;
 import tr.org.lider.repositories.RoleTypeRepository;
@@ -18,7 +20,7 @@ public class RoleService {
 
 	@Autowired
 	RoleRepository roleRepository;
-	
+
 	@Autowired
 	RoleTypeRepository roleTypeRepository;
 
@@ -28,72 +30,73 @@ public class RoleService {
 		roleRepository.deleteAll();
 		List<RoleTypeImpl> roleTypeList = new ArrayList<>();
 		List<RoleTypeImpl> roleTypeList2 = new ArrayList<>();
-		roleTypeList.add(new RoleTypeImpl("Admin Yetkisi", "role_admin"));
-		roleTypeList.add(new RoleTypeImpl("Arayüz Erişim Ayarları", "role_console"));
-		roleTypeList.add(new RoleTypeImpl("İstemci Yönetimi", "role_computer"));
-		roleTypeList.add(new RoleTypeImpl("Kullanıcı Yönetimi", "role_user"));
-		roleTypeList.add(new RoleTypeImpl("Aktif Dizin Yönetimi", "role_ad"));
-		roleTypeList.add(new RoleTypeImpl("Raporlama", "role_report"));
-		roleTypeList.add(new RoleTypeImpl("Kullanıcı Politika Yönetimi", "role_policy"));
-		roleTypeList.add(new RoleTypeImpl("Ayarlar", "role_settings"));
-		roleTypeList.add(new RoleTypeImpl("Tanımlamalar", "role_definition"));
-		roleTypeList.add(new RoleTypeImpl("Eklentiler", "role_plugin"));
-		
+		roleTypeList.add(new RoleTypeImpl("Admin Yetkisi", RoleTypeConstants.ADMIN));
+		roleTypeList.add(new RoleTypeImpl("Arayüz Erişim Ayarları", RoleTypeConstants.CONSOLE));
+		roleTypeList.add(new RoleTypeImpl("İstemci Yönetimi", RoleTypeConstants.COMPUTER));
+		roleTypeList.add(new RoleTypeImpl("Kullanıcı Yönetimi", RoleTypeConstants.USER));
+		roleTypeList.add(new RoleTypeImpl("Aktif Dizin Yönetimi", RoleTypeConstants.AD));
+		roleTypeList.add(new RoleTypeImpl("Raporlama", RoleTypeConstants.REPORT));
+		roleTypeList.add(new RoleTypeImpl("Kullanıcı Politika Yönetimi", RoleTypeConstants.POLICY));
+		roleTypeList.add(new RoleTypeImpl("Ayarlar", RoleTypeConstants.SETTINGS));
+		roleTypeList.add(new RoleTypeImpl("Tanımlamalar", RoleTypeConstants.DEFINITION));
+		roleTypeList.add(new RoleTypeImpl("Eklentiler", RoleTypeConstants.PLUGIN));
+
 		for (int i = 0; i < roleTypeList.size(); i++) {
 			if (roleTypeRepository.findByCode(roleTypeList.get(i).getCode()).isEmpty()) {
 				roleTypeList2.add(roleTypeList.get(i));
 			}
 		}
 		roleTypeRepository.saveAll(roleTypeList2);
-		
+
 //		roleRepository.deleteAll();
 		List<RoleImpl> roleList = new ArrayList<>();
-		roleList.add(new RoleImpl("Tüm Yetkiler(Admin)", "ROLE_ADMIN", 0, findRoleTypeByCode("role_admin")));
-		roleList.add(new RoleImpl("Arayüz Erişim Yetkisi", "ROLE_USER", 1, findRoleTypeByCode("role_console")));
-		roleList.add(new RoleImpl("İstemci Yönetimi", "ROLE_COMPUTERS", 10, findRoleTypeByCode("role_computer")));
-		roleList.add(new RoleImpl("İstemci Grup Yönetimi", "ROLE_COMPUTER_GROUPS", 12, findRoleTypeByCode("role_computer")));
-		roleList.add(new RoleImpl("Kullanıcı İşlemleri", "ROLE_USERS", 20, findRoleTypeByCode("role_user")));
-		roleList.add(new RoleImpl("Kullanıcı Grup Yönetimi", "ROLE_USER_GROUPS", 22, findRoleTypeByCode("role_user")));
-		roleList.add(new RoleImpl("Kullanıcı Yetkilendirme(Sudo)", "ROLE_SUDO_GROUPS", 24, findRoleTypeByCode("role_user")));
-		roleList.add(new RoleImpl("AD Senkronizasyon", "ROLE_AD_SYNC", 30, findRoleTypeByCode("role_ad")));
-		roleList.add(new RoleImpl("Detaylı İstemci Raporu", "ROLE_AGENT_INFO", 40, findRoleTypeByCode("role_report")));
-		roleList.add(new RoleImpl("Çalıştırılan Görevler Raporu", "ROLE_EXECUTED_TASK", 42, findRoleTypeByCode("role_report")));
-		roleList.add(new RoleImpl("Sistem Güncesi Raporu", "ROLE_OPERATION_LOG", 44, findRoleTypeByCode("role_report")));
-		roleList.add(new RoleImpl("Zamanlanmış Görev Raporu", "ROLE_SCHEDULE_TASK", 46, findRoleTypeByCode("role_report")));
-		roleList.add(new RoleImpl("Kullanıcı Oturum Raporu", "ROLE_USER_SESSION_REPORT", 48, findRoleTypeByCode("role_report")));
+		roleList.add(new RoleImpl("Tüm Yetkiler(Admin)", RoleConstants.ROLE_ADMIN, 0, findRoleTypeByCode(RoleTypeConstants.ADMIN)));
+		roleList.add(new RoleImpl("Arayüz Erişim Yetkisi", RoleConstants.ROLE_USER, 1, findRoleTypeByCode(RoleTypeConstants.CONSOLE)));
+		roleList.add(new RoleImpl("İstemci Yönetimi", RoleConstants.ROLE_COMPUTERS, 10, findRoleTypeByCode(RoleTypeConstants.COMPUTER)));
+		roleList.add(new RoleImpl("İstemci Grup Yönetimi", RoleConstants.ROLE_COMPUTER_GROUPS, 12, findRoleTypeByCode(RoleTypeConstants.COMPUTER)));
+		roleList.add(new RoleImpl("Kullanıcı İşlemleri", RoleConstants.ROLE_USERS, 20, findRoleTypeByCode(RoleTypeConstants.USER)));
+		roleList.add(new RoleImpl("Kullanıcı Grup Yönetimi", RoleConstants.ROLE_USER_GROUPS, 22, findRoleTypeByCode(RoleTypeConstants.USER)));
+		roleList.add(new RoleImpl("Kullanıcı Yetkilendirme(Sudo)", RoleConstants.ROLE_SUDO_GROUPS, 24, findRoleTypeByCode(RoleTypeConstants.USER)));
+		roleList.add(new RoleImpl("AD Senkronizasyon", RoleConstants.ROLE_AD_SYNC, 30, findRoleTypeByCode(RoleTypeConstants.AD)));
+		roleList.add(new RoleImpl("Detaylı İstemci Raporu", RoleConstants.ROLE_AGENT_INFO, 40, findRoleTypeByCode(RoleTypeConstants.REPORT)));
+		roleList.add(new RoleImpl("Çalıştırılan Görevler Raporu", RoleConstants.ROLE_EXECUTED_TASK, 42, findRoleTypeByCode(RoleTypeConstants.REPORT)));
+		roleList.add(new RoleImpl("Sistem Güncesi Raporu", RoleConstants.ROLE_OPERATION_LOG, 44, findRoleTypeByCode(RoleTypeConstants.REPORT)));
+		roleList.add(new RoleImpl("Zamanlanmış Görev Raporu", RoleConstants.ROLE_SCHEDULE_TASK, 46, findRoleTypeByCode(RoleTypeConstants.REPORT)));
+		roleList.add(new RoleImpl("Kullanıcı Oturum Raporu", RoleConstants.ROLE_USER_SESSION_REPORT, 48, findRoleTypeByCode(RoleTypeConstants.REPORT)));
 
-		roleList.add(new RoleImpl("Politika Yönetimi", "ROLE_POLICY", 50, findRoleTypeByCode("role_policy")));
-		roleList.add(new RoleImpl("Arayüz Erişim Ayarları", "ROLE_CONSOLE_ACCESS_SETTINGS", 60, findRoleTypeByCode("role_settings")));
-		roleList.add(new RoleImpl("Sunucu Ayarları", "ROLE_SERVER_SETTINGS", 62, findRoleTypeByCode("role_settings")));
-		roleList.add(new RoleImpl("Sunucu Bilgileri", "ROLE_SERVER_INFORMATION", 64, findRoleTypeByCode("role_settings")));
-		roleList.add(new RoleImpl("Sistem Gözlemcisi Tanımları", "ROLE_CONKY_DEFINITION", 80, findRoleTypeByCode("role_definition")));
-		roleList.add(new RoleImpl("Betik Tanımları", "ROLE_SCRIPT_DEFINITION", 82, findRoleTypeByCode("role_definition")));
-		roleList.add(new RoleImpl("ETA Mesaj Tanımları", "ROLE_ETA_MESSAGE_DEFINITION", 84, findRoleTypeByCode("role_definition")));
-		roleList.add(new RoleImpl("Kayıt Şablonları", "ROLE_REGISTRATION_TEMPLATE", 86, findRoleTypeByCode("role_definition")));
- 
+		roleList.add(new RoleImpl("Politika Yönetimi", RoleConstants.ROLE_POLICY, 50, findRoleTypeByCode(RoleTypeConstants.POLICY)));
+		roleList.add(new RoleImpl("Arayüz Erişim Ayarları", RoleConstants.ROLE_CONSOLE_ACCESS_SETTINGS, 60, findRoleTypeByCode(RoleTypeConstants.SETTINGS)));
+		roleList.add(new RoleImpl("Sunucu Ayarları", RoleConstants.ROLE_SERVER_SETTINGS, 62, findRoleTypeByCode(RoleTypeConstants.SETTINGS)));
+		roleList.add(new RoleImpl("Sunucu Bilgileri", RoleConstants.ROLE_SERVER_INFORMATION, 64, findRoleTypeByCode(RoleTypeConstants.SETTINGS)));
+		roleList.add(new RoleImpl("Sistem Gözlemcisi Tanımları", RoleConstants.ROLE_CONKY_DEFINITION, 80, findRoleTypeByCode(RoleTypeConstants.DEFINITION)));
+		roleList.add(new RoleImpl("Betik Tanımları", RoleConstants.ROLE_SCRIPT_DEFINITION, 82, findRoleTypeByCode(RoleTypeConstants.DEFINITION)));
+		roleList.add(new RoleImpl("ETA Mesaj Tanımları", RoleConstants.ROLE_ETA_MESSAGE_DEFINITION, 84, findRoleTypeByCode(RoleTypeConstants.DEFINITION)));
+		roleList.add(new RoleImpl("Kayıt Şablonları", RoleConstants.ROLE_REGISTRATION_TEMPLATE, 86, findRoleTypeByCode(RoleTypeConstants.DEFINITION)));
+
 		// role plugins
-		roleList.add(new RoleImpl("Kaynak Kullanımı", "ROLE_RESOURCE_USAGE", 100, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Oturum Yönetimi", "ROLE_SESSION_POWER", 101, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Root Parola Yönetimi", "ROLE_MANAGE_ROOT", 102, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Dosya Transferi", "ROLE_FILE_TRANSFER", 103, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Yerel Kullanıcı Yönetimi", "ROLE_LOCAL_USER", 104, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("İstemci Oturum Açma Ayarları", "ROLE_LOGIN_MANAGER", 105, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Dosya Yönetimi", "ROLE_FILE_MANAGEMENT", 106, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Anlık Mesaj Gönder", "ROLE_SEND_MESSAGE", 107, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Sistem Gözlemcisi", "ROLE_CONKY", 108, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Paket Kur veya Kaldır", "ROLE_PACKAGE_INSTALL_REMOVE", 109, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Paket Kontrolü", "ROLE_PACKAGE_CONTROL", 110, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Paket Listesi", "ROLE_PACKAGE_LIST", 111, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Depo Yönetimi", "ROLE_PACKAGE_REPO", 112, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Servis Yönetimi", "ROLE_SERVICE_MANAGEMENT", 113, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Betik", "ROLE_SCRIPT", 114, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("USB Kural Yönetimi(beyaz/kara liste)", "ROLE_USB_RULE", 115, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Aygıt Yönetimi", "ROLE_DEVICE_MANAGEMENT", 116, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Ağ Yönetimi", "ROLE_NETWORK_MANAGER", 117, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Uzak Erişim", "ROLE_REMOTE_ACCESS", 118, findRoleTypeByCode("role_plugin")));
-		roleList.add(new RoleImpl("Görev Geçmişi", "ROLE_TASK_HISTORY", 119, findRoleTypeByCode("role_plugin")));
-		
-		List<RoleImpl> roleList2 = new ArrayList<>();
+		roleList.add(new RoleImpl("Kaynak Kullanımı", RoleConstants.ROLE_RESOURCE_USAGE, 100, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Oturum Yönetimi", RoleConstants.ROLE_SESSION_POWER, 101, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Root Parola Yönetimi", RoleConstants.ROLE_MANAGE_ROOT, 102, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Dosya Transferi", RoleConstants.ROLE_FILE_TRANSFER, 103, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Yerel Kullanıcı Yönetimi", RoleConstants.ROLE_LOCAL_USER, 104, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("İstemci Oturum Açma Ayarları", RoleConstants.ROLE_LOGIN_MANAGER, 105, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Dosya Yönetimi", RoleConstants.ROLE_FILE_MANAGEMENT, 106, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Anlık Mesaj Gönder", RoleConstants.ROLE_SEND_MESSAGE, 107, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Sistem Gözlemcisi", RoleConstants.ROLE_CONKY, 108, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Paket Kur veya Kaldır", RoleConstants.ROLE_PACKAGE_INSTALL_REMOVE, 109, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Paket Kontrolü", RoleConstants.ROLE_PACKAGE_CONTROL, 110, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Paket Listesi", RoleConstants.ROLE_PACKAGE_LIST, 111, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Depo Yönetimi", RoleConstants.ROLE_PACKAGE_REPO, 112, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Servis Yönetimi", RoleConstants.ROLE_SERVICE_MANAGEMENT, 113, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Betik", RoleConstants.ROLE_SCRIPT, 114, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("USB Kural Yönetimi(beyaz/kara liste)", RoleConstants.ROLE_USB_RULE, 115, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Aygıt Yönetimi", RoleConstants.ROLE_DEVICE_MANAGEMENT, 116, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Ağ Yönetimi", RoleConstants.ROLE_NETWORK_MANAGER, 117, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Uzak Erişim", RoleConstants.ROLE_REMOTE_ACCESS, 118, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+		roleList.add(new RoleImpl("Görev Geçmişi", RoleConstants.ROLE_TASK_HISTORY, 119, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+        roleList.add(new RoleImpl("İstemci Ayarları" , RoleConstants.ROLE_CLIENT_MANAGEMENT, 120, findRoleTypeByCode(RoleTypeConstants.PLUGIN)));
+
+        List<RoleImpl> roleList2 = new ArrayList<>();
 		for (int i = 0; i < roleList.size(); i++) {
 			if (findRoleByValue(roleList.get(i).getValue()).isEmpty()) {
 				roleList2.add(roleList.get(i));
@@ -109,12 +112,12 @@ public class RoleService {
 	public List<RoleImpl> getRoles() {
 		return roleRepository.findAllByOrderByOrderNumberAsc();
 	}
-	
+
 	public RoleTypeImpl findRoleTypeByCode(String code) {
 		List<RoleTypeImpl> roleType =  roleTypeRepository.findByCode(code);
 		return roleType.get(0);
 	}
-	
+
 	public List<RoleImpl> findRoleByValue(String value) {
 		return roleRepository.findByValue(value);
 	}

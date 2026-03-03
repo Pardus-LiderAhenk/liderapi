@@ -2,6 +2,7 @@ package tr.org.lider.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.directory.api.ldap.model.message.SearchScope;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,17 @@ public class UserService implements UserDetailsService {
 		}
 		
 		if(ldapEntry!=null) {
+			Map<String, String[]> attributes = ldapEntry.getAttributesMultiValues();
+			String[] mailArray = attributes.get("mail");
+			String mail = (mailArray != null && mailArray.length > 0) ? mailArray[0] : null;
+
 			user = new User();
 			user.setUsername(userName);
 			user.setName(ldapEntry.getUid());
 			user.setPassword(ldapEntry.getUserPassword());
 			user.setSurname(ldapEntry.getSn());
 			user.setDn(ldapEntry.getDistinguishedName());
+			user.setMail(mail);
 			String[] priviliges = ldapEntry.getAttributesMultiValues().get("liderPrivilege");
 			List<String> roles = new ArrayList<String>();
 			for (int i = 0; i < priviliges.length; i++) {

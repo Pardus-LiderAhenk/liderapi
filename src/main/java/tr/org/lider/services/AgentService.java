@@ -148,10 +148,10 @@ public class AgentService {
 		agentRepository.deleteById(agentList.get(0).getId());
 	}
 	
-	public void getAgentStatus(String agentStatus) {
-		//List<AgentImpl> agentList = agentRepository.findByAgentStatus(agentStatus);
-		agentRepository.findByAgentStatus(agentStatus);
-	}
+//	public void getAgentStatus(String agentStatus) {
+//		//List<AgentImpl> agentList = agentRepository.findByAgentStatus(agentStatus);
+//		agentRepository.findByAgentStatus(agentStatus);
+//	}
 	
 	public List<String> getBrands() {
 		return agentRepository.getPropertyValueByName("hardware.baseboard.manufacturer");
